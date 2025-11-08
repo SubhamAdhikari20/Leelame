@@ -1,4 +1,4 @@
-// src/app/(auth)/sign-up/page.tsx
+// src/app/(auth)/(buyer)/sign-up/page.tsx
 "use client";
 import React, { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,7 +17,6 @@ import {
     FieldLabel
 } from "@/components/ui/field.tsx";
 import { Checkbox } from "@/components/ui/checkbox.tsx";
-import { Label } from "@/components/ui/label.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -25,7 +24,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import axios, { AxiosError } from "axios";
 import { ApiResponse } from "@/types/api-response";
-import { signUpSchema } from "@/schemas/auth/sign-up-schema.ts";
+import { buyerSignUpSchema } from "@/schemas/auth/sign-up-schema.ts";
 
 
 const SignUp = () => {
@@ -45,7 +44,7 @@ const SignUp = () => {
                 setIsCheckingUsername(true);
                 setUsernameMessage("");
                 try {
-                    const response = await axios.get(`/api/auth/check-username-unique?username=${username}`);
+                    const response = await axios.get(`/api/auth/buyer/check-username-unique?username=${username}`);
                     if (response.data.success) {
                         setUsernameMessage(response.data.message);
                     }
@@ -69,8 +68,8 @@ const SignUp = () => {
     }, [username]);
 
     // zod implementation using react hook form
-    const signUpForm = useForm<z.infer<typeof signUpSchema>>({
-        resolver: zodResolver(signUpSchema),
+    const signUpForm = useForm<z.infer<typeof buyerSignUpSchema>>({
+        resolver: zodResolver(buyerSignUpSchema),
         defaultValues: {
             fullName: "",
             username: "",
@@ -83,7 +82,7 @@ const SignUp = () => {
         },
     });
 
-    const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
+    const onSubmit = async (data: z.infer<typeof buyerSignUpSchema>) => {
         setIsSubmitting(true);
         try {
             const response = await axios.post<ApiResponse>("/api/auth/buyer/sign-up", data);
@@ -140,7 +139,7 @@ const SignUp = () => {
                 <Button
                     variant="ghost"
                     className="relative top-2 left-2 text-gray-600 dark:text-gray-400 hover:text-blue-950 dark:hover:text-gray-200 dark:hover:bg-gray-700"
-                    onClick={() => router.replace("/")}
+                    onClick={() => router.push("/")}
                     aria-label="Back to home"
                 >
                     <ArrowLeft size={24} />
@@ -197,6 +196,10 @@ const SignUp = () => {
                                                 id={field.name}
                                                 aria-invalid={fieldState.invalid}
                                                 placeholder="Username"
+                                                onChange={(e) => {
+                                                    field.onChange(e);
+                                                    debounced(e.target.value);
+                                                }}
                                                 autoComplete="off"
                                             />
                                             {isCheckingUsername && (
@@ -327,7 +330,7 @@ const SignUp = () => {
                                                 />
                                                 <button
                                                     type="button"
-                                                    onClick={togglePasswordVisibility}
+                                                    onClick={toggleConfirmPasswordVisibility}
                                                     className="cursor-pointer absolute inset-y-0 end-2.5 text-gray-400 focus:outline-hidden focus:text-blue-600 dark:text-neutral-500 dark:focus:text-blue-500"
                                                 >
                                                     {showConfirmPassword ? (

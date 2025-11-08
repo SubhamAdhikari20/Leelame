@@ -55,10 +55,10 @@ const roleValidation = z        // Role validation
 
 const termsAndConditionsValidation = z       // Terms and Conditions validation
     .boolean().refine((value) => value === true, {
-        message: "You must accept the terms and conditions",
+        message: "You must accept the terms and conditions"
     });
 
-export const signUpSchema = z.object({    // Sign Up Schema
+export const buyerSignUpSchema = z.object({    // Sign Up Schema
     fullName: fullNameValidation,
     username: usernameValidation,
     contact: contactValidation,
@@ -66,7 +66,7 @@ export const signUpSchema = z.object({    // Sign Up Schema
     password: passwordValidation,
     confirmPassword: confirmPasswordValidation,
     role: roleValidation,
-    terms: termsAndConditionsValidation,
+    terms: termsAndConditionsValidation
 }).superRefine((values, ctx) => {
     if (values.password !== values.confirmPassword) {
         ctx.addIssue({

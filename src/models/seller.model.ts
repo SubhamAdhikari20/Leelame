@@ -1,5 +1,6 @@
 // src/models/seller.model.ts
 import mongoose, { Schema, Document } from "mongoose";
+import type { IUser } from "./user.model.ts";
 
 export interface ISeller extends Document {
     userId: Schema.Types.ObjectId,
@@ -15,6 +16,10 @@ export interface ISeller extends Document {
     sellerBannedAt?: Date | null;
     sellerBannedDateFrom?: Date | null;
     sellerBannedDateTo?: Date | null;
+}
+
+export interface ISellerPopulated extends Omit<ISeller, "userId"> {
+    userId: IUser;
 }
 
 const sellerSchema: Schema<ISeller> = new Schema({
