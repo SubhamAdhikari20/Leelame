@@ -46,8 +46,8 @@ declare module "next-auth/jwt" {
         profilePictureUrl?: string | null;
 
         // Optional role-specific references
-        buyerProfile?: string | null;
-        sellerProfile?: string | null;
-        adminProfile?: string | null;
+        buyerProfile?: IBuyer | null;
+        sellerProfile?: ISeller | null;
+        adminProfile?: IAdmin | null;
     }
 }

@@ -1,5 +1,8 @@
 // src/models/user.model.ts
 import mongoose, { Schema, Document } from "mongoose";
+import type { IBuyer } from "./buyer.model.ts";
+import type { ISeller } from "./seller.model.ts";
+import type { IAdmin } from "./admin.model.ts";
 
 export interface IUser extends Document {
     email: string;
@@ -25,6 +28,15 @@ export interface IUser extends Document {
     bannedDateFrom?: Date | null;
     bannedDateTo?: Date | null;
 }
+
+export interface IUserPopulated extends Omit<IUser, ("buyerProfile" | "sellerProfile" | "adminProfile")> {
+    buyerProfile?: IBuyer | null;
+    sellerProfile?: ISeller | null;
+    adminProfile?: IAdmin | null;
+}
+// export interface IUserBuyerPopulated extends Omit<IUser, "buyerProfile"> {
+//     buyerProfile?: IBuyer | null;
+// }
 
 const userSchema: Schema<IUser> = new Schema({
     email: {

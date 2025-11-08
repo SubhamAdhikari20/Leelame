@@ -1,11 +1,16 @@
 // src/models/admin.model.ts
 import mongoose, { Schema, Document } from "mongoose";
+import type { IUser } from "./user.model.ts";
 
 export interface IAdmin extends Document {
     userId: Schema.Types.ObjectId,
     fullName: string;
     contact: string;
     password: string;
+}
+
+export interface IAdminPopulated extends Omit<IAdmin, "userId"> {
+    userId: IUser;
 }
 
 const adminSchema: Schema<IAdmin> = new Schema({

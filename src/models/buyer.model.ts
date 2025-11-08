@@ -1,5 +1,6 @@
 // src/models/buyer.model.ts
 import mongoose, { Schema, Document } from "mongoose";
+import type { IUser } from "./user.model.ts";
 
 export interface IBuyer extends Document {
     userId: Schema.Types.ObjectId,
@@ -10,6 +11,10 @@ export interface IBuyer extends Document {
     googleId?: string;
     bio?: string | null;
     terms: boolean;
+}
+
+export interface IBuyerPopulated extends Omit<IBuyer, "userId"> {
+    userId: IUser;
 }
 
 const buyerSchema: Schema<IBuyer> = new Schema({
