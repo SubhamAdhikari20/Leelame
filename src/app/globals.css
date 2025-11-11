@@ -3,7 +3,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* toast "sonner"(shadcn ui) close button */
+[data-sonner-toast][data-styled="true"] [data-close-button] {
+  right: -15px !important;
+  left: auto !important;
+}
+
 @theme inline {
+  --breakpoint-xs: 550px;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
