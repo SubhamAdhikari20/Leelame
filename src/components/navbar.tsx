@@ -38,6 +38,7 @@ import { useTheme } from "@/app/context/theme-provider.tsx";
 import { CurrentUser } from "@/types/current-user.ts";
 import { toast } from "sonner";
 import { signOut } from "next-auth/react";
+import Image from "next/image";
 
 interface NavbarProps {
     currentUser?: CurrentUser | null;
@@ -140,7 +141,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
                 {/* Branding */}
                 <div className="flex items-center gap-15">
                     <Link href="/" className="flex items-center gap-2">
-                        <img
+                        <Image
                             src="/images/leelame_logo_cropped_png.png"
                             alt="Leelame Logo"
                             width={50}
