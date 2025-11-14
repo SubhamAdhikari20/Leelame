@@ -43,7 +43,7 @@ const contactValidation = z      // Contact validation
 const roleValidation = z        // Role validation
     .enum(["admin", "seller", "buyer"], {
         error: "Role is required"
-    });
+    }).optional();
 
 // const roleValidation = z        // Role validation
 //     .array(z.enum(["admin", "seller", "buyer"]))

@@ -44,7 +44,7 @@ const SignUp = () => {
                 setIsCheckingUsername(true);
                 setUsernameMessage("");
                 try {
-                    const response = await axios.get(`/api/auth/buyer/check-username-unique?username=${username}`);
+                    const response = await axios.get(`/api/users/buyer/check-username-unique?username=${username}`);
                     if (response.data.success) {
                         setUsernameMessage(response.data.message);
                     }
@@ -85,12 +85,12 @@ const SignUp = () => {
     const onSubmit = async (data: z.infer<typeof buyerSignUpSchema>) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.post<ApiResponse>("/api/auth/buyer/sign-up", data);
+            const response = await axios.post<ApiResponse>("/api/users/buyer/sign-up", data);
             if (response.data.success) {
                 toast.success("Sign Up Successful", {
                     description: response.data.message,
                 });
-                router.replace(`/verify-account-registration/${username}`);
+                router.replace(`/verify-account/registration/${username}`);
             }
         }
         catch (error) {
@@ -174,7 +174,7 @@ const SignUp = () => {
                                                 id={field.name}
                                                 aria-invalid={fieldState.invalid}
                                                 placeholder="Full Name"
-                                                autoComplete="off"
+                                                // autoComplete="off"
                                             />
                                             {fieldState.invalid && (
                                                 <FieldError errors={[fieldState.error]} />
@@ -236,7 +236,7 @@ const SignUp = () => {
                                                 id={field.name}
                                                 aria-invalid={fieldState.invalid}
                                                 placeholder="Contact"
-                                                autoComplete="off"
+                                                // autoComplete="off"
                                             />
                                             {fieldState.invalid && (
                                                 <FieldError errors={[fieldState.error]} />
@@ -258,7 +258,7 @@ const SignUp = () => {
                                                 id={field.name}
                                                 aria-invalid={fieldState.invalid}
                                                 placeholder="Email"
-                                                autoComplete="off"
+                                                // autoComplete="off"
                                             />
                                             {fieldState.invalid && (
                                                 <FieldError errors={[fieldState.error]} />

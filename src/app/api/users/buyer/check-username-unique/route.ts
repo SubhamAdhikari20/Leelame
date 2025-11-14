@@ -1,4 +1,4 @@
-// src/api/auth/buyer/check-username-unique/route.ts
+// src/api/users/buyer/check-username-unique/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import dbConnect from "@/lib/db-connect.ts";

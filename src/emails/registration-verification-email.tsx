@@ -37,7 +37,7 @@ const RegistrationVerificationEmail = ({ fullName, otp }: RegistrationVerificati
                 </Row>
                 <Row>
                     <Text>
-                        Verification Code: {otp}
+                        Verification Code: <strong>{otp}</strong>
                     </Text>
                 </Row>
                 <Row>

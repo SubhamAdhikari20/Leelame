@@ -1,4 +1,4 @@
-// src/app/api/auth/buyer/sign-up/route.ts
+// src/app/api/users/buyer/sign-up/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 import dbConnection from "@/lib/db-connect.ts";
 import User from "@/models/user.model.ts";
 import Buyer from "@/models/buyer.model.ts";
-import { sendVerificationEmail } from "@/helpers/send-verification-email.ts";
+import { sendVerificationEmail } from "@/helpers/send-verification-email.tsx";
 
 
 export const POST = async (req: NextRequest) => {
@@ -82,7 +82,7 @@ export const POST = async (req: NextRequest) => {
             // Create new user
             newUser = new User({
                 email,
-                role: "buyer",
+                role: role,
                 isVerified: false,
                 verifyCode: otp,
                 verifyCodeExpiryDate: expiryDate,
