@@ -12,7 +12,9 @@ const AppLayout = ({
     return (
         <>
             <Navbar />
-            {children}
+            <main className="bg-size-[20px_20px] min-h-[90vh] bg-gray-100 dark:bg-background text-gray-900 dark:text-foreground transition-colors duration-300">
+                {children}
+            </main>
             <Footer />
         </>
     );

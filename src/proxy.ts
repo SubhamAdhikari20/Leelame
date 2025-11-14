@@ -16,7 +16,7 @@ type AuthToken = {
 // const PROTECTED_ROUTES = ["/:username", "/admin", "/seller"];
 // const PUBLIC_ROUTES = ["/login", "/sign-up", "/verify-account", "/"];
 
-const PUBLIC_PREFIXES = ["/login", "/sign-up", "/verify-account", "/forgot-passoword", "/reset-password"];
+const PUBLIC_PREFIXES = ["/login", "/sign-up", "/verify-account", "/forgot-password", "/reset-password"];
 const PUBLIC_ROOTS = ["/"]; // root is public
 
 
@@ -51,7 +51,7 @@ export const proxy = async (req: NextRequest) => {
     const token = (await getToken({ req: req, secret: process.env.NEXTAUTH_SECRET })) as AuthToken | null;
     const pathname = req.nextUrl.pathname;
 
-    // allow internal runtime & static assets
+    // allow internal runtime and static assets
     if (
         pathname.startsWith("/_next") ||
         pathname.startsWith("/static") ||
@@ -72,10 +72,13 @@ export const proxy = async (req: NextRequest) => {
         // logged in users: if not verified, send to verify page (unless already there)
         const tokenUsername = extractTokenUsername(token);
         if (!token.isVerified) {
-            if (!pathname.startsWith("/verify-account")) {
-                return NextResponse.redirect(new URL(`/verify-account/${tokenUsername ?? ""}`, req.url));
+            if (
+                pathname.startsWith("/verify-account/registration") ||
+                pathname.startsWith("/verify-account/reset-password")
+            ) {
+                return NextResponse.next();
             }
-            return NextResponse.next();
+            return NextResponse.redirect(new URL(`/verify-account/registration/${tokenUsername ?? ""}`, req.url));
         }
 
         // logged in & verified -> redirect from login/signup to user's proper place
@@ -107,15 +110,19 @@ export const proxy = async (req: NextRequest) => {
         if (!/^\/(login|sign-up|verify-account|forgot-password|reset-password)/.test(pathname)) {
             return NextResponse.rewrite(new URL("/not-found", req.url));
         }
-        return NextResponse.redirect(new URL("/login", req.url));
+        return NextResponse.next();
+        // return NextResponse.redirect(new URL("/login", req.url));
     }
 
     const tokenUsername = extractTokenUsername(token);
     if (!token.isVerified) {
-        if (!pathname.startsWith("/verify-account")) {
-            return NextResponse.redirect(new URL(`/verify-account/${tokenUsername ?? ""}`, req.url));
+        if (
+            pathname.startsWith("/verify-account/registration") ||
+            pathname.startsWith("/verify-account/reset-password")
+        ) {
+            return NextResponse.next();
         }
-        return NextResponse.next();
+        return NextResponse.redirect(new URL(`/verify-account/registration/${tokenUsername ?? ""}`, req.url));
     }
 
     // Split path segments
