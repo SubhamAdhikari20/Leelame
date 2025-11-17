@@ -12,7 +12,7 @@ const passwordValidation = z
 const roleValidation = z
     .enum(["admin", "seller", "buyer"], {
         error: "Role is required"
-    });
+    }).optional();
 
 export const buyerLoginSchema = z.object({
     // Identifier = Username OR Email

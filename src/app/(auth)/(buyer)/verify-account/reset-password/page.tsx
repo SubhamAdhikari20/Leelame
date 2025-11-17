@@ -1,7 +1,7 @@
 // src/app/(auth)/(buyer)/verify-account/reset-password/[email]/page.tsx
 "use client";
 import React, { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
@@ -29,7 +29,8 @@ const VerifyAccountResetPassword = () => {
     const [isVerifying, setIsVerifying] = useState(false);
 
     const router = useRouter();
-    const params = useParams();
+    const searchParams = useSearchParams();
+    const email = searchParams.get("email");
 
     const verifyAccountResetPasswordForm = useForm<z.infer<typeof verifyAccountResetPasswordSchema>>({
         resolver: zodResolver(verifyAccountResetPasswordSchema),
@@ -41,8 +42,8 @@ const VerifyAccountResetPassword = () => {
     const onSubmit = async (data: z.infer<typeof verifyAccountResetPasswordSchema>) => {
         setIsVerifying(true);
         try {
-            const response = await axios.post("/api/users/buyer/verify-account/reset-password", {
-                email: params.email,
+            const response = await axios.put("/api/users/buyer/verify-account/reset-password", {
+                email: email,
                 code: data.code,
             });
 
@@ -50,7 +51,7 @@ const VerifyAccountResetPassword = () => {
                 toast.success("Success", {
                     description: response.data.message,
                 });
-                router.replace(`/reset-password/${params.email}`);
+                router.replace(`/reset-password?email=${email}`);
             }
         }
         catch (error) {

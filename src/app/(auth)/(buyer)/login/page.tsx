@@ -30,6 +30,7 @@ import { getSession, signIn, useSession } from "next-auth/react";
 import axios, { AxiosError } from "axios";
 import { ApiResponse } from "@/types/api-response";
 import { buyerLoginSchema } from "@/schemas/auth/login-schema.ts";
+import { IBuyer } from "@/models/buyer.model.ts";
 
 
 const Login = () => {
@@ -47,7 +48,8 @@ const Login = () => {
         resolver: zodResolver(buyerLoginSchema),
         defaultValues: {
             identifier: "",
-            password: ""
+            password: "",
+            role: "buyer"
         },
     });
 
@@ -64,17 +66,33 @@ const Login = () => {
             });
 
             if (result?.error) {
-                if (result.error == "CredentialsSignIn") {
-                    toast.error("Login Failed", {
-                        description: "Incorrect username or password"
-                    });
-                }
-                else {
-                    toast.error("Error", {
-                        description: result.error
-                    });
+                switch (result.error) {
+                    case "MISSING_CREDENTIALS":
+                        toast.error("Login Failed", { description: "Please enter both username/email and password." });
+                        break;
+                    case "BUYER_NOT_FOUND":
+                        toast.error("Login Failed", { description: "Invalid username or email." });
+                        break;
+                    case "INVALID_PASSWORD":
+                        toast.error("Login Failed", { description: "Invalid password. Please enter correct password." });
+                        break;
+                    default:
+                        toast.error("Login failed", { description: result.error });
                 }
                 return;
+
+                // if ((result.error == "CredentialsSignIn") || (result.error == "CredentialsSignin")) {
+                //     toast.error("Login Failed", {
+                //         description: "Incorrect username or password"
+                //     });
+                // }
+                // else {
+                //     toast.error("Error", {
+                //         description: result.error
+                //     });
+                //     console.error(result.error);
+                // }
+                // return;
             }
 
             const updatedSession = await getSession();
@@ -147,7 +165,7 @@ const Login = () => {
     const sendAccountVerificationCode = async () => {
         setIsSendingCode(true);
         try {
-            const response = await axios.put("/api/auth/send-verification-email-registration", {
+            const response = await axios.put<ApiResponse>("/api/users/buyer/send-account-registration-email", {
                 email: emailToVerify,
             });
 
@@ -155,7 +173,8 @@ const Login = () => {
                 toast.success("Success", {
                     description: response.data.message
                 });
-                router.replace(`/verify-account-registration/${response.data.user.username}`);
+                const buyer = response.data.user?.buyerProfile as IBuyer;
+                router.replace(`/verify-account/registration?username=${buyer?.username}`);
             }
         }
         catch (error) {

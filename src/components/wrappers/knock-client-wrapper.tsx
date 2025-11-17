@@ -4,8 +4,9 @@ import React, { useEffect } from "react";
 import { KnockFeedProvider, KnockProvider } from "@knocklabs/react";
 // @ts-ignore - CSS file has no type declarations; consider adding a global declaration (e.g. src/global.d.ts: declare module '*.css';)
 import "@knocklabs/react/dist/index.css";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
+import { ApiResponse } from "@/types/api-response.ts";
 
 
 const KnockClientWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -29,7 +30,7 @@ const KnockClientWrapper = ({ children }: { children: React.ReactNode }) => {
                         fullName = session.user.adminProfile.fullName ?? "Admin";
                     }
 
-                    const response = await axios.get("/api/notifications/knock/update-user", {
+                    const response = await axios.post("/api/notifications/knock/update-user", {
                         data: {
                             userId: session.user._id,
                             fullName: fullName,
@@ -42,7 +43,8 @@ const KnockClientWrapper = ({ children }: { children: React.ReactNode }) => {
                     }
                 }
                 catch (error) {
-                    console.error("Error updating Knock user:", error);
+                    const axiosError = error as AxiosError<ApiResponse>;
+                    console.error("Error updating Knock user:", axiosError);
                 }
             }
         };
@@ -52,18 +54,18 @@ const KnockClientWrapper = ({ children }: { children: React.ReactNode }) => {
 
     // Validate environment variables at runtime
     const apiKey = process.env.NEXT_PUBLIC_KNOCK_PUBLIC_API_KEY;
-    const feedId = process.env.NEXT_PUBLIC_KNOCK_PUBLIC_FEED_ID;
-
     if (!apiKey) {
         console.error("NEXT_PUBLIC_KNOCK_PUBLIC_API_KEY is missing. Please set it in your .env file.");
         return <>{children}</>;
     }
+
+    const feedId = process.env.NEXT_PUBLIC_KNOCK_PUBLIC_FEED_ID;
     if (!feedId) {
         console.error("NEXT_PUBLIC_KNOCK_PUBLIC_FEED_ID is missing. Please set it in your .env file.");
         return <>{children}</>;
     }
 
-    if (status !== "authenticated" || !session.user?._id) {
+    if (status !== "authenticated" || !session?.user?._id) {
         return <>{children}</>;
     }
 

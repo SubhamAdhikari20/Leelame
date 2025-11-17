@@ -14,9 +14,9 @@ const confirmNewPasswordValidation = z     // Confirm New Password validation
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/, { message: "Confirm Password must contain atleast 1 uppercase, 1 lowercase, 1 digit and 1 special character" });
 
 export const resetPasswordSchema = z.object({
-    password: newPasswordValidation,
+    newPassword: newPasswordValidation,
     confirmPassword: confirmNewPasswordValidation,
-}).refine((data) => data.password === data.confirmPassword, {
+}).refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
 });

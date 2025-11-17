@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 import dbConnection from "@/lib/db-connect.ts";
 import User from "@/models/user.model.ts";
 import Buyer from "@/models/buyer.model.ts";
-import { sendVerificationEmail } from "@/helpers/send-verification-email.tsx";
+import { sendVerificationEmail } from "@/helpers/send-registration-verification-email.tsx";
 
 
 export const POST = async (req: NextRequest) => {
@@ -123,12 +123,15 @@ export const POST = async (req: NextRequest) => {
                 // If it was an existing unverified user, clear verification fields
                 newUser.verifyCode = null;
                 newUser.verifyCodeExpiryDate = null;
-                
+
                 await newUser.save();
                 await buyerProfile.save();
             }
 
-            return NextResponse.json({ success: false, message: "Failed to send verification email" }, { status: 500 });
+            return NextResponse.json(
+                { success: false, message: `${emailResponse.message ?? "Failed to send verification email"}` },
+                { status: 500 }
+            );
         }
 
         await buyerProfile.save();
@@ -148,7 +151,7 @@ export const POST = async (req: NextRequest) => {
         console.error("Error in buyer signup:", error);
         return NextResponse.json({
             success: false,
-            message: error.message || "Internal Server Error"
+            message: `${error.toString() ?? error.message ?? "Internal Server Error"}`
         }, { status: 500 });
     }
 };

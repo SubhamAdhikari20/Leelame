@@ -1,4 +1,4 @@
-// src/helpers/send-verification-email.tsx
+// src/helpers/send-registration-verification-email.tsx
 import React from "react";
 import nodemailer from "nodemailer";
 import { render } from "@react-email/components";

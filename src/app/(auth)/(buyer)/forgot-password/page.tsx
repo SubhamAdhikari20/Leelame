@@ -36,14 +36,14 @@ const ForgotPassword = () => {
     const onSubmit = async (data: z.infer<typeof forgotPasswordSchema>) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.post("/api/users/buyer/forgot-password", {
+            const response = await axios.put("/api/users/buyer/forgot-password", {
                 email: data.email,
             });
             toast.success("Success", {
                 description: response.data.message,
             });
 
-            router.replace(`/verify-account/reset-password/${data.email}`);
+            router.replace(`/verify-account/reset-password?email=${data.email}`);
         }
         catch (error) {
             const axiosError = error as AxiosError<ApiResponse>;

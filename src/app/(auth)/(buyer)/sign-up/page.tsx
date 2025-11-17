@@ -90,7 +90,7 @@ const SignUp = () => {
                 toast.success("Sign Up Successful", {
                     description: response.data.message,
                 });
-                router.replace(`/verify-account/registration/${username}`);
+                router.replace(`/verify-account/registration?username=${username}`);
             }
         }
         catch (error) {

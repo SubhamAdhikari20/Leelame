@@ -1,7 +1,7 @@
 // src/app/(auth)/(buyer)/reset-password/[email]/page.tsx
 "use client";
 import React, { useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,12 +28,13 @@ const ResetPassword = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const router = useRouter();
-    const params = useParams();
+    const searchParams = useSearchParams();
+    const email = searchParams.get("email")
 
     const resetPasswordForm = useForm<z.infer<typeof resetPasswordSchema>>({
         resolver: zodResolver(resetPasswordSchema),
         defaultValues: {
-            password: "",
+            newPassword: "",
             confirmPassword: ""
         },
     });
@@ -41,9 +42,9 @@ const ResetPassword = () => {
     const onSubmit = async (data: z.infer<typeof resetPasswordSchema>) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.post("/api/users/buyer/reset-password", {
-                email: params.email,
-                newPassword: data.password,
+            const response = await axios.put("/api/users/buyer/reset-password", {
+                email: email,
+                newPassword: data.newPassword,
             });
 
             toast("Success", {
@@ -82,7 +83,7 @@ const ResetPassword = () => {
                 >
                     <FieldGroup>
                         <Controller
-                            name="password"
+                            name="newPassword"
                             control={resetPasswordForm.control}
                             render={({ field, fieldState }) => (
                                 <Field data-invalid={fieldState.invalid}>

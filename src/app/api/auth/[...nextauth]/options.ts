@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 import User, { IUserPopulated } from "@/models/user.model.ts";
 import Buyer, { IBuyerPopulated } from "@/models/buyer.model.ts";
 import Seller, { ISellerPopulated } from "@/models/seller.model.ts";
-import Admin, { IAdminPopulated } from "@/models/admin.model.ts";
+// import Admin, { IAdminPopulated } from "@/models/admin.model.ts";
 
 
 type RawCredentials = {
@@ -15,25 +15,21 @@ type RawCredentials = {
     role?: "buyer" | "seller" | "admin" | string;
 };
 
-// const findUserByEmail = async (email?: string) => {
-//     if (!email) return null;
-//     return await User.findOne({ email: email?.trim() });
-// };
+const buildReturnUser = (user: any) => {
+    return {
+        _id: typeof user?._id === "object" && user?._id?.toString
+            ? user._id.toString()
+            : user?._id ?? user?.id,
+        email: user?.email ?? null,
+        role: user?.role ?? "buyer",
+        isVerified: Boolean(user?.isVerified),
+        profilePictureUrl: user?.profilePictureUrl ?? null,
 
-// const buildReturnUser = (userDoc: any, profileFields: any = {}) => {
-//     return {
-//         _id: typeof userDoc?._id === "object" && userDoc?._id?.toString
-//             ? userDoc._id.toString()
-//             : userDoc?._id ?? userDoc?.id ?? null,
-//         email: userDoc?.email ?? profileFields.email ?? null,
-//         role: userDoc?.role ?? profileFields.role ?? "buyer",
-//         isVerified: !!userDoc?.isVerified,
-//         profilePictureUrl: userDoc?.profilePictureUrl ?? profileFields.profilePictureUrl ?? null,
-//         fullName: profileFields.fullName ?? null,
-//         username: profileFields.username ?? null,
-//         contact: profileFields.contact ?? null,
-//     };
-// };
+        buyerProfile: user?.buyerProfile ?? null,
+        sellerProfile: user?.sellerProfile ?? null,
+        adminProfile: user?.adminProfile ?? null
+    };
+};
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -52,47 +48,37 @@ export const authOptions: NextAuthOptions = {
 
                 try {
                     if (!identifier || !password || !role) {
-                        return null;
+                        throw new Error("MISSING_CREDENTIALS");
+                        // return null;
                     }
 
                     // 1) Admin: email-only
                     if (role === "admin") {
                         // only allow email as identifier for admin
                         const user = await User.findOne({ email: identifier }).populate<IUserPopulated>("adminProfile");
-                        if (!user || user.role !== "admin") {
-                            return null;
+
+                        if (!user) {
+                            throw new Error("ADMIN_NOT_FOUND");
+                            // return null;
+                        }
+
+                        if (user.role !== "admin") {
+                            throw new Error("NOT_ADMIN");
+                            // return null;
                         }
 
                         const hashedPassword = user.adminProfile?.password ?? null;
                         if (!hashedPassword) {
-                            return null;
+                            throw new Error("ADMIN_NO_PASSWORD");
+                            // return null;
                         }
                         const isMatched = await bcrypt.compare(password, hashedPassword);
                         if (!isMatched) {
-                            return null;
+                            throw new Error("INVALID_PASSWORD");
+                            // return null;
 
                         }
-
-                        return user;
-
-                        // const user = await findUserByEmail(identifier);
-                        // if (!user || user.role !== "admin") return null;
-
-                        // // The admin profile may store password in Admin model or elsewhere.
-                        // const adminProfile = await Admin.findOne({ userId: user._id }).populate<IAdminPopulated>("userId");
-                        // const hashedPassword = adminProfile?.password ?? null;
-
-                        // if (!hashedPassword) return null;
-                        // const isMatched = await bcrypt.compare(password, hashedPassword);
-                        // if (!isMatched) return null;
-
-                        // return user;
-
-                        // return buildReturnUser(adminProfile?.userId, {
-                        //     fullName: adminProfile?.fullName ?? null,
-                        //     contact: adminProfile?.contact ?? null,
-                        // });
-
+                        return buildReturnUser(user);
                     }
 
                     // 2) Seller: email or contact
@@ -100,71 +86,49 @@ export const authOptions: NextAuthOptions = {
                         // Try email first (User collection)
                         let user = await User.findOne({ email: identifier }).populate<IUserPopulated>("sellerProfile");
 
-                        // let user = await findUserByEmail(identifier);
-
                         if (user && user.role === "seller") {
-                            const hashedPassword= user.sellerProfile?.password ?? null;
+                            const hashedPassword = user.sellerProfile?.password ?? null;
                             if (!hashedPassword) {
-                                return null;
-
+                                throw new Error("SELLER_NO_PASSWORD");
+                                // return null;
                             }
 
                             const isMatched = await bcrypt.compare(password, hashedPassword);
                             if (!isMatched) {
-                                return null;
+                                throw new Error("INVALID_PASSWORD");
+                                // return null;
                             }
 
-                            return user;
-
-                            // const sellerProfile = await Seller.findOne({ userId: user._id });
-                            // if (!sellerProfile?.password) return null;
-                            // const ok = await bcrypt.compare(password, sellerProfile.password);
-                            // if (!ok) return null;
-
-                            // return buildReturnUser(user, {
-                            //     fullName: sellerProfile.fullName,
-                            //     username: undefined,
-                            //     contact: sellerProfile.contact,
-                            // });
+                            return buildReturnUser(user);
                         }
+
                         // If not found by email, try contact lookup in seller collection
                         const sellerByContact = await Seller.findOne({ contact: identifier }).populate<ISellerPopulated>("userId");
+
                         if (!sellerByContact) {
-                            return null;
+                            throw new Error("SELLER_NOT_FOUND");
+                            // return null;
                         }
 
-                        const sellerUserDoc = sellerByContact.userId;
+                        let sellerUserDoc = sellerByContact.userId;
                         if (!sellerUserDoc || sellerUserDoc.role !== "seller") {
                             return null;
                         }
 
                         // password stored in seller profile
                         if (!sellerByContact.password) {
-                            return null;
+                            throw new Error("SELLER_NOT_FOUND");
+                            // return null;
                         }
                         const isMatched = await bcrypt.compare(password, sellerByContact.password);
                         if (!isMatched) {
-                            return null;
+                            throw new Error("INVALID_PASSWORD");
+                            // return null;
                         }
 
-                        return user;
+                        sellerUserDoc = { ...sellerUserDoc.toObject(), sellerProfile: sellerByContact }
 
-                        // // If not found by email, try contact lookup in seller collection
-                        // const sellerByContact = await Seller.findOne({ contact: identifier }).populate<ISellerPopulated>("userId");
-                        // if (!sellerByContact) return null;
-
-                        // const sellerUserDoc = sellerByContact.userId;
-                        // if (!sellerUserDoc || sellerUserDoc.role !== "seller") return null;
-
-                        // // password stored in seller profile
-                        // if (!sellerByContact.password) return null;
-                        // const okContact = await bcrypt.compare(password, sellerByContact.password);
-                        // if (!okContact) return null;
-
-                        // return buildReturnUser(sellerUserDoc, {
-                        //     fullName: sellerByContact.fullName,
-                        //     contact: sellerByContact.contact,
-                        // });
+                        return buildReturnUser(sellerUserDoc);
                     }
 
                     // 3) BUYER: email OR username
@@ -177,80 +141,54 @@ export const authOptions: NextAuthOptions = {
                         if (user && user.role === "buyer") {
                             const hashedPassword = user.buyerProfile?.password ?? null;
                             if (!hashedPassword) {
-                                return null;
+                                throw new Error("BUYER_NO_PASSWORD");
+                                // return null;
                             }
 
                             const isMatched = await bcrypt.compare(password, hashedPassword);
                             if (!isMatched) {
-                                return null;
+                                throw new Error("INVALID_PASSWORD");
+                                // return null;
                             }
-                            return user;
-
-                            // const buyerProfile = await Buyer.findOne({ userId: user._id });
-                            // if (buyerProfile?.password) {
-                            //     const ok = await bcrypt.compare(password, buyerProfile.password);
-                            //     if (!ok) return null;
-
-                            //     return buildReturnUser(user, {
-                            //         fullName: buyerProfile.fullName,
-                            //         username: buyerProfile.username,
-                            //         contact: buyerProfile.contact,
-                            //     });
-                            // }
-
-                            // If buyer profile lacks password but user doc stores some secret (uncommon),
-                            // you could compare against user.password (not present in your User schema).
-                            // For security clarity: prefer storing password in role profile (buyer/seller).
-                            // return buildReturnUser(user, {
-                            //     fullName: buyerProfile?.fullName ?? null,
-                            //     username: buyerProfile?.username ?? null,
-                            //     contact: buyerProfile?.contact ?? null,
-                            // });
-
+                            return buildReturnUser(user);
                         }
 
                         // If not found by email, try username in buyer collection
                         const buyerByUsername = await Buyer.findOne({ username: identifier }).populate<IBuyerPopulated>("userId");
+
                         if (!buyerByUsername) {
-                            return null;
+                            throw new Error("BUYER_NOT_FOUND");
+                            // return null;
                         }
 
-                        const buyerUserDoc = buyerByUsername.userId;
+                        let buyerUserDoc = buyerByUsername.userId;
                         if (!buyerUserDoc || buyerUserDoc.role !== "buyer") {
                             return null;
                         }
 
                         if (!buyerByUsername.password) {
-                            return null;
+                            throw new Error("BUYER_NO_PASSWORD");
+                            // return null;
                         }
                         const isMatched = await bcrypt.compare(password, buyerByUsername.password);
                         if (!isMatched) {
-                            return null;
+                            throw new Error("INVALID_PASSWORD");
+                            // return null;
                         }
 
-                        return user;
+                        buyerUserDoc = {
+                            ...buyerUserDoc.toObject(),
+                            buyerProfile: buyerByUsername,
+                        };
 
-                        // // If not found by email, try username in buyer collection
-                        // const buyerByUsername = await Buyer.findOne({ username: identifier }).populate<IBuyerPopulated>("userId");
-                        // if (!buyerByUsername) return null;
-
-                        // const buyerUserDoc = buyerByUsername.userId;
-                        // if (!buyerUserDoc || buyerUserDoc.role !== "buyer") return null;
-
-                        // if (!buyerByUsername.password) return null;
-                        // const okUsername = await bcrypt.compare(password, buyerByUsername.password);
-                        // if (!okUsername) return null;
-
-                        // return buildReturnUser(buyerUserDoc, {
-                        //     fullName: buyerByUsername.fullName,
-                        //     username: buyerByUsername.username,
-                        //     contact: buyerByUsername.contact,
-                        // });
+                        return buildReturnUser(buyerUserDoc);;
                     }
-                    return null;
+                    throw new Error("UNKNOWN_ERROR");
+                    // return null;
                 }
                 catch (error: any) {
-                    throw new Error(error);
+                    throw new Error(error.message ?? "AUTH_ERROR");
+                    // throw new Error(error);
                 }
             }
         }),
@@ -265,30 +203,37 @@ export const authOptions: NextAuthOptions = {
         async jwt({ token, user, account, profile }) {
             // user object present on first sign in (credentials or provider)
             if (user) {
-                // normalize to the shape expected by your types (use _id)
-                token._id = (user as any)._id ?? (user as any).id ?? token._id;
-                token.email = (user as any).email ?? token.email;
-                token.role = (user as any).role ?? token.role ?? "buyer";
-                token.isVerified = !!(user as any).isVerified;
-                token.profilePictureUrl = (user as any).profilePictureUrl ?? token.profilePictureUrl ?? null;
+                const normalized = buildReturnUser(user);
 
-                // token.fullName = (user as any).fullName ?? token.fullName ?? null;
-                // token.username = (user as any).username ?? token.username ?? null;
-                // token.contact = (user as any).contact ?? token.contact ?? null;
+                return {
+                    ...token,
+                    ...normalized,
+                };
 
-                if (token.buyerProfile && token.role === "buyer") {
-                    token.buyerProfile.fullName = (user as any).buyerProfile?.fullName ?? token.buyerProfile.fullName ?? null;
-                    token.buyerProfile.username = (user as any).buyerProfile?.username ?? token.buyerProfile.username ?? null;
-                    token.buyerProfile.contact = (user as any).buyerProfile?.contact ?? token.buyerProfile.contact ?? null;
-                }
-                if (token.sellerProfile && token.role === "seller") {
-                    token.sellerProfile.fullName = (user as any).sellerProfile?.fullName ?? token.sellerProfile.fullName ?? null;
-                    token.sellerProfile.contact = (user as any).sellerProfile?.contact ?? token.sellerProfile.contact ?? null;
-                }
-                if (token.adminProfile && token.role === "admin") {
-                    token.adminProfile.fullName = (user as any).adminProfile?.fullName ?? token.adminProfile.fullName ?? null;
-                    token.adminProfile.contact = (user as any).adminProfile?.contact ?? token.adminProfile.contact ?? null;
-                }
+                // // normalize to the shape expected by your types (use _id)
+                // token._id = (user as any)._id ?? (user as any).id ?? token._id;
+                // token.email = (user as any).email ?? token.email;
+                // token.role = (user as any).role ?? token.role ?? "buyer";
+                // token.isVerified = !!(user as any).isVerified;
+                // token.profilePictureUrl = (user as any).profilePictureUrl ?? token.profilePictureUrl ?? null;
+
+                // // token.fullName = (user as any).fullName ?? token.fullName ?? null;
+                // // token.username = (user as any).username ?? token.username ?? null;
+                // // token.contact = (user as any).contact ?? token.contact ?? null;
+
+                // if (token.buyerProfile && token.role === "buyer") {
+                //     token.buyerProfile.fullName = (user as any).buyerProfile?.fullName ?? token.buyerProfile.fullName ?? null;
+                //     token.buyerProfile.username = (user as any).buyerProfile?.username ?? token.buyerProfile.username ?? null;
+                //     token.buyerProfile.contact = (user as any).buyerProfile?.contact ?? token.buyerProfile.contact ?? null;
+                // }
+                // if (token.sellerProfile && token.role === "seller") {
+                //     token.sellerProfile.fullName = (user as any).sellerProfile?.fullName ?? token.sellerProfile.fullName ?? null;
+                //     token.sellerProfile.contact = (user as any).sellerProfile?.contact ?? token.sellerProfile.contact ?? null;
+                // }
+                // if (token.adminProfile && token.role === "admin") {
+                //     token.adminProfile.fullName = (user as any).adminProfile?.fullName ?? token.adminProfile.fullName ?? null;
+                //     token.adminProfile.contact = (user as any).adminProfile?.contact ?? token.adminProfile.contact ?? null;
+                // }
 
             }
             else if (account && profile) {
@@ -303,28 +248,45 @@ export const authOptions: NextAuthOptions = {
 
         // Attach the typed fields into session.user to match your next-auth.d.ts
         async session({ session, token }) {
-            if (!session.user) session.user = {} as any;
+            if (!session.user) {
+                session.user = {} as any;
+            }
 
-            session.user._id = (token as any)._id ?? session.user._id;
-            session.user.email = (token as any).email ?? session.user.email;
-            session.user.role = (token as any).role ?? session.user.role;
-            session.user.isVerified = !!(token as any).isVerified;
-            session.user.profilePictureUrl = (token as any).profilePictureUrl ?? session.user.profilePictureUrl ?? null;
-            if (session.user.buyerProfile && session.user.role === "buyer") {
-                session.user.buyerProfile.fullName = (token as any).buyerProfile?.fullName ?? session.user.buyerProfile.fullName ?? null;
-                session.user.buyerProfile.username = (token as any).buyerProfile?.username ?? session.user.buyerProfile.username ?? null;
-                session.user.buyerProfile.contact = (token as any).buyerProfile?.contact ?? session.user.buyerProfile.contact ?? null;
-            }
-            if (session.user.sellerProfile && session.user.role === "seller") {
-                session.user.sellerProfile.fullName = (token as any).sellerProfile?.fullName ?? session.user.sellerProfile.fullName ?? null;
-                session.user.sellerProfile.contact = (token as any).sellerProfile?.contact ?? session.user.sellerProfile.contact ?? null;
-            }
-            if (session.user.adminProfile && session.user.role === "admin") {
-                session.user.adminProfile.fullName = (token as any).adminProfile?.fullName ?? session.user.adminProfile.fullName ?? null;
-                session.user.adminProfile.contact = (token as any).adminProfile?.contact ?? session.user.adminProfile.contact ?? null;
-            }
+            session.user = {
+                ...session.user,
+                _id: token._id,
+                email: token.email,
+                role: token.role,
+                isVerified: token.isVerified,
+                profilePictureUrl: token.profilePictureUrl ?? null,
+
+                buyerProfile: token.buyerProfile ?? null,
+                sellerProfile: token.sellerProfile ?? null,
+                adminProfile: token.adminProfile ?? null,
+            };
 
             return session;
+
+            // session.user._id = (token as any)._id ?? session.user._id;
+            // session.user.email = (token as any).email ?? session.user.email;
+            // session.user.role = (token as any).role ?? session.user.role;
+            // session.user.isVerified = !!(token as any).isVerified;
+            // session.user.profilePictureUrl = (token as any).profilePictureUrl ?? session.user.profilePictureUrl ?? null;
+            // if (session.user.buyerProfile && session.user.role === "buyer") {
+            //     session.user.buyerProfile.fullName = (token as any).buyerProfile?.fullName ?? session.user.buyerProfile.fullName ?? null;
+            //     session.user.buyerProfile.username = (token as any).buyerProfile?.username ?? session.user.buyerProfile.username ?? null;
+            //     session.user.buyerProfile.contact = (token as any).buyerProfile?.contact ?? session.user.buyerProfile.contact ?? null;
+            // }
+            // if (session.user.sellerProfile && session.user.role === "seller") {
+            //     session.user.sellerProfile.fullName = (token as any).sellerProfile?.fullName ?? session.user.sellerProfile.fullName ?? null;
+            //     session.user.sellerProfile.contact = (token as any).sellerProfile?.contact ?? session.user.sellerProfile.contact ?? null;
+            // }
+            // if (session.user.adminProfile && session.user.role === "admin") {
+            //     session.user.adminProfile.fullName = (token as any).adminProfile?.fullName ?? session.user.adminProfile.fullName ?? null;
+            //     session.user.adminProfile.contact = (token as any).adminProfile?.contact ?? session.user.adminProfile.contact ?? null;
+            // }
+
+            // return session;
         }
     },
     pages: {
