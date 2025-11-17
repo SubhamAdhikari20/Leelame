@@ -60,7 +60,7 @@ export const GET = async (req: NextRequest) => {
         return NextResponse.json(
             {
                 success: false,
-                message: error.message || "Internal Server Error"
+                message: `${error.toString() ?? error.message ?? "Internal Server Error"}`
             },
             { status: 500 }
         );

@@ -18,9 +18,12 @@ declare module "next-auth" {
         profilePictureUrl?: string | null;
 
         // Optional populated references
-        buyerProfile?: IBuyer | Types.ObjectId | null;
-        sellerProfile?: ISeller | Types.ObjectId | null;
-        adminProfile?: IAdmin | Types.ObjectId | null;
+        buyerProfile?: IBuyer | null;
+        sellerProfile?: ISeller | null;
+        adminProfile?: IAdmin | null;
+        // buyerProfile?: IBuyer | Types.ObjectId | null;
+        // sellerProfile?: ISeller | Types.ObjectId | null;
+        // adminProfile?: IAdmin | Types.ObjectId | null;
     }
 
     interface Session {

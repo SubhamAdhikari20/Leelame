@@ -1,17 +1,18 @@
-// src/emails/registration-verification-email.tsx
+// src/emails/reset-password-verification-email.tsx
 import React from "react";
 import { Html, Head, Font, Preview, Heading, Row, Section, Text } from "@react-email/components";
 
-interface RegistrationVerificationEmailProps {
+interface ResetPasswordVerificationEmailProps {
     fullName: string;
+    email: string;
     otp: string;
 }
 
-const RegistrationVerificationEmail = ({ fullName, otp }: RegistrationVerificationEmailProps) => {
+const ResetPasswordVerificationEmail = ({ fullName, email, otp }: ResetPasswordVerificationEmailProps) => {
     return (
         <Html lang="en" dir="ltr">
             <Head>
-                <title>Verification Code</title>
+                <title>Verification Code for reseting password</title>
                 <Font
                     fontFamily="Roboto"
                     fallbackFontFamily="Verdana"
@@ -24,7 +25,7 @@ const RegistrationVerificationEmail = ({ fullName, otp }: RegistrationVerificati
                 />
             </Head>
 
-            <Preview>Here&apos;s your verification code: {otp}</Preview>
+            <Preview>Here&apos;s your verification code for reseting password: {otp}</Preview>
 
             <Section>
                 <Row>
@@ -32,17 +33,12 @@ const RegistrationVerificationEmail = ({ fullName, otp }: RegistrationVerificati
                 </Row>
                 <Row>
                     <Text>
-                        Thank you for signing up with us. Please use the following code to verify your email address for your registration.
+                        Please use the following code to verify your email address i.e. <strong>{email}</strong> for reseting your password to a new one.
                     </Text>
                 </Row>
                 <Row>
                     <Text>
-                        Verification Code: <strong>{otp}</strong>
-                    </Text>
-                </Row>
-                <Row>
-                    <Text>
-                        If you did not sign up for an account, please ignore this email.
+                        Verification Code for reseting password: <strong>{otp}</strong>
                     </Text>
                 </Row>
                 <Row>
@@ -51,8 +47,9 @@ const RegistrationVerificationEmail = ({ fullName, otp }: RegistrationVerificati
                     </Text>
                 </Row>
             </Section>
-        </Html>
-    )
-}
 
-export default RegistrationVerificationEmail;
+        </Html>
+    );
+};
+
+export default ResetPasswordVerificationEmail;

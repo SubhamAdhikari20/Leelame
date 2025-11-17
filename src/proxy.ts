@@ -16,7 +16,18 @@ type AuthToken = {
 // const PROTECTED_ROUTES = ["/:username", "/admin", "/seller"];
 // const PUBLIC_ROUTES = ["/login", "/sign-up", "/verify-account", "/"];
 
-const PUBLIC_PREFIXES = ["/login", "/sign-up", "/verify-account", "/forgot-password", "/reset-password"];
+const PUBLIC_PREFIXES = [
+    "/login",
+    "/sign-up",
+    "/verify-account",
+    "/forgot-password",
+    "/reset-password",
+    "/blog",
+    "/about",
+    "/contact",
+    "/products",
+    "/become-seller"
+];
 const PUBLIC_ROOTS = ["/"]; // root is public
 
 
@@ -67,6 +78,7 @@ export const proxy = async (req: NextRequest) => {
         if (!token) {
             // not logged in => allow public
             return NextResponse.next();
+            // return NextResponse.rewrite(new URL("/not-found", req.url));
         }
 
         // logged in users: if not verified, send to verify page (unless already there)
@@ -107,10 +119,11 @@ export const proxy = async (req: NextRequest) => {
 
     if (!token) {
         // Instead of redirecting unknown routes to login, show not-found
-        if (!/^\/(login|sign-up|verify-account|forgot-password|reset-password)/.test(pathname)) {
-            return NextResponse.rewrite(new URL("/not-found", req.url));
-        }
-        return NextResponse.next();
+        // if (!/^\/(login|sign-up|verify-account|forgot-password|reset-password)/.test(pathname)) {
+        //     return NextResponse.rewrite(new URL("/not-found", req.url));
+        // }
+        // return NextResponse.next();
+        return NextResponse.rewrite(new URL("/not-found", req.url));
         // return NextResponse.redirect(new URL("/login", req.url));
     }
 
@@ -137,12 +150,14 @@ export const proxy = async (req: NextRequest) => {
             if (token.role === "seller" || token.role === "admin") {
                 return NextResponse.redirect(new URL(`/${token.role}/dashboard`, req.url));
             }
-            return NextResponse.redirect(new URL("/", req.url));
+            // return NextResponse.redirect(new URL("/", req.url));
+            return NextResponse.rewrite(new URL("/not-found", req.url));
         }
 
         if (tokenUsername !== maybeUsername) {
             // prevent visiting other buyers' pages: redirect to own buyer home
             return NextResponse.redirect(new URL(`/${tokenUsername}`, req.url));
+            // return NextResponse.rewrite(new URL("/not-found", req.url));
         }
         return NextResponse.next();
     }
@@ -157,13 +172,16 @@ export const proxy = async (req: NextRequest) => {
             if (token.role !== second) {
                 // not the correct role; redirect to logged-in user's place
                 if (token.role === "buyer") {
-                    return NextResponse.redirect(new URL(`/${tokenUsername}`, req.url));
+                    // return NextResponse.redirect(new URL(`/${tokenUsername}`, req.url));
+                    return NextResponse.rewrite(new URL("/not-found", req.url));
                 }
-                return NextResponse.redirect(new URL(`/${token.role}/dashboard`, req.url));
+                // return NextResponse.redirect(new URL(`/${token.role}/dashboard`, req.url));
+                return NextResponse.rewrite(new URL("/not-found", req.url));
             }
             if (tokenUsername !== first) {
                 // username mismatch
-                return NextResponse.redirect(new URL(`/${token.role}/dashboard`, req.url));
+                // return NextResponse.redirect(new URL(`/${token.role}/dashboard`, req.url));
+                return NextResponse.rewrite(new URL("/not-found", req.url));
             }
             return NextResponse.next();
         }
@@ -172,7 +190,8 @@ export const proxy = async (req: NextRequest) => {
         if (first === "seller" || first === "admin") {
             if (token.role !== first) {
                 if (token.role === "buyer") {
-                    return NextResponse.redirect(new URL(`/${tokenUsername}`, req.url));
+                    // return NextResponse.redirect(new URL(`/${tokenUsername}`, req.url));
+                    return NextResponse.rewrite(new URL("/not-found", req.url));
                 }
                 return NextResponse.redirect(new URL(`/${token.role}/dashboard`, req.url));
             }
@@ -187,11 +206,12 @@ export const proxy = async (req: NextRequest) => {
 // See "Matching Paths" below to learn more
 export const config = {
     matcher: [
-        "/",
-        "/verify-account/:path*",
-        "/:username",
-        "/:username/:role/:path*",
-        "/:role/:path*",
+        // "/",
+        // "/:path*",
+        // "/verify-account/:path*",
+        // "/:username",
+        // // "/:username/:role/:path*",
+        // "/:role/:path*",
         "/((?!_next|api|static|favicon.ico|images).*)",
     ]
 };

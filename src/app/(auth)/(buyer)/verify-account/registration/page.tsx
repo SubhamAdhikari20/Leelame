@@ -1,7 +1,7 @@
-// src/app/(auth)/(buyer)/verify-account/registration/[username]/page.tsx
+// src/app/(auth)/(buyer)/verify-account/registration/page.tsx
 "use client";
 import React, { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
@@ -30,7 +30,8 @@ const VerifyAccountRegistration = () => {
     const [isVerifying, setIsVerifying] = useState(false);
 
     const router = useRouter();
-    const params = useParams();
+    const searchParams = useSearchParams();
+    const username = searchParams.get("username");
 
     const verifyAccountRegistrationForm = useForm<z.infer<typeof verifyAccountRegistrationSchema>>({
         resolver: zodResolver(verifyAccountRegistrationSchema),
@@ -42,8 +43,8 @@ const VerifyAccountRegistration = () => {
     const onSubmit = async (data: z.infer<typeof verifyAccountRegistrationSchema>) => {
         setIsVerifying(true);
         try {
-            const response = await axios.post("/api/users/buyer/verify-account/registration", {
-                username: params.username,
+            const response = await axios.put("/api/users/buyer/verify-account/registration", {
+                username: username,
                 code: data.code
             });
 

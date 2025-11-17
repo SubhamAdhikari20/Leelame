@@ -128,8 +128,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
         setMobileMenuOpen((prev) => !prev);
     };
 
-    const handleLogout = () => {
-        signOut();
+    const handleLogout = async () => {
+        // await signOut({ callbackUrl: "/login" });
+        await signOut({ redirect: false });
         router.replace("/login");
         toggleMenu();
         toast.success("Logout Successful");
@@ -226,7 +227,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
                     Become a seller
                 </Link>
 
-                {currentUser ? (
+                {currentUser && (
                     <>
                         <NotificationIconButton
                             ref={notifButtonRef}
@@ -242,7 +243,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
                             </PortalWrapper>
                         )}
                     </>
-                ) : null}
+                )}
 
                 {/* Desktop Navigation - Navbar Right*/}
                 <div className="hidden lg:flex items-center gap-8">

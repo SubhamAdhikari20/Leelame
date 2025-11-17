@@ -1,16 +1,17 @@
 // src/app/context/auth-provider.tsx
 "use client";
-import React from 'react'
+import React from "react";
 import { SessionProvider } from "next-auth/react";
+import { Session } from "next-auth";
 
 const AuthProvider = ({
-    children,
-}: { children: React.ReactNode }) => {
+    children, session
+}: { children: React.ReactNode, session: Session | null }) => {
     return (
-        <SessionProvider>
+        <SessionProvider session={session}>
             {children}
         </SessionProvider>
-    )
-}
+    );
+};
 
 export default AuthProvider;
