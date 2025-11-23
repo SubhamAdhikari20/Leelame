@@ -1,4 +1,4 @@
-// src/app/(app)page.tsx
+// src/app/(app)/(buyer)/page.tsx
 "use client";
 import React, { useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -10,7 +10,7 @@ const HomePage = () => {
     const { data: session } = useSession();
     const router = useRouter();
 
-    const username = session?.user?.buyerProfile?.username;
+    const username = session?.user?.username;
     useEffect(() => {
         if (username) {
             router.replace(`/${username}`);

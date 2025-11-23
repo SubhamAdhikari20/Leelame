@@ -1,7 +1,8 @@
-// src/app/(auth)/layout.tsx
+// src/app/(app)/(buyer)/layout.tsx
 import React from "react";
 import Navbar from "@/components/navbar.tsx";
 import Footer from "@/components/footer.tsx";
+// import useSWR from "swr";
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
     return (

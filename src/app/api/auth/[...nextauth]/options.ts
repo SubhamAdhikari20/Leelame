@@ -16,18 +16,38 @@ type RawCredentials = {
 };
 
 const buildReturnUser = (user: any) => {
-    return {
-        _id: typeof user?._id === "object" && user?._id?.toString
-            ? user._id.toString()
-            : user?._id ?? user?.id,
-        email: user?.email ?? null,
-        role: user?.role ?? "buyer",
-        isVerified: Boolean(user?.isVerified),
-        profilePictureUrl: user?.profilePictureUrl ?? null,
+    const baseUser = user.userId ?? user;
 
-        buyerProfile: user?.buyerProfile ?? null,
-        sellerProfile: user?.sellerProfile ?? null,
-        adminProfile: user?.adminProfile ?? null
+    return {
+        _id: typeof baseUser?._id === "object" && baseUser?._id?.toString
+            ? baseUser._id.toString()
+            : baseUser?._id ?? user?.id,
+        email: baseUser?.email ?? null,
+        role: baseUser?.role ?? "buyer",
+        isVerified: Boolean(baseUser?.isVerified),
+        profilePictureUrl: baseUser?.profilePictureUrl ?? null,
+        username: baseUser.role === "buyer" ? baseUser?.buyerProfile?.username : null,
+        googleId: baseUser.role === "buyer" ? baseUser?.buyerProfile?.googleId : null,
+        fullName: (baseUser.role === "buyer") ? (baseUser?.buyerProfile?.fullName) : (baseUser.role === "seller") ? (baseUser?.sellerProfile?.fullName) : (baseUser.role === "admin") ? (baseUser?.adminProfile?.fullName) : null,
+        contact: (baseUser.role === "buyer") ? (baseUser?.buyerProfile?.contact) : (baseUser.role === "seller") ? (baseUser?.sellerProfile?.contact) : (baseUser.role === "admin") ? (baseUser?.adminProfile?.contact) : null,
+
+        buyerProfile:
+            baseUser.role === "buyer"
+                ? (user.buyerProfile?._id || user._id)?.toString() || null
+                : null,
+
+        sellerProfile:
+            baseUser.role === "seller"
+                ? (user.sellerProfile?._id || user._id)?.toString() || null
+                : null,
+
+        adminProfile:
+            baseUser.role === "admin"
+                ? (user.adminProfile?._id || user._id)?.toString() || null
+                : null,
+        // buyerProfile: baseUser?.buyerProfile ?? null,
+        // sellerProfile: baseUser?.sellerProfile ?? null,
+        // adminProfile: baseUser?.adminProfile ?? null
     };
 };
 
@@ -255,10 +275,14 @@ export const authOptions: NextAuthOptions = {
             session.user = {
                 ...session.user,
                 _id: token._id,
+                fullName: token.fullName,
                 email: token.email,
+                contact: token.contact ?? null,
+                username: token.username ?? null,
                 role: token.role,
                 isVerified: token.isVerified,
                 profilePictureUrl: token.profilePictureUrl ?? null,
+                googleId: token.googleId ?? null,
 
                 buyerProfile: token.buyerProfile ?? null,
                 sellerProfile: token.sellerProfile ?? null,

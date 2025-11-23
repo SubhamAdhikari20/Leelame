@@ -37,14 +37,10 @@ import ProfilePopover from "./profile-popover.tsx";
 import { useTheme } from "@/app/context/theme-provider.tsx";
 import { CurrentUser } from "@/types/current-user.ts";
 import { toast } from "sonner";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 
-interface NavbarProps {
-    currentUser?: CurrentUser | null;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
+const Navbar = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
@@ -54,6 +50,8 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
     const [searchQuery, setSearchQuery] = useState("");
     // const [isFocused, setIsFocused] = useState(false);
 
+    const { data: session } = useSession();
+    const currentUser: CurrentUser | null = session?.user as CurrentUser | null;
     const router = useRouter();
     const currentPath = usePathname();
     const menuRef = useRef<HTMLDivElement | null>(null);
@@ -94,7 +92,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
     const navLinks = [
         { name: "Home", path: "/" },
         { name: "Products", path: "/products" },
-        { name: "My Bids", path: `/${currentUser?.buyerProfile?.username}/my-bids`, authRequired: true },
+        { name: "My Bids", path: `/${currentUser?.username}/my-bids`, authRequired: true },
         { name: "Blog", path: "/blog" },
         { name: "About", path: "/about" },
         { name: "Contact", path: "/contact" },
@@ -164,14 +162,14 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
                             const actualPath =
                                 link.path === "/"
                                     ? (currentUser && currentUser.buyerProfile)
-                                        ? `/${currentUser.buyerProfile.username}`
+                                        ? `/${currentUser.username}`
                                         : "/"
                                     : link.path;
 
                             let isActive = false;
                             if (link.path === "/") {
                                 if (currentUser && currentUser.buyerProfile) {
-                                    isActive = currentPath === `/${currentUser.buyerProfile.username}`;
+                                    isActive = currentPath === `/${currentUser.username}`;
                                 }
                                 else {
                                     isActive = currentPath === "/";
@@ -256,13 +254,13 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
                                 {currentUser.profilePictureUrl ? (
                                     <AvatarImage
                                         src={currentUser.profilePictureUrl}
-                                        alt={currentUser.buyerProfile.fullName}
+                                        alt={currentUser.fullName}
                                     />
                                 ) : (
                                     <AvatarFallback>
                                         {(
-                                            currentUser.buyerProfile.fullName ??
-                                            currentUser.buyerProfile.username ??
+                                            currentUser.fullName ??
+                                            currentUser.username ??
                                             "U"
                                         )
                                             .split(" ")
@@ -370,15 +368,15 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
 
                             const actualPath =
                                 link.path === "/"
-                                    ? currentUser
-                                        ? `/${currentUser.buyerProfile?.username}`
+                                    ? currentUser && currentUser.buyerProfile
+                                        ? `/${currentUser.username}`
                                         : "/"
                                     : link.path;
 
                             let isActive = false;
                             if (link.path === "/") {
-                                if (currentUser) {
-                                    isActive = currentPath === `/${currentUser.buyerProfile?.username}`;
+                                if (currentUser && currentUser.buyerProfile) {
+                                    isActive = currentPath === `/${currentUser.username}`;
                                 }
                                 else {
                                     isActive = currentPath === "/";
@@ -408,7 +406,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
                     {currentUser && currentUser.buyerProfile ? (
                         <>
                             <Link
-                                href={`/${currentUser.buyerProfile.username}/my-profile/dashboard`}
+                                href={`/${currentUser.username}/my-profile/dashboard`}
                                 onClick={toggleMenu}
                                 className="flex items-center gap-2"
                             >
@@ -416,13 +414,13 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
                                     {currentUser.profilePictureUrl ? (
                                         <AvatarImage
                                             src={currentUser.profilePictureUrl}
-                                            alt={currentUser.buyerProfile.fullName}
+                                            alt={currentUser.fullName}
                                         />
                                     ) : (
                                         <AvatarFallback>
                                             {(
-                                                currentUser.buyerProfile.fullName ??
-                                                currentUser.buyerProfile.username ??
+                                                currentUser.fullName ??
+                                                currentUser.username ??
                                                 "U"
                                             )
                                                 .split(" ")

@@ -109,7 +109,7 @@ const Login = () => {
                     description: `Logged in as ${user.role}`
                 });
                 if (user.role === "buyer") {
-                    router.replace(`/${user.buyerProfile?.username}`);
+                    router.replace(`/${user.username}`);
                 }
             }
             else {

@@ -7,22 +7,21 @@ import { Button } from "@/components/ui/button.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Quote } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
+import { useSession } from "next-auth/react";
 import { CurrentUser } from "@/types/current-user.ts";
 
 
-interface HomeUserProps {
-    currentUser?: CurrentUser | null;
-}
-
-const HomeUser: React.FC<HomeUserProps> = ({ currentUser }) => {
+const HomeUser = () => {
     const [phraseIndex, setPhraseIndex] = useState(0);
+    const { data: session } = useSession();
+    const currentUser: CurrentUser | null = session?.user as CurrentUser | null;
 
     // Hero Text Phrases
     const phrases = (currentUser && currentUser.buyerProfile)
         ? [
-            `Welcome, ${currentUser.buyerProfile.fullName ?? currentUser.buyerProfile.username}`,
-            `Hello, ${currentUser.buyerProfile.fullName ?? currentUser.buyerProfile.username}`,
-            `Bid on, ${currentUser.buyerProfile.fullName ?? currentUser.buyerProfile.username}`,
+            `Welcome, ${currentUser.fullName ?? currentUser.username}`,
+            `Hello, ${currentUser.fullName ?? currentUser.username}`,
+            `Bid on, ${currentUser.fullName ?? currentUser.username}`,
         ]
         : ["Leelame", "Your Bid Companion", "Bid with Peace of Mind"];
 

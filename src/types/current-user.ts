@@ -7,11 +7,16 @@ type UserRole = "buyer" | "seller" | "admin";
 
 export interface CurrentUser {
     _id: string;
+    fullName: string;
+    username?: string | null;
+    contact?: string | null;
     email: string;
     role: UserRole;
     isVerified: boolean;
     profilePictureUrl?: string | null;
-    buyerProfile?: IBuyer | null;
-    sellerProfile?: ISeller | null;
-    adminProfile?: IAdmin | null;
+    googleId?: string | null;
+
+    buyerProfile?: string | null;
+    sellerProfile?: string | null;
+    adminProfile?: string | null;
 }

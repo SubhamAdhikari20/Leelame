@@ -12,15 +12,20 @@ type UserRole = "buyer" | "seller" | "admin";
 declare module "next-auth" {
     interface User extends Partial<IUser> {
         _id: string;
+        fullName: string;
         email: string;
+        username?: string | null;
+        contact?: string | null;
         role: UserRole;
         isVerified: boolean;
         profilePictureUrl?: string | null;
+        googleId?: string | null;
+
+        buyerProfile?: string | null;
+        sellerProfile?: string | null;
+        adminProfile?: string | null;
 
         // Optional populated references
-        buyerProfile?: IBuyer | null;
-        sellerProfile?: ISeller | null;
-        adminProfile?: IAdmin | null;
         // buyerProfile?: IBuyer | Types.ObjectId | null;
         // sellerProfile?: ISeller | Types.ObjectId | null;
         // adminProfile?: IAdmin | Types.ObjectId | null;
@@ -29,13 +34,18 @@ declare module "next-auth" {
     interface Session {
         user: {
             _id: string;
+            fullName: string;
             email: string;
+            username?: string | null;
+            contact?: string | null;
             role: UserRole;
             isVerified: boolean;
             profilePictureUrl?: string | null;
-            buyerProfile?: IBuyer | null;
-            sellerProfile?: ISeller | null;
-            adminProfile?: IAdmin | null;
+            googleId?: string | null;
+
+            buyerProfile?: string | null;
+            sellerProfile?: string | null;
+            adminProfile?: string | null;
         } & DefaultSession["user"]
     }
 }
@@ -43,14 +53,17 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
     interface JWT {
         _id: string;
+        fullName: string;
         email: string;
+        username?: string | null;
+        contact?: string | null;
         role: UserRole;
         isVerified: boolean;
         profilePictureUrl?: string | null;
+        googleId?: string | null;
 
-        // Optional role-specific references
-        buyerProfile?: IBuyer | null;
-        sellerProfile?: ISeller | null;
-        adminProfile?: IAdmin | null;
+        buyerProfile?: string | null;
+        sellerProfile?: string | null;
+        adminProfile?: string | null;
     }
 }
