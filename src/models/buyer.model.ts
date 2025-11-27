@@ -8,7 +8,7 @@ export interface IBuyer extends Document {
     username?: string | null;
     contact?: string | null;
     password?: string | null;
-    googleId?: string;
+    googleId?: string | null;
     bio?: string | null;
     terms: boolean;
 }
@@ -52,7 +52,8 @@ const buyerSchema: Schema<IBuyer> = new Schema({
     googleId: {
         type: String,
         unique: true,
-        sparse: true
+        sparse: true,
+        default: null
     },
     bio: {
         type: String,
