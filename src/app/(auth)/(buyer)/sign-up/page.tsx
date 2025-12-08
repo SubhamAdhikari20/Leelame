@@ -23,8 +23,8 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import axios, { AxiosError } from "axios";
-import { ApiResponse } from "@/types/api-response";
-import { buyerSignUpSchema } from "@/schemas/auth/sign-up-schema.ts";
+import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
+import { buyerSignUpSchema } from "@/schemas/auth/sign-up.schema.ts";
 
 
 const SignUp = () => {
@@ -44,13 +44,13 @@ const SignUp = () => {
                 setIsCheckingUsername(true);
                 setUsernameMessage("");
                 try {
-                    const response = await axios.get(`/api/users/buyer/check-username-unique?username=${username}`);
+                    const response = await axios.get<BuyerResponseDtoType>(`/api/users/buyer/check-username-unique?username=${username}`);
                     if (response.data.success) {
                         setUsernameMessage(response.data.message);
                     }
                 }
                 catch (error) {
-                    const axiosError = error as AxiosError<ApiResponse>;
+                    const axiosError = error as AxiosError<BuyerResponseDtoType>;
                     setUsernameMessage(
                         axiosError.response?.data.message ?? "Error checking username uniqueness!"
                     );
@@ -85,7 +85,7 @@ const SignUp = () => {
     const onSubmit = async (data: z.infer<typeof buyerSignUpSchema>) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.post<ApiResponse>("/api/users/buyer/sign-up", data);
+            const response = await axios.post<BuyerResponseDtoType>("/api/users/buyer/sign-up", data);
             if (response.data.success) {
                 toast.success("Sign Up Successful", {
                     description: response.data.message,
@@ -94,7 +94,7 @@ const SignUp = () => {
             }
         }
         catch (error) {
-            const axiosError = error as AxiosError<ApiResponse>;
+            const axiosError = error as AxiosError<BuyerResponseDtoType>;
             console.error("Error in sign up of user: ", axiosError);
             toast.error("Error signing up the user", {
                 description: axiosError.response?.data.message,
@@ -109,7 +109,7 @@ const SignUp = () => {
         onSuccess: async (tokenResponse) => {
             try {
                 // const response = await loginUserWithGoogle(tokenResponse.access_token);
-                const response = await axios.post<ApiResponse>("/api/auth/google-login", { tokenResponse });
+                const response = await axios.post<BuyerResponseDtoType>("/api/auth/google-login", { tokenResponse });
                 if (response.data.success) {
                     toast.success("Google Login Successful", {
                         description: response.data.message,
@@ -118,7 +118,7 @@ const SignUp = () => {
                 }
             }
             catch (error) {
-                const axiosError = error as AxiosError<ApiResponse>;
+                const axiosError = error as AxiosError<BuyerResponseDtoType>;
                 console.error("Error in google login: ", axiosError);
                 toast.error("Error in google login", {
                     description: axiosError.response?.data.message

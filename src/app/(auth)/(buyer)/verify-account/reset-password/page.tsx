@@ -21,8 +21,8 @@ import {
 } from "@/components/ui/input-otp.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import axios, { AxiosError } from "axios";
-import { ApiResponse } from "@/types/api-response";
-import { verifyAccountResetPasswordSchema } from "@/schemas/auth/verify-account-reset-password-schema.ts";
+import { verifyAccountResetPasswordSchema } from "@/schemas/auth/verify-account-reset-password.schema";
+import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
 
 
 const VerifyAccountResetPassword = () => {
@@ -42,7 +42,7 @@ const VerifyAccountResetPassword = () => {
     const onSubmit = async (data: z.infer<typeof verifyAccountResetPasswordSchema>) => {
         setIsVerifying(true);
         try {
-            const response = await axios.put("/api/users/buyer/verify-account/reset-password", {
+            const response = await axios.put<BuyerResponseDtoType>("/api/users/buyer/verify-account/reset-password", {
                 email: email,
                 code: data.code,
             });
@@ -55,7 +55,7 @@ const VerifyAccountResetPassword = () => {
             }
         }
         catch (error) {
-            const axiosError = error as AxiosError<ApiResponse>;
+            const axiosError = error as AxiosError<BuyerResponseDtoType>;
             console.error("Error in verifying OTP for reseting password: ", axiosError);
             toast.error("Failed to verify OTP", {
                 description: axiosError.response?.data.message,

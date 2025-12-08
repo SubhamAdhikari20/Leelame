@@ -21,13 +21,13 @@ const KnockClientWrapper = ({ children }: { children: React.ReactNode }) => {
                     let fullName = "User";
 
                     if (role === "buyer" && session.user.buyerProfile) {
-                        fullName = (session.user.buyerProfile.fullName || session.user.buyerProfile.username) ?? "Buyer";
+                        fullName = (session.user.fullName || session.user.username) ?? "Buyer";
                     }
                     else if (role === "seller" && session.user.sellerProfile) {
-                        fullName = session.user.sellerProfile.fullName ?? "Seller";
+                        fullName = session.user.fullName ?? "Seller";
                     }
                     else if (role === "admin" && session.user.adminProfile) {
-                        fullName = session.user.adminProfile.fullName ?? "Admin";
+                        fullName = session.user.fullName ?? "Admin";
                     }
 
                     const response = await axios.post("/api/notifications/knock/update-user", {

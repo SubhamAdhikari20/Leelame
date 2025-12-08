@@ -22,9 +22,9 @@ import {
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import axios, { AxiosError } from "axios";
-import { ApiResponse } from "@/types/api-response";
-import { verifyAccountRegistrationSchema } from "@/schemas/auth/verify-account-registration-schema.ts";
-
+import { ApiResponse } from "@/types/api-response.ts";
+import { verifyAccountRegistrationSchema } from "@/schemas/auth/verify-account-registration.schema";
+import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
 
 const VerifyAccountRegistration = () => {
     const [isVerifying, setIsVerifying] = useState(false);
@@ -43,9 +43,9 @@ const VerifyAccountRegistration = () => {
     const onSubmit = async (data: z.infer<typeof verifyAccountRegistrationSchema>) => {
         setIsVerifying(true);
         try {
-            const response = await axios.put("/api/users/buyer/verify-account/registration", {
+            const response = await axios.put<BuyerResponseDtoType>("/api/users/buyer/verify-account/registration", {
                 username: username,
-                code: data.code
+                otp: data.code
             });
 
             if (response.data.success) {
@@ -56,7 +56,7 @@ const VerifyAccountRegistration = () => {
             }
         }
         catch (error) {
-            const axiosError = error as AxiosError<ApiResponse>;
+            const axiosError = error as AxiosError<BuyerResponseDtoType>;
             console.error("Error verifying OTP for user registration: ", axiosError);
             toast.error("Error verifying OTP for user registration", {
                 description: axiosError.response?.data.message,

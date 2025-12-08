@@ -18,8 +18,8 @@ import {
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import axios, { AxiosError } from "axios";
-import { forgotPasswordSchema } from "@/schemas/auth/forgot-password-schema.ts";
-import { ApiResponse } from "@/types/api-response";
+import { forgotPasswordSchema } from "@/schemas/auth/forgot-password.schema.ts";
+import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
 
 
 const ForgotPassword = () => {
@@ -36,7 +36,7 @@ const ForgotPassword = () => {
     const onSubmit = async (data: z.infer<typeof forgotPasswordSchema>) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.put("/api/users/buyer/forgot-password", {
+            const response = await axios.put<BuyerResponseDtoType>("/api/users/buyer/forgot-password", {
                 email: data.email,
             });
             toast.success("Success", {
@@ -46,7 +46,7 @@ const ForgotPassword = () => {
             router.replace(`/verify-account/reset-password?email=${data.email}`);
         }
         catch (error) {
-            const axiosError = error as AxiosError<ApiResponse>;
+            const axiosError = error as AxiosError<BuyerResponseDtoType>;
             console.error("Error sending forgot password request", axiosError);
             toast("Failed", {
                 description:

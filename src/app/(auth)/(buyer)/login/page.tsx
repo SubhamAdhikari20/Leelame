@@ -28,9 +28,8 @@ import { FcGoogle } from "react-icons/fc"
 import { useGoogleLogin } from "@react-oauth/google";
 import { getSession, signIn, useSession } from "next-auth/react";
 import axios, { AxiosError } from "axios";
-import { ApiResponse } from "@/types/api-response";
-import { buyerLoginSchema } from "@/schemas/auth/login-schema.ts";
-import { IBuyer } from "@/models/buyer.model.ts";
+import { buyerLoginSchema } from "@/schemas/auth/login.schema.ts";
+import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
 
 
 const Login = () => {
@@ -126,7 +125,7 @@ const Login = () => {
             }
         }
         catch (error) {
-            const axiosError = error as AxiosError<ApiResponse>;
+            const axiosError = error as AxiosError<BuyerResponseDtoType>;
             console.error("Error in user login: ", axiosError);
             toast.error("Error in user login", {
                 description: axiosError.response?.data.message
@@ -140,7 +139,7 @@ const Login = () => {
     const loginWithGoogle = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
-                const response = await axios.post<ApiResponse>("/api/auth/google-login", { tokenResponse });
+                const response = await axios.post<BuyerResponseDtoType>("/api/auth/google-login", { tokenResponse });
 
                 if (response.data.success) {
                     toast.success("Google Login Successful", {
@@ -150,7 +149,7 @@ const Login = () => {
                 }
             }
             catch (error) {
-                const axiosError = error as AxiosError<ApiResponse>;
+                const axiosError = error as AxiosError<BuyerResponseDtoType>;
                 console.error("Error in google login: ", axiosError);
                 toast.error("Error in google login", {
                     description: axiosError.response?.data.message
@@ -165,7 +164,7 @@ const Login = () => {
     const sendAccountVerificationCode = async () => {
         setIsSendingCode(true);
         try {
-            const response = await axios.put<ApiResponse>("/api/users/buyer/send-account-registration-email", {
+            const response = await axios.put<BuyerResponseDtoType>("/api/users/buyer/send-account-registration-email", {
                 email: emailToVerify,
             });
 
@@ -173,12 +172,12 @@ const Login = () => {
                 toast.success("Success", {
                     description: response.data.message
                 });
-                const buyer = response.data.user?.buyerProfile as IBuyer;
+                const buyer = response.data.user;
                 router.replace(`/verify-account/registration?username=${buyer?.username}`);
             }
         }
         catch (error) {
-            const axiosError = error as AxiosError<ApiResponse>;
+            const axiosError = error as AxiosError<BuyerResponseDtoType>;
             console.error("Error sending account verification email: ", axiosError);
             toast.error("Error sending account verification email", {
                 description: axiosError.response?.data.message

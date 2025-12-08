@@ -2,11 +2,11 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import bcrypt from "bcryptjs";
-import User, { IUserPopulated } from "@/models/user.model.ts";
-import Buyer, { IBuyerPopulated } from "@/models/buyer.model.ts";
-import Seller, { ISellerPopulated } from "@/models/seller.model.ts";
-// import Admin, { IAdminPopulated } from "@/models/admin.model.ts";
+import { AuthService } from "@/services/auth.service.ts";
+import { UserRepository } from "@/repositories/user.repository.ts";
+import { BuyerRepository } from "@/repositories/buyer.repository.ts";
+import { SellerRepository } from "@/repositories/seller.repository.ts";
+import { AdminRepository } from "@/repositories/admin.repository.ts";
 
 
 type RawCredentials = {
@@ -15,41 +15,80 @@ type RawCredentials = {
     role?: "buyer" | "seller" | "admin" | string;
 };
 
+// const buildReturnUser = (user: any) => {
+//     const baseUser = user.userId ?? user;
+
+//     return {
+//         _id: typeof baseUser?._id === "object" && baseUser?._id?.toString
+//             ? baseUser._id.toString()
+//             : baseUser?._id ?? user?.id,
+//         email: baseUser?.email ?? null,
+//         role: baseUser?.role ?? "buyer",
+//         isVerified: Boolean(baseUser?.isVerified),
+//         profilePictureUrl: baseUser?.profilePictureUrl ?? null,
+//         username: baseUser.role === "buyer" ? baseUser?.buyerProfile?.username : null,
+//         googleId: baseUser.role === "buyer" ? baseUser?.buyerProfile?.googleId : null,
+//         fullName: (baseUser.role === "buyer") ? (baseUser?.buyerProfile?.fullName) : (baseUser.role === "seller") ? (baseUser?.sellerProfile?.fullName) : (baseUser.role === "admin") ? (baseUser?.adminProfile?.fullName) : null,
+//         contact: (baseUser.role === "buyer") ? (baseUser?.buyerProfile?.contact) : (baseUser.role === "seller") ? (baseUser?.sellerProfile?.contact) : (baseUser.role === "admin") ? (baseUser?.adminProfile?.contact) : null,
+
+//         buyerProfile:
+//             baseUser.role === "buyer"
+//                 ? (user.buyerProfile?._id || user._id)?.toString() || null
+//                 : null,
+
+//         sellerProfile:
+//             baseUser.role === "seller"
+//                 ? (user.sellerProfile?._id || user._id)?.toString() || null
+//                 : null,
+
+//         adminProfile:
+//             baseUser.role === "admin"
+//                 ? (user.adminProfile?._id || user._id)?.toString() || null
+//                 : null,
+//         // buyerProfile: baseUser?.buyerProfile ?? null,
+//         // sellerProfile: baseUser?.sellerProfile ?? null,
+//         // adminProfile: baseUser?.adminProfile ?? null
+//     };
+// };
+
 const buildReturnUser = (user: any) => {
-    const baseUser = user.userId ?? user;
+    // const baseUser = user.userId ?? user;
 
     return {
-        _id: typeof baseUser?._id === "object" && baseUser?._id?.toString
-            ? baseUser._id.toString()
-            : baseUser?._id ?? user?.id,
-        email: baseUser?.email ?? null,
-        role: baseUser?.role ?? "buyer",
-        isVerified: Boolean(baseUser?.isVerified),
-        profilePictureUrl: baseUser?.profilePictureUrl ?? null,
-        username: baseUser.role === "buyer" ? baseUser?.buyerProfile?.username : null,
-        googleId: baseUser.role === "buyer" ? baseUser?.buyerProfile?.googleId : null,
-        fullName: (baseUser.role === "buyer") ? (baseUser?.buyerProfile?.fullName) : (baseUser.role === "seller") ? (baseUser?.sellerProfile?.fullName) : (baseUser.role === "admin") ? (baseUser?.adminProfile?.fullName) : null,
-        contact: (baseUser.role === "buyer") ? (baseUser?.buyerProfile?.contact) : (baseUser.role === "seller") ? (baseUser?.sellerProfile?.contact) : (baseUser.role === "admin") ? (baseUser?.adminProfile?.contact) : null,
+        _id: typeof user?._id === "object" && user?._id?.toString
+            ? user._id.toString()
+            : user?._id ?? user?.id,
+        email: user?.email ?? null,
+        role: user?.role ?? "buyer",
+        isVerified: Boolean(user?.isVerified),
+        profilePictureUrl: user?.profilePictureUrl ?? null,
+        username: user?.role === "buyer" ? user?.username : null,
+        googleId: user?.role === "buyer" ? user?.googleId : null,
+        fullName: (user?.role === "buyer") ? (user?.fullName) : (user?.role === "seller") ? (user?.fullName) : (user?.role === "admin") ? (user?.fullName) : null,
+        contact: (user?.role === "buyer") ? (user?.contact) : (user?.role === "seller") ? (user?.contact) : (user?.role === "admin") ? (user?.contact) : null,
 
         buyerProfile:
-            baseUser.role === "buyer"
-                ? (user.buyerProfile?._id || user._id)?.toString() || null
+            user?.role === "buyer"
+                ? user?.buyerProfile?.toString() || null
                 : null,
 
         sellerProfile:
-            baseUser.role === "seller"
-                ? (user.sellerProfile?._id || user._id)?.toString() || null
+            user?.role === "seller"
+                ? user?.sellerProfile?.toString() || null
                 : null,
 
         adminProfile:
-            baseUser.role === "admin"
-                ? (user.adminProfile?._id || user._id)?.toString() || null
+            user?.role === "admin"
+                ? user?.adminProfile?.toString() || null
                 : null,
-        // buyerProfile: baseUser?.buyerProfile ?? null,
-        // sellerProfile: baseUser?.sellerProfile ?? null,
-        // adminProfile: baseUser?.adminProfile ?? null
     };
 };
+
+const userRepo = new UserRepository();
+const buyerRepo = new BuyerRepository();
+const sellerRepo = new SellerRepository();
+const adminRepo = new AdminRepository();
+const authService = new AuthService(userRepo, buyerRepo, sellerRepo, adminRepo);
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -62,149 +101,33 @@ export const authOptions: NextAuthOptions = {
                 role: { label: "Role", type: "text" }
             },
             async authorize(credentials?: RawCredentials): Promise<any | null> {
-                const identifier = credentials?.identifier?.trim();
-                const password = credentials?.password;
-                const role = (credentials?.role ?? "buyer").toString();
+                if (!credentials || !credentials.identifier) {
+                    throw new Error("MISSING_CREDENTIALS");
+                }
+                if (!credentials.identifier || !credentials.password || !credentials.role) {
+                    throw new Error("MISSING_CREDENTIALS");
+                }
+
+                const identifier = credentials.identifier.trim();
+                const password = credentials.password;
+                const role = (credentials.role ?? "buyer").toString();
 
                 try {
                     if (!identifier || !password || !role) {
                         throw new Error("MISSING_CREDENTIALS");
-                        // return null;
                     }
 
-                    // 1) Admin: email-only
-                    if (role === "admin") {
-                        // only allow email as identifier for admin
-                        const user = await User.findOne({ email: identifier }).populate<IUserPopulated>("adminProfile");
+                    const response = await authService.authenticate({
+                        identifier: identifier,
+                        password: password,
+                        role: role as any ?? "buyer"
+                    });
 
-                        if (!user) {
-                            throw new Error("ADMIN_NOT_FOUND");
-                            // return null;
-                        }
-
-                        if (user.role !== "admin") {
-                            throw new Error("NOT_ADMIN");
-                            // return null;
-                        }
-
-                        const hashedPassword = user.adminProfile?.password ?? null;
-                        if (!hashedPassword) {
-                            throw new Error("ADMIN_NO_PASSWORD");
-                            // return null;
-                        }
-                        const isMatched = await bcrypt.compare(password, hashedPassword);
-                        if (!isMatched) {
-                            throw new Error("INVALID_PASSWORD");
-                            // return null;
-
-                        }
-                        return buildReturnUser(user);
+                    if (response.success) {
+                        return buildReturnUser(response.user);
                     }
 
-                    // 2) Seller: email or contact
-                    if (role === "seller") {
-                        // Try email first (User collection)
-                        let user = await User.findOne({ email: identifier }).populate<IUserPopulated>("sellerProfile");
-
-                        if (user && user.role === "seller") {
-                            const hashedPassword = user.sellerProfile?.password ?? null;
-                            if (!hashedPassword) {
-                                throw new Error("SELLER_NO_PASSWORD");
-                                // return null;
-                            }
-
-                            const isMatched = await bcrypt.compare(password, hashedPassword);
-                            if (!isMatched) {
-                                throw new Error("INVALID_PASSWORD");
-                                // return null;
-                            }
-
-                            return buildReturnUser(user);
-                        }
-
-                        // If not found by email, try contact lookup in seller collection
-                        const sellerByContact = await Seller.findOne({ contact: identifier }).populate<ISellerPopulated>("userId");
-
-                        if (!sellerByContact) {
-                            throw new Error("SELLER_NOT_FOUND");
-                            // return null;
-                        }
-
-                        let sellerUserDoc = sellerByContact.userId;
-                        if (!sellerUserDoc || sellerUserDoc.role !== "seller") {
-                            return null;
-                        }
-
-                        // password stored in seller profile
-                        if (!sellerByContact.password) {
-                            throw new Error("SELLER_NOT_FOUND");
-                            // return null;
-                        }
-                        const isMatched = await bcrypt.compare(password, sellerByContact.password);
-                        if (!isMatched) {
-                            throw new Error("INVALID_PASSWORD");
-                            // return null;
-                        }
-
-                        sellerUserDoc = { ...sellerUserDoc.toObject(), sellerProfile: sellerByContact }
-
-                        return buildReturnUser(sellerUserDoc);
-                    }
-
-                    // 3) BUYER: email OR username
-                    if (role === "buyer") {
-                        // Try email first (User collection)
-                        // let user = await findUserByEmail(identifier);
-
-                        let user = await User.findOne({ email: identifier }).populate<IUserPopulated>("buyerProfile");
-
-                        if (user && user.role === "buyer") {
-                            const hashedPassword = user.buyerProfile?.password ?? null;
-                            if (!hashedPassword) {
-                                throw new Error("BUYER_NO_PASSWORD");
-                                // return null;
-                            }
-
-                            const isMatched = await bcrypt.compare(password, hashedPassword);
-                            if (!isMatched) {
-                                throw new Error("INVALID_PASSWORD");
-                                // return null;
-                            }
-                            return buildReturnUser(user);
-                        }
-
-                        // If not found by email, try username in buyer collection
-                        const buyerByUsername = await Buyer.findOne({ username: identifier }).populate<IBuyerPopulated>("userId");
-
-                        if (!buyerByUsername) {
-                            throw new Error("BUYER_NOT_FOUND");
-                            // return null;
-                        }
-
-                        let buyerUserDoc = buyerByUsername.userId;
-                        if (!buyerUserDoc || buyerUserDoc.role !== "buyer") {
-                            return null;
-                        }
-
-                        if (!buyerByUsername.password) {
-                            throw new Error("BUYER_NO_PASSWORD");
-                            // return null;
-                        }
-                        const isMatched = await bcrypt.compare(password, buyerByUsername.password);
-                        if (!isMatched) {
-                            throw new Error("INVALID_PASSWORD");
-                            // return null;
-                        }
-
-                        buyerUserDoc = {
-                            ...buyerUserDoc.toObject(),
-                            buyerProfile: buyerByUsername,
-                        };
-
-                        return buildReturnUser(buyerUserDoc);;
-                    }
-                    throw new Error("UNKNOWN_ERROR");
-                    // return null;
+                    throw new Error(response.message ?? "AUTH_ERROR");
                 }
                 catch (error: any) {
                     throw new Error(error.message ?? "AUTH_ERROR");
@@ -229,39 +152,26 @@ export const authOptions: NextAuthOptions = {
                     ...token,
                     ...normalized,
                 };
-
-                // // normalize to the shape expected by your types (use _id)
-                // token._id = (user as any)._id ?? (user as any).id ?? token._id;
-                // token.email = (user as any).email ?? token.email;
-                // token.role = (user as any).role ?? token.role ?? "buyer";
-                // token.isVerified = !!(user as any).isVerified;
-                // token.profilePictureUrl = (user as any).profilePictureUrl ?? token.profilePictureUrl ?? null;
-
-                // // token.fullName = (user as any).fullName ?? token.fullName ?? null;
-                // // token.username = (user as any).username ?? token.username ?? null;
-                // // token.contact = (user as any).contact ?? token.contact ?? null;
-
-                // if (token.buyerProfile && token.role === "buyer") {
-                //     token.buyerProfile.fullName = (user as any).buyerProfile?.fullName ?? token.buyerProfile.fullName ?? null;
-                //     token.buyerProfile.username = (user as any).buyerProfile?.username ?? token.buyerProfile.username ?? null;
-                //     token.buyerProfile.contact = (user as any).buyerProfile?.contact ?? token.buyerProfile.contact ?? null;
-                // }
-                // if (token.sellerProfile && token.role === "seller") {
-                //     token.sellerProfile.fullName = (user as any).sellerProfile?.fullName ?? token.sellerProfile.fullName ?? null;
-                //     token.sellerProfile.contact = (user as any).sellerProfile?.contact ?? token.sellerProfile.contact ?? null;
-                // }
-                // if (token.adminProfile && token.role === "admin") {
-                //     token.adminProfile.fullName = (user as any).adminProfile?.fullName ?? token.adminProfile.fullName ?? null;
-                //     token.adminProfile.contact = (user as any).adminProfile?.contact ?? token.adminProfile.contact ?? null;
-                // }
-
             }
             else if (account && profile) {
-                // Example: a provider login (Google). If you want to automatically create/find a user,
-                // implement that logic here (find or create User + Buyer record, set role etc.)
-                // For now, we keep provider tokens minimal; you should extend based on your desired flow.
-                token.email = token.email ?? (profile as any).email;
-                token.fullName = token.fullName ?? (profile as any).name;
+                try {
+                    const normalized = await authService.findOrCreateFromProvider(profile as any, account.provider);
+                    if (normalized && normalized.user) {
+                        token._id = normalized.user._id ?? token._id;
+                        token.email = normalized.user.email ?? token.email;
+                        token.role = normalized.user.role as any ?? token.role;
+                        token.isVerified = token.isVerified ?? normalized.user.isVerified;
+                        token.fullName = normalized.user.fullName ?? token.fullName;
+                        token.username = normalized.user.username ?? token.username;
+                        token.profilePictureUrl = normalized.user.profilePictureUrl ?? token.profilePictureUrl;
+                        token.buyerProfile = normalized.user.buyerProfile ?? token.buyerProfile;
+                        token.googleId = normalized.user.googleId ?? token.googleId;
+                    }
+                }
+                catch (error: any) {
+                    console.error("Error in provider findOrCreate: ", error)
+                    throw new Error(`Error in provider findOrCreate: ${error}`);
+                }
             }
             return token;
         },
@@ -290,27 +200,6 @@ export const authOptions: NextAuthOptions = {
             };
 
             return session;
-
-            // session.user._id = (token as any)._id ?? session.user._id;
-            // session.user.email = (token as any).email ?? session.user.email;
-            // session.user.role = (token as any).role ?? session.user.role;
-            // session.user.isVerified = !!(token as any).isVerified;
-            // session.user.profilePictureUrl = (token as any).profilePictureUrl ?? session.user.profilePictureUrl ?? null;
-            // if (session.user.buyerProfile && session.user.role === "buyer") {
-            //     session.user.buyerProfile.fullName = (token as any).buyerProfile?.fullName ?? session.user.buyerProfile.fullName ?? null;
-            //     session.user.buyerProfile.username = (token as any).buyerProfile?.username ?? session.user.buyerProfile.username ?? null;
-            //     session.user.buyerProfile.contact = (token as any).buyerProfile?.contact ?? session.user.buyerProfile.contact ?? null;
-            // }
-            // if (session.user.sellerProfile && session.user.role === "seller") {
-            //     session.user.sellerProfile.fullName = (token as any).sellerProfile?.fullName ?? session.user.sellerProfile.fullName ?? null;
-            //     session.user.sellerProfile.contact = (token as any).sellerProfile?.contact ?? session.user.sellerProfile.contact ?? null;
-            // }
-            // if (session.user.adminProfile && session.user.role === "admin") {
-            //     session.user.adminProfile.fullName = (token as any).adminProfile?.fullName ?? session.user.adminProfile.fullName ?? null;
-            //     session.user.adminProfile.contact = (token as any).adminProfile?.contact ?? session.user.adminProfile.contact ?? null;
-            // }
-
-            // return session;
         }
     },
     pages: {

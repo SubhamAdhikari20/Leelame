@@ -225,7 +225,7 @@ const Navbar = () => {
                     Become a seller
                 </Link>
 
-                {currentUser && (
+                {/* {currentUser && (
                     <>
                         <NotificationIconButton
                             ref={notifButtonRef}
@@ -241,7 +241,7 @@ const Navbar = () => {
                             </PortalWrapper>
                         )}
                     </>
-                )}
+                )} */}
 
                 {/* Desktop Navigation - Navbar Right*/}
                 <div className="hidden lg:flex items-center gap-8">

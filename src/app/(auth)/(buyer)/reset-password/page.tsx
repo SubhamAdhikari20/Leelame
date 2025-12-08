@@ -18,8 +18,8 @@ import { Button } from "@/components/ui/button.tsx";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Loader2 } from "lucide-react";
 import axios, { AxiosError } from "axios";
-import { ApiResponse } from "@/types/api-response";
-import { resetPasswordSchema } from "@/schemas/auth/reset-password-schema.ts";
+import { resetPasswordSchema } from "@/schemas/auth/reset-password.schema";
+import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
 
 
 const ResetPassword = () => {
@@ -42,7 +42,7 @@ const ResetPassword = () => {
     const onSubmit = async (data: z.infer<typeof resetPasswordSchema>) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.put("/api/users/buyer/reset-password", {
+            const response = await axios.put<BuyerResponseDtoType>("/api/users/buyer/reset-password", {
                 email: email,
                 newPassword: data.newPassword,
             });
@@ -52,13 +52,15 @@ const ResetPassword = () => {
             });
 
             router.replace(`/login`);
-        } catch (error) {
-            const axiosError = error as AxiosError<ApiResponse>;
+        }
+        catch (error) {
+            const axiosError = error as AxiosError<BuyerResponseDtoType>;
             console.error("Error in reseting password of the user", axiosError);
             toast("Reset Password failed", {
                 description: axiosError.response?.data.message,
             });
-        } finally {
+        }
+        finally {
             setIsSubmitting(false);
         }
     };

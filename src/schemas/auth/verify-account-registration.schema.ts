@@ -1,4 +1,4 @@
-// src/schemas/auth/verify-account-registration-schema.ts
+// src/schemas/auth/verify-account-registration.schema.ts
 import { z } from "zod";
 
 const verifyCodeValidation = z

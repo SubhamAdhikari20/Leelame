@@ -1,4 +1,4 @@
-// frontend/src/schemas/auth/loginSchema.js
+// frontend/src/schemas/auth/login.schema.js
 import { z } from "zod";
 
 const buyerIdentifierValidation = z

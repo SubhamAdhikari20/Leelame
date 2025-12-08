@@ -1,5 +1,5 @@
 // src/repositories/user.repository.ts
-import { UserRepositoryInterface } from "@/interfaces/user.repository.interface";
+import { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
 import { User, UserDocument } from "@/types/user.type.ts";
 import UserModel from "@/models/user.model.ts";
 
@@ -21,6 +21,11 @@ export class UserRepository implements UserRepositoryInterface {
     findUserByEmail = async (email: string): Promise<UserDocument | null> => {
         const user = await UserModel.findOne({ email }).lean();
         return user as unknown as UserDocument | null;
+    };
+
+    findUserById = async (id: string): Promise<UserDocument | null> => {
+        const buyer = await UserModel.findById(id).lean();
+        return buyer as unknown as UserDocument | null;
     };
 
     getAllUsers = async (): Promise<UserDocument[] | null> => {

@@ -1,8 +1,8 @@
 // src/repositories/buyer.repository.ts
-import { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interface";
-import { Buyer, BuyerDocument } from "@/types/buyer.type.ts";
+import { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interface.ts";
+import { Buyer, BuyerDocument, ProviderBuyer, ProviderBuyerDocument } from "@/types/buyer.type.ts";
 import BuyerModel from "@/models/buyer.model.ts";
-import dbConnection from "@/lib/db-connect";
+
 
 export class BuyerRepository implements BuyerRepositoryInterface {
     createBuyer = async (buyer: Buyer): Promise<BuyerDocument | null> => {
@@ -24,6 +24,11 @@ export class BuyerRepository implements BuyerRepositoryInterface {
         return buyer as unknown as BuyerDocument | null;
     };
 
+    findUserById = async (userId: string): Promise<BuyerDocument | null> => {
+        const buyer = await BuyerModel.findOne({ userId: userId }).lean();
+        return buyer as unknown as BuyerDocument | null;
+    };
+
     findBuyerByUsername = async (username: string): Promise<BuyerDocument | null> => {
         const buyer = await BuyerModel.findOne({ username }).lean();
         return buyer as unknown as BuyerDocument | null;
@@ -38,4 +43,9 @@ export class BuyerRepository implements BuyerRepositoryInterface {
         const buyers = await BuyerModel.find().lean();
         return buyers as unknown as BuyerDocument[];
     };
+
+    createGoogleProviderBuyer = async (buyer: ProviderBuyer): Promise<ProviderBuyerDocument | null> => {
+        const newBuyer = await BuyerModel.create(buyer);
+        return newBuyer as unknown as ProviderBuyerDocument | null;
+    }
 }

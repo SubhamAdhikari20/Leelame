@@ -6,5 +6,6 @@ export interface UserRepositoryInterface {
     updateUser(id: string, user: Partial<User>): Promise<UserDocument | null>;
     deleteUser(id: string) : Promise<void | null>;
     findUserByEmail(email: string): Promise<UserDocument | null>;
+    findUserById(id: string): Promise<UserDocument | null>;
     getAllUsers(): Promise<UserDocument[] | null>;
 }

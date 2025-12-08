@@ -1,0 +1,13 @@
+// src/interfaces/seller.repository.interface.ts
+import { SellerDocument, Seller } from "@/types/seller.type.ts";
+
+
+export interface SellerRepositoryInterface {
+    createSeller(seller: Seller): Promise<SellerDocument | null>;
+    updateSeller(id: string, seller: Partial<Seller>): Promise<SellerDocument | null>;
+    deleteSeller(id: string) : Promise<void | null>;
+    findSellerById(id: string): Promise<SellerDocument | null>;
+    findUserById(userId: string): Promise<SellerDocument | null>;
+    findSellerByContact(contact: string): Promise<SellerDocument | null>;
+    getAllSellers(): Promise<SellerDocument[] | null>;
+}
