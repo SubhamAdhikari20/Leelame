@@ -4,12 +4,15 @@ import React from "react";
 import { FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
 import Link from "next/link";
 import { CurrentUser } from "@/types/current-user.ts";
+import { useSession } from "next-auth/react";
 
-interface FooterProps {
-    currentUser?: CurrentUser | null;
-}
+// interface FooterProps {
+//     currentUser?: CurrentUser | null;
+// }
 
-const Footer: React.FC<FooterProps> = ({ currentUser }) => {
+const Footer = () => {
+    const { data: session } = useSession();
+    const currentUser: CurrentUser | null = session?.user as CurrentUser | null;
     const currentYear = new Date().getFullYear();
 
     return (

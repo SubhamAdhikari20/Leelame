@@ -10,7 +10,7 @@ const HomePage = () => {
     const { data: session } = useSession();
     const router = useRouter();
 
-    const username = session?.user?.buyerProfile?.username;
+    const username = session?.user?.username;
     useEffect(() => {
         if (username) {
             router.replace(`/${username}`);

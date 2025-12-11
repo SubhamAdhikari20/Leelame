@@ -4,61 +4,48 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 type AuthToken = {
-    _id?: string;
-    email?: string;
-    role?: "buyer" | "seller" | "admin" | string;
+    _id: string;
+    email: string;
+    role: "buyer" | "seller" | "admin" | string;
     isVerified?: boolean;
-    username?: string; // optional
-    buyerProfile?: { username?: string } | string | null;
+    username?: string | null;
+    buyerProfile?: string | null;
+    sellerProfile?: string | null;
+    adminProfile?: string | null;
     [k: string]: any;
 };
 
-// const PROTECTED_ROUTES = ["/:username", "/admin", "/seller"];
-// const PUBLIC_ROUTES = ["/login", "/sign-up", "/verify-account", "/"];
-
-const PUBLIC_PREFIXES = [
+const PUBLIC_PATHS = [
     "/login",
     "/sign-up",
     "/verify-account",
     "/forgot-password",
     "/reset-password",
-    "/blog",
-    "/about",
-    "/contact",
-    "/products",
-    "/become-seller"
+    // "/blog",
+    // "/about",
+    // "/contact",
+    // "/products",
+    // "/become-seller"
 ];
-const PUBLIC_ROOTS = ["/"]; // root is public
+const PUBLIC_ROOTS = ["/"];
 
+const AUTH_ENTRY_PATHS = ["/", "/login", "/sign-up", "/forgot-password", "/reset-password"];
 
 const isPublicPath = (pathname: string) => {
     if (PUBLIC_ROOTS.includes(pathname)) {
         return true;
     }
-    if (PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+    if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
         return true;
     }
     return false;
 };
 
-const extractTokenUsername = (token: AuthToken | null): (string | null) => {
-    if (!token) {
-        return null;
-    }
-    if (typeof token.username === "string" && token.username.length) {
-        return token.username;
-    }
-    const buyerProfile = token.buyerProfile;
-    if (buyerProfile && typeof buyerProfile === "object" && typeof (buyerProfile as any).username === "string") {
-        return (buyerProfile as any).username;
-    }
-    if (typeof buyerProfile === "string" && buyerProfile.length) {
-        return buyerProfile;
-    }
-    return null;
+const isAuthEntryPath = (path: string) => {
+    return AUTH_ENTRY_PATHS.includes(path) || AUTH_ENTRY_PATHS.some(p => path.startsWith(`${p}/`));
 };
 
-export const proxy = async (req: NextRequest) => {
+export async function proxy(req: NextRequest) {
     const token = (await getToken({ req: req, secret: process.env.NEXTAUTH_SECRET })) as AuthToken | null;
     const pathname = req.nextUrl.pathname;
 
@@ -76,13 +63,10 @@ export const proxy = async (req: NextRequest) => {
     // Public Routes
     if (isPublicPath(pathname)) {
         if (!token) {
-            // not logged in => allow public
             return NextResponse.next();
             // return NextResponse.rewrite(new URL("/not-found", req.url));
         }
 
-        // logged in users: if not verified, send to verify page (unless already there)
-        const tokenUsername = extractTokenUsername(token);
         if (!token.isVerified) {
             if (
                 pathname.startsWith("/verify-account/registration") ||
@@ -90,33 +74,27 @@ export const proxy = async (req: NextRequest) => {
             ) {
                 return NextResponse.next();
             }
-            return NextResponse.redirect(new URL(`/verify-account/registration/${tokenUsername ?? ""}`, req.url));
+            return NextResponse.redirect(new URL(`/verify-account/registration/${token.username}`, req.url));
         }
 
-        // logged in & verified -> redirect from login/signup to user's proper place
-        // If buyer -> /:username ; seller/admin -> /:username/:role/dashboard
-        if (token.role === "buyer") {
-            const username = tokenUsername ?? "";
-            // if already at their username, allow; else redirect to it
-            if (pathname === `/${username}`) {
-                return NextResponse.next();
+        if (isAuthEntryPath(pathname)) {
+            if (token.role === "buyer") {
+                if (pathname === `/${token.username}`) {
+                    return NextResponse.next();
+                }
+                return NextResponse.redirect(new URL(`/${token.username}`, req.url));
             }
-            return NextResponse.redirect(new URL(`/${username}`, req.url));
+            if (token.role === "seller" || token.role === "admin") {
+                return NextResponse.redirect(new URL(`/${token.role}/dashboard`, req.url));
+            }
         }
-        else if (token.role === "seller" || token.role === "admin") {
-            return NextResponse.redirect(new URL(`/${token.role}/dashboard`, req.url));
-        }
-        else {
-            return NextResponse.redirect(new URL("/", req.url));
-        }
+
+        return NextResponse.rewrite(new URL("/not-found", req.url));
+        // return NextResponse.next();
+        // return NextResponse.redirect(new URL("/", req.url));
     }
 
     // Protected Routes
-    // if (!token) {
-    //     return NextResponse.redirect(new URL("/login", req.url));
-    //     // return NextResponse.next();
-    // }
-
     if (!token) {
         // Instead of redirecting unknown routes to login, show not-found
         // if (!/^\/(login|sign-up|verify-account|forgot-password|reset-password)/.test(pathname)) {
@@ -127,7 +105,6 @@ export const proxy = async (req: NextRequest) => {
         // return NextResponse.redirect(new URL("/login", req.url));
     }
 
-    const tokenUsername = extractTokenUsername(token);
     if (!token.isVerified) {
         if (
             pathname.startsWith("/verify-account/registration") ||
@@ -135,14 +112,13 @@ export const proxy = async (req: NextRequest) => {
         ) {
             return NextResponse.next();
         }
-        return NextResponse.redirect(new URL(`/verify-account/registration/${tokenUsername ?? ""}`, req.url));
+        return NextResponse.redirect(new URL(`/verify-account/registration/${token.username}`, req.url));
     }
 
     // Split path segments
     const segments = pathname.split("/").filter(Boolean); // ["alice","seller","dashboard"] or ["seller","list"]
-    // Case A: single-segment path -> buyer home (/:username)
     if (segments.length === 1) {
-        const [maybeUsername] = segments;
+        const [username] = segments;
 
         // allow only if logged-in buyer whose username matches
         if (token.role !== "buyer") {
@@ -154,9 +130,9 @@ export const proxy = async (req: NextRequest) => {
             return NextResponse.rewrite(new URL("/not-found", req.url));
         }
 
-        if (tokenUsername !== maybeUsername) {
+        if (token.username !== username) {
             // prevent visiting other buyers' pages: redirect to own buyer home
-            return NextResponse.redirect(new URL(`/${tokenUsername}`, req.url));
+            return NextResponse.redirect(new URL(`/${token.username}`, req.url));
             // return NextResponse.rewrite(new URL("/not-found", req.url));
         }
         return NextResponse.next();
@@ -178,7 +154,7 @@ export const proxy = async (req: NextRequest) => {
                 // return NextResponse.redirect(new URL(`/${token.role}/dashboard`, req.url));
                 return NextResponse.rewrite(new URL("/not-found", req.url));
             }
-            if (tokenUsername !== first) {
+            if (token.username !== first) {
                 // username mismatch
                 // return NextResponse.redirect(new URL(`/${token.role}/dashboard`, req.url));
                 return NextResponse.rewrite(new URL("/not-found", req.url));
@@ -214,4 +190,4 @@ export const config = {
         // "/:role/:path*",
         "/((?!_next|api|static|favicon.ico|images).*)",
     ]
-};
+}
