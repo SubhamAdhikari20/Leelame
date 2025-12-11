@@ -1,6 +1,6 @@
 // src/proxy.ts
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 type AuthToken = {
@@ -21,11 +21,11 @@ const PUBLIC_PATHS = [
     "/verify-account",
     "/forgot-password",
     "/reset-password",
-    // "/blog",
-    // "/about",
-    // "/contact",
-    // "/products",
-    // "/become-seller"
+    "/blog",
+    "/about",
+    "/contact",
+    "/products",
+    "/become-seller"
 ];
 const PUBLIC_ROOTS = ["/"];
 
@@ -177,6 +177,7 @@ export async function proxy(req: NextRequest) {
 
     // otherwise allow
     return NextResponse.rewrite(new URL("/not-found", req.url));
+    // return NextResponse.next();
 };
 
 // See "Matching Paths" below to learn more

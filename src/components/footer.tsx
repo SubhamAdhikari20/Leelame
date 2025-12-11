@@ -22,7 +22,7 @@ const Footer = () => {
                     <div className="flex items-center space-x-4">
                         <Link href="/">
                             <img
-                                src="images/leelame_logo2_cropped_png.png"
+                                src="images/leelame_logo_cropped_png.png"
                                 alt="Leelame Logo"
                                 width={75}
                                 height={75}
