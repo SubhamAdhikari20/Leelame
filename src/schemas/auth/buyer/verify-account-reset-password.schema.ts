@@ -1,4 +1,4 @@
-// src/schemas/auth/verify-account-reset-password-schema.ts
+// src/schemas/auth/buyer/verify-account-reset-password.schema.ts
 import { z } from "zod";
 
 const verifyCodeResetPasswordSchema = z

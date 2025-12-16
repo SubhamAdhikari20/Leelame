@@ -1,9 +1,9 @@
-// frontend/src/schemas/auth/login.schema.js
+// src/schemas/auth/seller/login.schema.js
 import { z } from "zod";
 
-const buyerIdentifierValidation = z
+const sellerIdentifierValidation = z
     .string()
-    .min(3, { message: "Username or Email is required" });
+    .min(3, { message: "Email or Contact is required" });
 
 const passwordValidation = z
     .string()
@@ -14,9 +14,9 @@ const roleValidation = z
         error: "Role is required"
     }).optional();
 
-export const buyerLoginSchema = z.object({
-    // Identifier = Username OR Email
-    identifier: buyerIdentifierValidation,
+export const sellerLoginSchema = z.object({
+    // Identifier = Email OR Contact
+    identifier: sellerIdentifierValidation,
     password: passwordValidation,
     role: roleValidation
 });

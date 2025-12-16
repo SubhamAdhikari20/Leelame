@@ -24,7 +24,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import axios, { AxiosError } from "axios";
 import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
-import { buyerSignUpSchema } from "@/schemas/auth/sign-up.schema.ts";
+import { buyerSignUpSchema } from "@/schemas/auth/buyer/sign-up.schema.ts";
 
 
 const SignUp = () => {

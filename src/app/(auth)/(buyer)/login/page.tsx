@@ -28,7 +28,7 @@ import { FcGoogle } from "react-icons/fc"
 import { useGoogleLogin } from "@react-oauth/google";
 import { getSession, signIn, useSession } from "next-auth/react";
 import axios, { AxiosError } from "axios";
-import { buyerLoginSchema } from "@/schemas/auth/login.schema.ts";
+import { buyerLoginSchema } from "@/schemas/auth/buyer/login.schema.ts";
 import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
 
 

@@ -1,4 +1,4 @@
-// src/schemas/auth/reset-password-schema.ts
+// src/schemas/auth/buyer/reset-password.schema.ts
 import * as z from "zod";
 
 const newPasswordValidation = z     // New Password validation

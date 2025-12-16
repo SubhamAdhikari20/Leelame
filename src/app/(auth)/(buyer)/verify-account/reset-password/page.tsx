@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/input-otp.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import axios, { AxiosError } from "axios";
-import { verifyAccountResetPasswordSchema } from "@/schemas/auth/verify-account-reset-password.schema";
+import { verifyAccountResetPasswordSchema } from "@/schemas/auth/buyer/verify-account-reset-password.schema.ts";
 import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
 
 

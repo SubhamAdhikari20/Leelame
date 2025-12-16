@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Loader2 } from "lucide-react";
 import axios, { AxiosError } from "axios";
-import { resetPasswordSchema } from "@/schemas/auth/reset-password.schema";
+import { resetPasswordSchema } from "@/schemas/auth/buyer/reset-password.schema.ts";
 import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
 
 

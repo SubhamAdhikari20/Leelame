@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import axios, { AxiosError } from "axios";
-import { forgotPasswordSchema } from "@/schemas/auth/forgot-password.schema.ts";
+import { forgotPasswordSchema } from "@/schemas/auth/buyer/forgot-password.schema.ts";
 import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
 
 

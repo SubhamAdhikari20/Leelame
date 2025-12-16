@@ -60,7 +60,7 @@ export const termsAndConditionsValidation = z
         message: "You must accept the terms and conditions"
     });
 
-export const otpvalidation = z
+export const otpValidation = z
     .string()
     .length(6, { message: "Verification code must be 6 characters long" })
     .regex(/^[0-9]+$/, { message: "Verification code must contain only digits" });
