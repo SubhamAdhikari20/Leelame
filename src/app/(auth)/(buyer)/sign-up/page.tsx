@@ -71,13 +71,14 @@ const SignUp = () => {
     const signUpForm = useForm<z.infer<typeof buyerSignUpSchema>>({
         resolver: zodResolver(buyerSignUpSchema),
         defaultValues: {
-            fullName: "",
-            username: "",
-            email: "",
-            contact: "",
-            password: "",
-            confirmPassword: "",
-            terms: false,
+            fullName: "Subham Adhikari",
+            username: "Subham20",
+            email: "subhamadhikari20@gmail.com",
+            contact: "9746454403",
+            password: "Subham@123",
+            confirmPassword: "Subham@123",
+            terms: true,
+            // terms: false,
             role: "buyer",
         },
     });
@@ -90,14 +91,17 @@ const SignUp = () => {
                 toast.success("Sign Up Successful", {
                     description: response.data.message,
                 });
-                router.replace(`/verify-account/registration?username=${username}`);
+                const responeUsername = response.data.user?.username;
+                router.replace(`/verify-account/registration?username=${responeUsername}`);
             }
         }
         catch (error) {
+            // console.log("Error Custom", error)
             const axiosError = error as AxiosError<BuyerResponseDtoType>;
+            // console.log(axiosError, "axios");
             console.error("Error in sign up of user: ", axiosError);
             toast.error("Error signing up the user", {
-                description: axiosError.response?.data.message,
+                description: axiosError.response?.data?.message || "Login validation failed",
             });
         }
         finally {
@@ -174,7 +178,7 @@ const SignUp = () => {
                                                 id={field.name}
                                                 aria-invalid={fieldState.invalid}
                                                 placeholder="Full Name"
-                                                // autoComplete="off"
+                                            // autoComplete="off"
                                             />
                                             {fieldState.invalid && (
                                                 <FieldError errors={[fieldState.error]} />
@@ -236,7 +240,7 @@ const SignUp = () => {
                                                 id={field.name}
                                                 aria-invalid={fieldState.invalid}
                                                 placeholder="Contact"
-                                                // autoComplete="off"
+                                            // autoComplete="off"
                                             />
                                             {fieldState.invalid && (
                                                 <FieldError errors={[fieldState.error]} />
@@ -258,7 +262,7 @@ const SignUp = () => {
                                                 id={field.name}
                                                 aria-invalid={fieldState.invalid}
                                                 placeholder="Email"
-                                                // autoComplete="off"
+                                            // autoComplete="off"
                                             />
                                             {fieldState.invalid && (
                                                 <FieldError errors={[fieldState.error]} />

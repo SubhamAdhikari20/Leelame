@@ -1,16 +1,20 @@
 // src/models/buyer.model.ts
 import mongoose, { Schema, Document } from "mongoose";
 import type { IUser } from "./user.model.ts";
+import type { Buyer } from "@/types/buyer.type.ts";
 
-export interface IBuyer extends Document {
-    userId: Schema.Types.ObjectId,
-    fullName: string;
-    username?: string | null;
-    contact?: string | null;
-    password?: string | null;
-    googleId?: string | null;
-    bio?: string | null;
-    terms: boolean;
+export interface IBuyer extends Omit<Buyer, 'userId'>, Document {
+// export interface IBuyer extends Buyer, Document {
+    userId: Schema.Types.ObjectId | string,
+    // fullName: string;
+    // username?: string | null;
+    // contact?: string | null;
+    // password?: string | null;
+    // googleId?: string | null;
+    // bio?: string | null;
+    // terms: boolean;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface IBuyerPopulated extends Omit<IBuyer, "userId"> {

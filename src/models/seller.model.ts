@@ -1,12 +1,13 @@
 // src/models/seller.model.ts
 import mongoose, { Schema, Document } from "mongoose";
 import type { IUser } from "./user.model.ts";
+import type { Seller } from "@/types/seller.type.ts";
 
-export interface ISeller extends Document {
+export interface ISeller extends Seller, Document {
     userId: Schema.Types.ObjectId,
-    fullName: string;
-    contact: string;
-    password: string;
+    // fullName: string;
+    // contact: string;
+    // password: string;
     sellerNotes?: string | null;
     sellerStatus: "none" | "pending" | "verified" | "rejected";
     sellerVerificationDate?: Date | null;

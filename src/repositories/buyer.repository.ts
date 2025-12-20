@@ -1,18 +1,18 @@
 // src/repositories/buyer.repository.ts
 import { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interface.ts";
-import { Buyer, BuyerDocument, ProviderBuyer, ProviderBuyerDocument } from "@/types/buyer.type.ts";
+import { Buyer, BuyerDocument, ProviderBuyer } from "@/types/buyer.type.ts";
 import BuyerModel from "@/models/buyer.model.ts";
-
+import { Schema } from "mongoose";
 
 export class BuyerRepository implements BuyerRepositoryInterface {
     createBuyer = async (buyer: Buyer): Promise<BuyerDocument | null> => {
         const newBuyer = await BuyerModel.create(buyer);
-        return newBuyer as unknown as BuyerDocument | null;
+        return newBuyer;
     };
 
     updateBuyer = async (id: string, buyer: Partial<Buyer>): Promise<BuyerDocument | null> => {
         const updatedBuyer = await BuyerModel.findByIdAndUpdate(id, buyer, { new: true }).lean();
-        return updatedBuyer as unknown as BuyerDocument | null;
+        return updatedBuyer;
     };
 
     deleteBuyer = async (id: string): Promise<void | null> => {
@@ -21,31 +21,31 @@ export class BuyerRepository implements BuyerRepositoryInterface {
 
     findBuyerById = async (id: string): Promise<BuyerDocument | null> => {
         const buyer = await BuyerModel.findById(id).lean();
-        return buyer as unknown as BuyerDocument | null;
+        return buyer;
     };
 
     findUserById = async (userId: string): Promise<BuyerDocument | null> => {
-        const buyer = await BuyerModel.findOne({ userId: userId }).lean();
-        return buyer as unknown as BuyerDocument | null;
+        const buyer = await BuyerModel.findOne({ userId: new Schema.Types.ObjectId(userId) }).lean();
+        return buyer;
     };
 
     findBuyerByUsername = async (username: string): Promise<BuyerDocument | null> => {
         const buyer = await BuyerModel.findOne({ username }).lean();
-        return buyer as unknown as BuyerDocument | null;
+        return buyer;
     };
 
     findBuyerByContact = async (contact: string): Promise<BuyerDocument | null> => {
         const buyer = await BuyerModel.findOne({ contact }).lean();
-        return buyer as unknown as BuyerDocument | null;
+        return buyer;
     };
 
-    getAllBuyers = async (): Promise<BuyerDocument[]> => {
+    getAllBuyers = async (): Promise<BuyerDocument[] | null> => {
         const buyers = await BuyerModel.find().lean();
-        return buyers as unknown as BuyerDocument[];
+        return buyers;
     };
 
-    createGoogleProviderBuyer = async (buyer: ProviderBuyer): Promise<ProviderBuyerDocument | null> => {
+    createGoogleProviderBuyer = async (buyer: ProviderBuyer): Promise<BuyerDocument | null> => {
         const newBuyer = await BuyerModel.create(buyer);
-        return newBuyer as unknown as ProviderBuyerDocument | null;
+        return newBuyer;
     }
 }

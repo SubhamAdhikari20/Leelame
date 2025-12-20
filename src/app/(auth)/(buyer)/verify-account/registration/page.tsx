@@ -19,10 +19,8 @@ import {
     InputOTPGroup,
     InputOTPSlot,
 } from "@/components/ui/input-otp.tsx";
-import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import axios, { AxiosError } from "axios";
-import { ApiResponse } from "@/types/api-response.ts";
 import { verifyAccountRegistrationSchema } from "@/schemas/auth/buyer/verify-account-registration.schema.ts";
 import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
 

@@ -1,6 +1,5 @@
 // src/interfaces/buyer.repository.interface.ts
-import { Buyer, BuyerDocument, ProviderBuyer, ProviderBuyerDocument } from "@/types/buyer.type.ts";
-
+import { Buyer, BuyerDocument, ProviderBuyer } from "@/types/buyer.type.ts";
 
 export interface BuyerRepositoryInterface {
     createBuyer(buyer: Buyer): Promise<BuyerDocument | null>;
@@ -11,5 +10,5 @@ export interface BuyerRepositoryInterface {
     findBuyerByUsername(username: string): Promise<BuyerDocument | null>;
     findBuyerByContact(contact: string): Promise<BuyerDocument | null>;
     getAllBuyers(): Promise<BuyerDocument[] | null>;
-    createGoogleProviderBuyer(buyer: ProviderBuyer): Promise<ProviderBuyerDocument | null>;
+    createGoogleProviderBuyer(buyer: ProviderBuyer): Promise<BuyerDocument | null>;
 }

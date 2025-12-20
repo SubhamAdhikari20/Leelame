@@ -77,7 +77,7 @@ export class BuyerService {
             }
 
             // Update existing unverified user
-            newUser = await this.userRepo.updateUser(existingUserByEmail._id, {
+            newUser = await this.userRepo.updateUser(existingUserByEmail._id.toString(), {
                 verifyCode: otp,
                 verifyCodeExpiryDate: expiryDate,
                 role,
@@ -93,11 +93,11 @@ export class BuyerService {
             }
 
             // If buyerProfile does not exist for this user, create one
-            buyerProfile = await this.buyerRepo.findBuyerById(newUser._id);
+            buyerProfile = await this.buyerRepo.findBuyerById(newUser._id.toString());
 
             if (!buyerProfile) {
                 buyerProfile = await this.buyerRepo.createBuyer({
-                    userId: newUser._id,
+                    userId: newUser._id.toString(),
                     fullName,
                     username,
                     contact,
@@ -109,7 +109,7 @@ export class BuyerService {
             }
             else {
                 // Update if exists
-                buyerProfile = await this.buyerRepo.updateBuyer(buyerProfile._id, {
+                buyerProfile = await this.buyerRepo.updateBuyer(buyerProfile._id.toString(), {
                     fullName,
                     username,
                     contact,
@@ -139,7 +139,7 @@ export class BuyerService {
             }
 
             buyerProfile = await this.buyerRepo.createBuyer({
-                userId: newUser._id,
+                userId: newUser._id.toString(),
                 fullName,
                 username,
                 contact,
@@ -175,12 +175,12 @@ export class BuyerService {
         if (!emailResponse.success) {
             // Rollback user creation if email sending fails
             if (isNewUserCreated) {
-                await this.userRepo.deleteUser(newUser._id);
-                await this.buyerRepo.deleteBuyer(buyerProfile._id);
+                await this.userRepo.deleteUser(newUser._id.toString());
+                await this.buyerRepo.deleteBuyer(buyerProfile._id.toString());
             }
             else {
                 // If it was an existing unverified user, clear verification fields
-                newUser = await this.userRepo.updateUser(newUser._id, {
+                newUser = await this.userRepo.updateUser(newUser._id.toString(), {
                     verifyCode: null,
                     verifyCodeExpiryDate: null,
                     role,
@@ -188,7 +188,7 @@ export class BuyerService {
 
                 // If profile was updated (not new), we don't revert changes for simplicity
                 if (isNewProfileCreated) {
-                    await this.buyerRepo.deleteBuyer(buyerProfile._id);
+                    await this.buyerRepo.deleteBuyer(buyerProfile._id.toString());
                 }
             }
             // throw new Error(emailResponse.message ?? "Failed to send verification email");
@@ -200,8 +200,9 @@ export class BuyerService {
             return response;
         }
 
-        newUser = await this.userRepo.updateUser(newUser._id, {
-            buyerProfile: buyerProfile._id,
+        // newUser = await this.userRepo.findUserById(newUser._id.toString());
+        newUser = await this.userRepo.updateUser(newUser._id.toString(), {
+            buyerProfile: buyerProfile._id.toString()
         });
 
         if (!newUser) {
@@ -219,15 +220,15 @@ export class BuyerService {
             status: 201,
             token,
             user: {
-                _id: buyerProfile._id,
-                userId: buyerProfile.userId,
+                _id: buyerProfile._id.toString(),
+                userId: buyerProfile.userId.toString(),
                 email: newUser.email,
                 isVerified: newUser.isVerified,
                 fullName: buyerProfile.fullName,
                 username: buyerProfile.username,
                 role: newUser.role,
                 isPermanentlyBanned: newUser.isPermanentlyBanned,
-                createAt: buyerProfile.createdAt,
+                createdAt: buyerProfile.createdAt,
                 updatedAt: buyerProfile.updatedAt,
             }
         };
@@ -250,7 +251,7 @@ export class BuyerService {
             return response;
         }
 
-        const linkedUser = await this.userRepo.findUserById(existingBuyer.userId);
+        const linkedUser = await this.userRepo.findUserById(existingBuyer.userId.toString());
 
         if (linkedUser && linkedUser.isVerified === true) {
             const response: BuyerResponseDtoType = {
@@ -272,7 +273,7 @@ export class BuyerService {
     verifyOtpForRegistration = async (verifyOtpForRegistrationDto: VerifyOtpForRegistrationDtoType): Promise<BuyerResponseDtoType> => {
         const { username, otp } = verifyOtpForRegistrationDto;
 
-        if (!username || username.trim() === '') {
+        if (!username || username.trim() === "") {
             const response: BuyerResponseDtoType = {
                 success: false,
                 message: "Username is required",
@@ -281,7 +282,7 @@ export class BuyerService {
             return response;
         }
 
-        if (!otp || otp.trim() === '') {
+        if (!otp || otp.trim() === "") {
             const response: BuyerResponseDtoType = {
                 success: false,
                 message: "OTP is required",
@@ -302,7 +303,7 @@ export class BuyerService {
             return response;
         }
 
-        const existingUserById = await this.userRepo.findUserById(existingBuyerByUsername.userId);
+        const existingUserById = await this.userRepo.findUserById(existingBuyerByUsername.userId.toString());
         if (!existingUserById) {
             const response: BuyerResponseDtoType = {
                 success: false,
@@ -348,7 +349,7 @@ export class BuyerService {
             return response;
         }
 
-        const updatedUser = await this.userRepo.updateUser(existingUserById._id, {
+        const updatedUser = await this.userRepo.updateUser(existingUserById._id.toString(), {
             isVerified: true,
             verifyCode: null,
             verifyCodeExpiryDate: null,
@@ -368,15 +369,15 @@ export class BuyerService {
             message: "Account verified successfully. You can now login.",
             status: 200,
             user: {
-                _id: existingBuyerByUsername._id,
-                userId: updatedUser._id,
+                _id: existingBuyerByUsername._id.toString(),
+                userId: existingBuyerByUsername.userId.toString(),
                 email: updatedUser.email,
                 isVerified: updatedUser.isVerified,
                 fullName: existingBuyerByUsername.fullName,
                 username: existingBuyerByUsername.username,
                 role: updatedUser.role,
                 isPermanentlyBanned: updatedUser.isPermanentlyBanned,
-                createAt: existingBuyerByUsername.createdAt,
+                createdAt: existingBuyerByUsername.createdAt,
                 updatedAt: existingBuyerByUsername.updatedAt,
             }
         };
@@ -426,7 +427,7 @@ export class BuyerService {
             return response;
         }
 
-        const buyerProfile = await this.buyerRepo.findBuyerById(user.buyerProfile);
+        const buyerProfile = await this.buyerRepo.findBuyerById(user.buyerProfile.toString());
 
         if (!buyerProfile) {
             const response: BuyerResponseDtoType = {
@@ -442,7 +443,7 @@ export class BuyerService {
         const expiryDate = new Date();
         expiryDate.setMinutes(expiryDate.getMinutes() + 10);    // Add 10 mins from 'now'
 
-        const updatedUser = await this.userRepo.updateUser(user._id, {
+        const updatedUser = await this.userRepo.updateUser(user._id.toString(), {
             verifyEmailResetPassword: otp,
             verifyEmailResetPasswordExpiryDate: expiryDate
         });
@@ -476,15 +477,15 @@ export class BuyerService {
             message: "Reset Password instructions have been sent to your email",
             status: 200,
             user: {
-                _id: buyerProfile._id,
-                userId: buyerProfile.userId,
+                _id: buyerProfile._id.toString(),
+                userId: buyerProfile.userId.toString(),
                 email: updatedUser.email,
                 isVerified: updatedUser.isVerified,
                 fullName: buyerProfile.fullName,
                 username: buyerProfile.username,
                 role: updatedUser.role,
                 isPermanentlyBanned: updatedUser.isPermanentlyBanned,
-                createAt: buyerProfile.createdAt,
+                createdAt: buyerProfile.createdAt,
                 updatedAt: buyerProfile.updatedAt,
             }
         };
@@ -569,7 +570,7 @@ export class BuyerService {
             return response;
         }
 
-        const buyerProfile = await this.buyerRepo.findBuyerById(existingUserByEmail.buyerProfile);
+        const buyerProfile = await this.buyerRepo.findBuyerById(existingUserByEmail.buyerProfile.toString());
         if (!buyerProfile) {
             const response: BuyerResponseDtoType = {
                 success: false,
@@ -584,15 +585,15 @@ export class BuyerService {
             message: "Account verified successfully. You can now login.",
             status: 200,
             user: {
-                _id: buyerProfile._id,
-                userId: existingUserByEmail._id,
+                _id: buyerProfile._id.toString(),
+                userId: buyerProfile.userId.toString(),
                 email: existingUserByEmail.email,
                 isVerified: existingUserByEmail.isVerified,
                 fullName: buyerProfile.fullName,
                 username: buyerProfile.username,
                 role: existingUserByEmail.role,
                 isPermanentlyBanned: existingUserByEmail.isPermanentlyBanned,
-                createAt: buyerProfile.createdAt,
+                createdAt: buyerProfile.createdAt,
                 updatedAt: buyerProfile.updatedAt,
             }
         };
@@ -659,7 +660,7 @@ export class BuyerService {
             return response;
         }
 
-        const buyerProfile = await this.buyerRepo.findBuyerById(existingUserByEmail.buyerProfile);
+        const buyerProfile = await this.buyerRepo.findBuyerById(existingUserByEmail.buyerProfile.toString());
         if (!buyerProfile) {
             const response: BuyerResponseDtoType = {
                 success: false,
@@ -669,7 +670,7 @@ export class BuyerService {
             return response;
         }
 
-        const updatedUser = await this.userRepo.updateUser(existingUserByEmail._id, {
+        const updatedUser = await this.userRepo.updateUser(existingUserByEmail._id.toString(), {
             verifyEmailResetPassword: null,
             verifyEmailResetPasswordExpiryDate: null,
         });
@@ -686,7 +687,7 @@ export class BuyerService {
         const salt = bcrypt.genSaltSync(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-        const updatedBuer = await this.buyerRepo.updateBuyer(buyerProfile._id, {
+        const updatedBuer = await this.buyerRepo.updateBuyer(buyerProfile._id.toString(), {
             password: hashedPassword
         });
 
@@ -704,15 +705,15 @@ export class BuyerService {
             message: "Account verified successfully. You can now login.",
             status: 200,
             user: {
-                _id: buyerProfile._id,
-                userId: existingUserByEmail._id,
+                _id: buyerProfile._id.toString(),
+                userId: buyerProfile.userId.toString(),
                 email: existingUserByEmail.email,
                 isVerified: existingUserByEmail.isVerified,
                 fullName: buyerProfile.fullName,
                 username: buyerProfile.username,
                 role: existingUserByEmail.role,
                 isPermanentlyBanned: existingUserByEmail.isPermanentlyBanned,
-                createAt: buyerProfile.createdAt,
+                createdAt: buyerProfile.createdAt,
                 updatedAt: buyerProfile.updatedAt,
             }
         };
@@ -751,7 +752,7 @@ export class BuyerService {
             return response;
         }
 
-        const buyerProfile = await this.buyerRepo.findUserById(user._id);
+        const buyerProfile = await this.buyerRepo.findUserById(user._id.toString());
 
         if (!buyerProfile) {
             const response: BuyerResponseDtoType = {
@@ -767,7 +768,7 @@ export class BuyerService {
         const expiryDate = new Date();
         expiryDate.setMinutes(expiryDate.getMinutes() + 10);    // Add 10 mins from 'now'
 
-        const updatedUser = await this.userRepo.updateUser(user._id, {
+        const updatedUser = await this.userRepo.updateUser(user._id.toString(), {
             isVerified: false,
             verifyCode: otp,
             verifyCodeExpiryDate: expiryDate

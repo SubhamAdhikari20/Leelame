@@ -50,13 +50,13 @@ const ProfilePopover: React.FC<ProfilePopoverProps> = ({
                             src={
                                 currentUser.profilePictureUrl
                             }
-                            alt={currentUser.buyerProfile.fullName}
+                            alt={currentUser.fullName}
                         />
                     ) : (
                         <AvatarFallback>
                             {(
-                                currentUser.buyerProfile.fullName ??
-                                currentUser.buyerProfile.username ??
+                                currentUser.fullName ??
+                                currentUser.username ??
                                 "U"
                             )
                                 .split(" ")
@@ -67,10 +67,10 @@ const ProfilePopover: React.FC<ProfilePopoverProps> = ({
                     )}
                 </Avatar>
                 <h1 className="mt-2 font-bold text-gray-900 dark:text-white">
-                    {currentUser.buyerProfile.fullName}
+                    {currentUser.fullName}
                 </h1>
                 <h2 className="mt-2 font-semibold text-gray-800 dark:text-gray-100">
-                    {currentUser.buyerProfile.username}
+                    {currentUser.username}
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                     {currentUser.email}
@@ -81,7 +81,7 @@ const ProfilePopover: React.FC<ProfilePopoverProps> = ({
             <div className="grid grid-cols-2 gap-1 px-3 pb-3">
                 {/* Profile Link */}
                 <Link
-                    href={`/${currentUser.buyerProfile.username}/my-profile/dashboard`}
+                    href={`/${currentUser.username}/my-profile/dashboard`}
                     className="flex items-center justify-center gap-2 px-2 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                     onClick={() => {
                         setDesktopMenuOpen(false);

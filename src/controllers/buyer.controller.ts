@@ -1,6 +1,6 @@
 // src/controllers/buyer.controller.ts
 import { NextRequest, NextResponse } from "next/server";
-import { CheckUsernameUniqueDto, CreatedBuyerDto, ForgotPasswordDto, ResetPasswordDto, SendEmailForRegistrationDto, VerifyOtpForRegistrationDto, VerifyOtpForResetPasswordDto } from "@/dtos/buyer.dto.ts";
+import { BuyerResponseDto, CheckUsernameUniqueDto, CreatedBuyerDto, ForgotPasswordDto, ResetPasswordDto, SendEmailForRegistrationDto, VerifyOtpForRegistrationDto, VerifyOtpForResetPasswordDto } from "@/dtos/buyer.dto.ts";
 import { BuyerService } from "@/services/buyer.service.ts";
 import { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interface.ts";
 import { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
@@ -27,19 +27,33 @@ export class BuyerController {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: validatedData.error
+                        message: z.prettifyError(validatedData.error)
                     },
                     { status: 400 }
                 );
             }
 
             const result = await this.buyerService.createBuyer(validatedData.data);
+
+            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
+
+            if (!validatedResponseBuyerData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedResponseBuyerData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: result?.success,
                     message: result?.message,
                     token: result?.token,
-                    user: result?.user,
+                    user: validatedResponseBuyerData.data,
+                    // user: result?.user,
                 },
                 { status: result?.status ?? 200 }
             );
@@ -82,10 +96,23 @@ export class BuyerController {
                     },
                     { status: 400 }
                 );
-                // return NextResponse.json({ success: false, message: validatedData.error }, { status: 400 });
+                // return NextResponse.json({ success: false, message: z.prettifyError(validatedData.error) }, { status: 400 });
             }
 
             const result = await this.buyerService.checkUsernameUnique(validatedData.data);
+
+            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
+
+            if (!validatedResponseBuyerData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedResponseBuyerData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: result?.success,
@@ -117,13 +144,26 @@ export class BuyerController {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: validatedData.error
+                        message: z.prettifyError(validatedData.error)
                     },
                     { status: 400 }
                 );
             }
 
             const result = await this.buyerService.verifyOtpForRegistration(validatedData.data);
+
+            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
+
+            if (!validatedResponseBuyerData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedResponseBuyerData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: result?.success,
@@ -161,6 +201,19 @@ export class BuyerController {
             }
 
             const result = await this.buyerService.forgotPassword(validatedData.data);
+
+            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
+
+            if (!validatedResponseBuyerData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedResponseBuyerData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: result?.success,
@@ -198,6 +251,19 @@ export class BuyerController {
             }
 
             const result = await this.buyerService.verifyOtpForResetpassword(validatedData.data);
+
+            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
+
+            if (!validatedResponseBuyerData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedResponseBuyerData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: result?.success,
@@ -235,6 +301,19 @@ export class BuyerController {
             }
 
             const result = await this.buyerService.resetPassword(validatedData.data);
+
+            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
+
+            if (!validatedResponseBuyerData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedResponseBuyerData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: result?.success,
@@ -272,6 +351,19 @@ export class BuyerController {
             }
 
             const result = await this.buyerService.handleSendEmailForRegistration(validatedData.data);
+
+            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
+
+            if (!validatedResponseBuyerData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedResponseBuyerData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: result?.success,

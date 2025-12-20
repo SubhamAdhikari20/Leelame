@@ -3,9 +3,10 @@ import { z } from "zod";
 import { userSchema } from "@/types/user.type.ts";
 
 // What clients sends when creating a new user x
-// export const CreatedUserDto = userSchema;
+export const CreatedUserDto = userSchema
+    .omit({ buyerProfile: true, sellerProfile: true, adminProfile: true });
 
-export type CreatedUserDto = z.infer<typeof userSchema>;
+export type CreatedUserDtoType = z.infer<typeof CreatedUserDto>;
 
 // what server responds with when sending user data 
 export const UserResponseDto = z.object({
@@ -21,4 +22,4 @@ export const UserResponseDto = z.object({
     updatedAt: z.date().optional()
 });
 
-export type UserResponseDto = z.infer<typeof UserResponseDto>;
+export type UserResponseDtoType = z.infer<typeof UserResponseDto>;

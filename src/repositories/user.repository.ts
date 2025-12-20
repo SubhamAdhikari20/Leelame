@@ -6,12 +6,12 @@ import UserModel from "@/models/user.model.ts";
 export class UserRepository implements UserRepositoryInterface {
     createUser = async (user: User): Promise<UserDocument | null> => {
         const newUser = await UserModel.create(user);
-        return newUser as unknown as UserDocument;
+        return newUser;
     };
 
     updateUser = async (id: string, user: Partial<User>): Promise<UserDocument | null> => {
         const updatedUser = await UserModel.findByIdAndUpdate(id, user, { new: true }).lean();
-        return updatedUser as unknown as UserDocument | null;
+        return updatedUser;
     };
 
     deleteUser = async (id: string): Promise<void | null> => {
@@ -20,16 +20,16 @@ export class UserRepository implements UserRepositoryInterface {
 
     findUserByEmail = async (email: string): Promise<UserDocument | null> => {
         const user = await UserModel.findOne({ email }).lean();
-        return user as unknown as UserDocument | null;
+        return user;
     };
 
     findUserById = async (id: string): Promise<UserDocument | null> => {
-        const buyer = await UserModel.findById(id).lean();
-        return buyer as unknown as UserDocument | null;
+        const user = await UserModel.findById(id).lean();
+        return user;
     };
 
     getAllUsers = async (): Promise<UserDocument[] | null> => {
         const users = await UserModel.find().lean();
-        return users as unknown as UserDocument[];
+        return users;
     };
 }

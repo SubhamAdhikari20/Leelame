@@ -3,30 +3,35 @@ import mongoose, { Schema, Document } from "mongoose";
 import type { IBuyer } from "./buyer.model.ts";
 import type { ISeller } from "./seller.model.ts";
 import type { IAdmin } from "./admin.model.ts";
+import type { User } from "@/types/user.type.ts";
 
-export interface IUser extends Document {
-    email: string;
-    profilePictureUrl?: string | null;
-    role: "admin" | "seller" | "buyer";
+export interface IUser extends Omit<User, ("buyerProfile" | "sellerProfile" | "adminProfile")>, Document {
+    // export interface IUser extends User, Document {
+    // email: string;
+    // profilePictureUrl?: string | null;
+    // role: "admin" | "seller" | "buyer";
 
     // Relations and References
-    buyerProfile?: mongoose.Types.ObjectId | null;
-    sellerProfile?: mongoose.Types.ObjectId | null;
-    adminProfile?: mongoose.Types.ObjectId | null;
+    buyerProfile?: Schema.Types.ObjectId | string | null;
+    sellerProfile?: Schema.Types.ObjectId | string | null;
+    adminProfile?: Schema.Types.ObjectId | string | null;
 
     // Account Verification and Security
-    isVerified: boolean;
-    verifyCode?: string | null;
-    verifyCodeExpiryDate?: Date | null;
-    verifyEmailResetPassword?: string | null;
-    verifyEmailResetPasswordExpiryDate?: Date | null;
+    // isVerified: boolean;
+    // verifyCode?: string | null;
+    // verifyCodeExpiryDate?: Date | null;
+    // verifyEmailResetPassword?: string | null;
+    // verifyEmailResetPasswordExpiryDate?: Date | null;
 
-    // Ban and Moderation
-    isPermanentlyBanned: boolean;
-    banReason?: string | null;
-    bannedAt?: Date | null;
-    bannedDateFrom?: Date | null;
-    bannedDateTo?: Date | null;
+    // // Ban and Moderation
+    // isPermanentlyBanned: boolean;
+    // banReason?: string | null;
+    // bannedAt?: Date | null;
+    // bannedDateFrom?: Date | null;
+    // bannedDateTo?: Date | null;
+
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface IUserPopulated extends Omit<IUser, ("buyerProfile" | "sellerProfile" | "adminProfile")> {
