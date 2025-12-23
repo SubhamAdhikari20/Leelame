@@ -2,7 +2,7 @@
 import { Seller, SellerDocument } from "@/types/seller.type.ts";
 
 export interface SellerRepositoryInterface {
-    createSeller(seller: Seller): Promise<SellerDocument | null>;
+    createSeller(seller: Partial<Seller>): Promise<SellerDocument | null>;
     updateSeller(id: string, seller: Partial<Seller>): Promise<SellerDocument | null>;
     deleteSeller(id: string): Promise<void | null>;
     findSellerById(id: string): Promise<SellerDocument | null>;

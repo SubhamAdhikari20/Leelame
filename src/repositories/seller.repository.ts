@@ -5,7 +5,7 @@ import SellerModel, { ISeller } from "@/models/seller.model.ts";
 import { Types } from "mongoose";
 
 export class SellerRepository implements SellerRepositoryInterface {
-    createSeller = async (seller: Seller): Promise<ISeller | null> => {
+    createSeller = async (seller: Partial<Seller>): Promise<ISeller | null> => {
         const newSeller = await SellerModel.create(seller);
         return newSeller as unknown as ISeller | null;
     };

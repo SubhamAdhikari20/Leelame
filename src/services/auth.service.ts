@@ -73,7 +73,7 @@ export class AuthService {
                 // throw new Error("NOT_ADMIN");
             }
 
-            const adminProfile = await this.adminRepo.findUserById(user._id);
+            const adminProfile = await this.adminRepo.findUserById(user._id.toString());
             if (!adminProfile) {
                 const response: AuthResponseDtoType = {
                     success: false,
@@ -126,7 +126,7 @@ export class AuthService {
             // try email-based user
             let user = await this.userRepo.findUserByEmail(identifier);
             if (user && user.role === "seller") {
-                const sellerProfile = await this.sellerRepo.findUserById(user._id);
+                const sellerProfile = await this.sellerRepo.findUserById(user._id.toString());
 
                 if (!sellerProfile) {
                     const response: AuthResponseDtoType = {
@@ -205,7 +205,7 @@ export class AuthService {
             }
 
             // // get linked user doc:
-            const sellerUserDoc = await this.userRepo.findUserById(sellerProfile.userId);
+            const sellerUserDoc = await this.userRepo.findUserById(sellerProfile.userId.toString());
             if (!sellerUserDoc) {
                 const response: AuthResponseDtoType = {
                     success: false,
@@ -238,7 +238,7 @@ export class AuthService {
         if (role === "buyer") {
             let user = await this.userRepo.findUserByEmail(identifier);
             if (user && user.role === "buyer") {
-                const buyerProfile = await this.buyerRepo.findUserById(user._id);
+                const buyerProfile = await this.buyerRepo.findUserById(user._id.toString());
 
                 if (!buyerProfile) {
                     const response: AuthResponseDtoType = {
@@ -318,7 +318,7 @@ export class AuthService {
                 return response;
                 // throw new Error("INVALID_PASSWORD");
             }
-            const buyerUserDoc = await this.userRepo.findUserById(buyerProfile.userId);
+            const buyerUserDoc = await this.userRepo.findUserById(buyerProfile.userId.toString());
             if (!buyerUserDoc) {
                 const response: AuthResponseDtoType = {
                     success: false,
@@ -382,9 +382,9 @@ export class AuthService {
         if (user) {
             // if buyer role and buyerProfile exists, update googleId if missing
             if (user.role === "buyer" && user.buyerProfile) {
-                const buyerProfile = await this.buyerRepo.findBuyerById(user.buyerProfile);
+                const buyerProfile = await this.buyerRepo.findBuyerById(user.buyerProfile.toString());
                 if (buyerProfile && !buyerProfile.googleId) {
-                    await this.buyerRepo.updateBuyer(buyerProfile._id, { googleId: profile.id });
+                    await this.buyerRepo.updateBuyer(buyerProfile._id.toString(), { googleId: profile.id });
                 }
                 const response: AuthResponseDtoType = {
                     success: true,
@@ -419,19 +419,19 @@ export class AuthService {
         }
 
         const newBuyer = await this.buyerRepo.createGoogleProviderBuyer({
-            userId: newUser._id,
+            userId: newUser._id.toString(),
             fullName: profile.name,
             terms: true,
             googleId: profile.id,
         });
 
         // attach buyerProfile to user
-        await this.userRepo.updateUser(newUser._id, { buyerProfile: newUser._id });
+        await this.userRepo.updateUser(newUser._id.toString(), { buyerProfile: newUser._id.toString() });
 
         const response: AuthResponseDtoType = {
             success: true,
             user: this.normalizeForResponse(newUser, newBuyer),
         };
         return response;
-    }
+    };
 }

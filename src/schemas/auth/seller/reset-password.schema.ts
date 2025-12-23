@@ -1,13 +1,13 @@
-// src/schemas/auth/seller/reset-password.schema.ts.ts
+// src/schemas/auth/seller/verify-account-reset-password.schema.ts
 import { z } from "zod";
 import { otpValidation, passwordValidation, confirmPasswordValidation } from "../../user.schema.ts";
 
-export const sellerVerifyAccountRegistrationSchema = z.object({
+export const sellerResetPasswordSchema = z.object({
     code: otpValidation,
-    password: passwordValidation,
+    newPassword: passwordValidation,
     confirmPassword: confirmPasswordValidation
 }).superRefine((values, ctx) => {
-    if (values.password !== values.confirmPassword) {
+    if (values.newPassword !== values.confirmPassword) {
         ctx.addIssue({
             code: "custom",
             message: "Passwords do not match",

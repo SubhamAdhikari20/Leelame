@@ -8,17 +8,17 @@ export const sellerSchema = z.object({
     fullName: fullNameValidation,
     contact: contactValidation,
     password: passwordValidation,
-    // userId: z.string(),
+    userId: z.string(),
 
-    // sellerNotes: z.string().optional().nullish(),
-    // sellerStatus: z.string(),
-    // sellerVerificationDate: z.date().optional().nullish(),
-    // sellerAttemptCount: z.number(),
-    // sellerRuleViolationCount: z.number(),
-    // isSellerPermanentlyBanned: z.boolean(),
-    // sellerBannedAt: z.date().optional().nullish(),
-    // sellerBannedDateFrom: z.date().optional().nullish(),
-    // sellerBannedDateTo: z.date().optional().nullish()
+    sellerNotes: z.string().nullish(),
+    sellerStatus: z.enum(["none", "pending", "verified", "rejected"]),
+    sellerVerificationDate: z.date().nullish(),
+    sellerAttemptCount: z.number(),
+    sellerRuleViolationCount: z.number(),
+    isSellerPermanentlyBanned: z.boolean(),
+    sellerBannedAt: z.date().nullish(),
+    sellerBannedDateFrom: z.date().nullish(),
+    sellerBannedDateTo: z.date().nullish()
 });
 
 export type Seller = z.infer<typeof sellerSchema>;

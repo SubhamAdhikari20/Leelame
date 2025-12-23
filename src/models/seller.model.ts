@@ -3,20 +3,25 @@ import mongoose, { Schema, Document } from "mongoose";
 import type { IUser } from "./user.model.ts";
 import type { Seller } from "@/types/seller.type.ts";
 
-export interface ISeller extends Seller, Document {
-    userId: Schema.Types.ObjectId,
+export interface ISeller extends Omit<Seller, 'userId'>, Document {
+// export interface ISeller extends Seller, Document {
+    userId: Schema.Types.ObjectId | string,
     // fullName: string;
     // contact: string;
     // password: string;
-    sellerNotes?: string | null;
-    sellerStatus: "none" | "pending" | "verified" | "rejected";
-    sellerVerificationDate?: Date | null;
-    sellerAttemptCount: number;
-    sellerRuleViolationCount: number;
-    isSellerPermanentlyBanned: boolean;
-    sellerBannedAt?: Date | null;
-    sellerBannedDateFrom?: Date | null;
-    sellerBannedDateTo?: Date | null;
+
+    // sellerNotes?: string | null;
+    // sellerStatus: "none" | "pending" | "verified" | "rejected";
+    // sellerVerificationDate?: Date | null;
+    // sellerAttemptCount: number;
+    // sellerRuleViolationCount: number;
+    // isSellerPermanentlyBanned: boolean;
+    // sellerBannedAt?: Date | null;
+    // sellerBannedDateFrom?: Date | null;
+    // sellerBannedDateTo?: Date | null;
+
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface ISellerPopulated extends Omit<ISeller, "userId"> {

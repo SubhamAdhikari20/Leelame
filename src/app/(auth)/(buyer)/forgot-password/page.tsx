@@ -39,11 +39,17 @@ const ForgotPassword = () => {
             const response = await axios.put<BuyerResponseDtoType>("/api/users/buyer/forgot-password", {
                 email: data.email,
             });
-            toast.success("Success", {
+
+            if (response.data.success) {
+                toast.success("Success", {
+                    description: response.data.message,
+                });
+                router.replace(`/verify-account/reset-password?email=${data.email}`);
+            }
+
+            toast.success("Failed", {
                 description: response.data.message,
             });
-
-            router.replace(`/verify-account/reset-password?email=${data.email}`);
         }
         catch (error) {
             const axiosError = error as AxiosError<BuyerResponseDtoType>;

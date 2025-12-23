@@ -1,6 +1,7 @@
 // src/types/admin.type.ts
 import { z } from "zod";
 import { fullNameValidation, contactValidation, passwordValidation } from "@/schemas/user.schema.ts";
+import { IAdmin } from "@/models/admin.model.ts";
 
 
 export const adminSchema = z.object({
@@ -12,8 +13,4 @@ export const adminSchema = z.object({
 
 export type Admin = z.infer<typeof adminSchema>;
 
-export type AdminDocument = Admin & {
-    _id: string;
-    createdAt: Date;
-    updatedAt: Date;
-};
+export type AdminDocument = IAdmin;

@@ -27,11 +27,15 @@ import {
     FieldGroup,
     FieldLabel
 } from "@/components/ui/field.tsx";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog.tsx";
+import { Label } from "@/components/ui/label.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs.tsx";
-import { FcGoogle } from "react-icons/fc";
-import { useDebounceCallback } from "usehooks-ts";
-import { useGoogleLogin } from "@react-oauth/google";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 // import { verifyAccountRegistrationSchema } from "@/schemas/auth/verifyAccountRegistrationSchema.js";
@@ -39,10 +43,14 @@ import { Loader2 } from "lucide-react";
 // import { verifyAccountResetPasswordSchema } from "@/schemas/auth/verifyAccountResetPasswordSchema.js";
 // import { resetPasswordSchema } from "@/schemas/auth/resetPasswordSchema.js";
 import axios, { AxiosError } from "axios";
+import { SellerResponseDtoType } from "@/dtos/seller.dto.ts";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { sellerSignUpSchema } from "@/schemas/auth/seller/sign-up.schema.ts";
 import { sellerLoginSchema } from "@/schemas/auth/seller/login.schema.ts";
 import { sellerVerifyAccountRegistrationSchema } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
+import { sellerForgotPasswordSchema } from "@/schemas/auth/seller/forgot-password.schema.ts";
+import { sellerResetPasswordSchema } from "@/schemas/auth/seller/reset-password.schema.ts";
+import { getSession, signIn } from "next-auth/react";
 
 
 const BecomeSeller = () => {
@@ -51,6 +59,10 @@ const BecomeSeller = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [emailToVerify, setEmailToVerify] = useState("");
+    const [iSendingCode, setIsSendingCode] = useState(false);
 
     const router = useRouter();
 
@@ -66,6 +78,8 @@ const BecomeSeller = () => {
     const signUpForm = useForm<z.infer<typeof sellerSignUpSchema>>({
         resolver: zodResolver(sellerSignUpSchema),
         defaultValues: {
+            fullName: "",
+            contact: "",
             email: "",
             role: "buyer",
         },
@@ -80,56 +94,54 @@ const BecomeSeller = () => {
         },
     });
 
-    // const forgotPasswordForm = useForm({
-    //     resolver: zodResolver(forgotPasswordSchema),
-    //     defaultValues: {
-    //         email: ""
-    //     },
-    // });
+    const forgotPasswordForm = useForm({
+        resolver: zodResolver(sellerForgotPasswordSchema),
+        defaultValues: {
+            email: ""
+        },
+    });
 
-    // const verifyAccountResetPasswordForm = useForm({
-    //     resolver: zodResolver(verifyAccountResetPasswordSchema),
-    //     defaultValues: {
-    //         code: ""
-    //     },
-    // });
-
-    // const resetPasswordForm = useForm({
-    //     resolver: zodResolver(resetPasswordSchema),
-    //     defaultValues: {
-    //         password: "",
-    //         confirmPassword: ""
-    //     },
-    // });
+    const resetPasswordForm = useForm({
+        resolver: zodResolver(sellerResetPasswordSchema),
+        defaultValues: {
+            code: "",
+            newPassword: "",
+            confirmPassword: ""
+        },
+    });
 
     const handleSignUp = async (data: z.infer<typeof sellerSignUpSchema>) => {
-        setTab("verify-otp-register");
-        // setIsSubmitting(true);
-        // try {
-        //     const response = await axios.post<any>("/api/users/seller/sign-up", data);
-        //     if (response.data.success) {
-        //         toast.success("Sign Up Successful", {
-        //             description: response.data.message,
-        //         });
-        //         setTab("verify-otp-register");
-        //     }
-        // }
-        // catch (error) {
-        //     const axiosError = error as AxiosError<any>;
-        //     console.error("Error in sign up of user: ", axiosError);
-        //     toast.error("Error signing up the user", {
-        //         description: axiosError.response?.data.message,
-        //     });
-        // }
-        // finally {
-        //     setIsSubmitting(false);
-        // }
+        // setTab("verify-otp-register");
+        setIsSubmitting(true);
+        try {
+            const response = await axios.post<SellerResponseDtoType>("/api/users/seller/sign-up", data);
+            if (response.data.success) {
+                toast.success("Sign Up Successful", {
+                    description: response.data.message,
+                });
+                setTab("verify-otp-register");
+            }
+
+            toast.success("Sign Up Failed", {
+                description: response.data.message,
+            });
+        }
+        catch (error) {
+            const axiosError = error as AxiosError<SellerResponseDtoType>;
+            console.error("Error in sign up of user: ", axiosError);
+            toast.error("Error signing up the user", {
+                description: axiosError.response?.data.message,
+            });
+        }
+        finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleVerifyAccountRegistration = async (data: z.infer<typeof sellerVerifyAccountRegistrationSchema>) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.post<any>("/api/users/seller/sign-up", data);
+            const response = await axios.post<SellerResponseDtoType>("/api/users/seller/sign-up", data);
 
             if (response.data.success) {
                 toast.success("Success", {
@@ -138,9 +150,13 @@ const BecomeSeller = () => {
                 setTab("login");
                 // setOtpSent(false);
             }
+
+            toast.success("Failed", {
+                description: response.data.message,
+            });
         }
         catch (error) {
-            const axiosError = error as AxiosError<any>;
+            const axiosError = error as AxiosError<SellerResponseDtoType>;
             console.error("Error verifying OTP for user registration: ", axiosError);
             toast.error("Error verifying OTP for user registration", {
                 description: axiosError.response?.data.message,
@@ -151,27 +167,146 @@ const BecomeSeller = () => {
         }
     };
 
-    const handleLogin = (values: any) => {
-        toast.success(`Logged in as ${values.identifier}`);
-        router.replace("/");
+    const handleLogin = async (data: z.infer<typeof sellerLoginSchema>) => {
+        setIsSubmitting(true);
+        try {
+            const result = await signIn("credentials", {
+                redirect: false,
+                identifier: data.identifier,
+                password: data.password,
+                role: data.role,
+            });
+
+            if (result?.error) {
+                switch (result.error) {
+                    case "MISSING_CREDENTIALS":
+                        toast.error("Login Failed", { description: "Please enter both username/email and password." });
+                        break;
+                    case "BUYER_NOT_FOUND":
+                        toast.error("Login Failed", { description: "Invalid username or email." });
+                        break;
+                    case "INVALID_PASSWORD":
+                        toast.error("Login Failed", { description: "Invalid password. Please enter correct password." });
+                        break;
+                    default:
+                        toast.error("Login failed", { description: result.error });
+                }
+                return;
+            }
+
+            const updatedSession = await getSession();
+
+            if (!updatedSession) {
+                toast.error("Session not found.");
+                return;
+            }
+
+            const { user } = updatedSession;
+
+            if (user.isVerified) {
+                toast.success("Login Successful", {
+                    description: `Logged in as ${user.role}`
+                });
+                if (user.role === "seller") {
+                    router.replace(`/seller/${user._id}`);
+                }
+            }
+            else {
+                toast.warning('Account Not Verified', {
+                    description: `Do you want to verify your account?`,
+                    action: {
+                        label: "Yes",
+                        onClick: () => {
+                            setEmailToVerify(user.email);
+                            setDialogOpen(true);
+                        }
+                    }
+                });
+            }
+        }
+        catch (error) {
+            const axiosError = error as AxiosError<SellerResponseDtoType>;
+            console.error("Error in user login: ", axiosError);
+            toast.error("Error in user login", {
+                description: axiosError.response?.data.message
+            });
+        }
+        finally {
+            setIsSubmitting(false);
+        }
     };
 
-    // const handleForgotPassword = (values) => {
-    //     toast.success(`OTP sent to ${values.email}`);
-    //     setOtpSent(true);
-    // };
+    const sendAccountVerificationCode = async () => {
+        setIsSendingCode(true);
+        try {
+            const response = await axios.put<SellerResponseDtoType>("/api/users/seller/send-account-registration-email", {
+                email: emailToVerify,
+            });
 
-    // const handleVerifyAccountResetPassword = (values) => {
-    //     toast.success(`OTP sent to ${values.identifier}`);
-    //     setOtpSent(false);
-    //     setTab("reset-password");
-    // };
+            if (response.data.success) {
+                toast.success("Success", {
+                    description: response.data.message
+                });
+                setTab("verify-otp-register");
+            }
 
-    // const handleResetPassword = (values) => {
-    //     toast.success("Password reset successful!");
-    //     setOtpSent(false);
-    //     setTab("login");
-    // };
+            toast.success("Failed", {
+                description: response.data.message,
+            });
+        }
+        catch (error) {
+            const axiosError = error as AxiosError<SellerResponseDtoType>;
+            console.error("Error sending account verification email: ", axiosError);
+            toast.error("Error sending account verification email", {
+                description: axiosError.response?.data.message
+            });
+        }
+        finally {
+            setIsSendingCode(false);
+        }
+    };
+
+    const handleForgotPassword = async (data: z.infer<typeof sellerForgotPasswordSchema>) => {
+        setIsSubmitting(true);
+        try {
+            const response = await axios.put<SellerResponseDtoType>("/api/users/seller/forgot-password", {
+                email: data.email,
+            });
+
+            if (response.data.success) {
+                toast.success("Success", {
+                    description: response.data.message
+                });
+
+                setTab("reset-password");
+            }
+
+            toast.success("Failed", {
+                description: response.data.message,
+            });
+        }
+        catch (error) {
+            const axiosError = error as AxiosError<SellerResponseDtoType>;
+            console.error("Error sending forgot password request", axiosError);
+            toast("Failed", {
+                description:
+                    axiosError.response?.data.message ||
+                    "Failed to send reset instructions",
+            });
+        }
+        finally {
+            setIsSubmitting(false);
+        }
+
+        toast.success(`OTP sent to ${data.email}`);
+        setOtpSent(true);
+    };
+
+
+    const handleResetPassword = (data: z.infer<typeof sellerResetPasswordSchema>) => {
+        setOtpSent(false);
+        setTab("login");
+    };
 
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
     const toggleConfirmPasswordVisibility = () => setShowConfirmPassword((prev) => !prev);
@@ -231,6 +366,50 @@ const BecomeSeller = () => {
                                 >
                                     <FieldGroup>
                                         <Controller
+                                            name="fullName"
+                                            control={signUpForm.control}
+                                            render={({ field, fieldState }) => (
+                                                <Field data-invalid={fieldState.invalid}>
+                                                    <FieldLabel htmlFor={field.name}>
+                                                        Full Name
+                                                    </FieldLabel>
+                                                    <Input
+                                                        {...field}
+                                                        id={field.name}
+                                                        aria-invalid={fieldState.invalid}
+                                                        placeholder="Full Name"
+                                                    // autoComplete="off"
+                                                    />
+                                                    {fieldState.invalid && (
+                                                        <FieldError errors={[fieldState.error]} />
+                                                    )}
+                                                </Field>
+                                            )}
+                                        />
+
+                                        <Controller
+                                            name="contact"
+                                            control={signUpForm.control}
+                                            render={({ field, fieldState }) => (
+                                                <Field data-invalid={fieldState.invalid}>
+                                                    <FieldLabel htmlFor={field.name}>
+                                                        Mobile Number
+                                                    </FieldLabel>
+                                                    <Input
+                                                        {...field}
+                                                        id={field.name}
+                                                        aria-invalid={fieldState.invalid}
+                                                        placeholder="Mobile Number"
+                                                    // autoComplete="off"
+                                                    />
+                                                    {fieldState.invalid && (
+                                                        <FieldError errors={[fieldState.error]} />
+                                                    )}
+                                                </Field>
+                                            )}
+                                        />
+
+                                        <Controller
                                             name="email"
                                             control={signUpForm.control}
                                             render={({ field, fieldState }) => (
@@ -256,7 +435,7 @@ const BecomeSeller = () => {
                                         <Button
                                             type="submit"
                                             disabled={isSubmitting}
-                                            className="w-full font-semibold bg-green-600 hover:bg-green-700"
+                                            className="w-full font-semibold bg-green-600 hover:bg-green-700 text-white"
                                         >
                                             {isSubmitting ? (
                                                 <>
@@ -367,7 +546,7 @@ const BecomeSeller = () => {
                                         <Button
                                             type="submit"
                                             disabled={isSubmitting}
-                                            className="w-full font-semibold bg-green-600 hover:bg-green-700"
+                                            className="w-full font-semibold bg-green-600 hover:bg-green-700 text-white"
                                         >
                                             {isSubmitting ? (
                                                 <>
@@ -519,7 +698,7 @@ const BecomeSeller = () => {
                                 <div className="flex items-center justify-evenly gap-2">
                                     <Button
                                         type="submit"
-                                        className="flex-1 w-full font-semibold bg-green-600 hover:bg-green-700"
+                                        className="flex-1 w-full font-semibold bg-green-600 hover:bg-green-700 text-white"
                                         disabled={isSubmitting}
                                     >
                                         {isSubmitting ? (
@@ -535,7 +714,7 @@ const BecomeSeller = () => {
                                         type="button"
                                         className="flex-1 font-semibold"
                                         variant="outline"
-                                        onClick={() => setTab("login")}
+                                        onClick={() => setTab("sign-up")}
                                     >
                                         Back
                                     </Button>
@@ -555,14 +734,14 @@ const BecomeSeller = () => {
                             </CardHeader>
 
                             <form
-                                id="sign-up-form"
-                                onSubmit={signUpForm.handleSubmit(handleSignUp)}
+                                id="forgot-password-form"
+                                onSubmit={forgotPasswordForm.handleSubmit(handleForgotPassword)}
                                 className="space-y-6"
                             >
                                 <FieldGroup>
                                     <Controller
                                         name="email"
-                                        control={signUpForm.control}
+                                        control={forgotPasswordForm.control}
                                         render={({ field, fieldState }) => (
                                             <Field data-invalid={fieldState.invalid}>
                                                 <FieldLabel htmlFor={field.name}>
@@ -586,7 +765,7 @@ const BecomeSeller = () => {
                                     <Button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className="w-full font-semibold bg-green-600 hover:bg-green-700"
+                                        className="w-full font-semibold bg-green-600 hover:bg-green-700 text-white"
                                     >
                                         {isSubmitting ? (
                                             <>
@@ -611,8 +790,7 @@ const BecomeSeller = () => {
                     )}
 
                     {/* Verify (OTP) Account for Reset Password */}
-
-                    {/* {tab === "verify-otp-reset" && (
+                    {tab === "reset-password" && (
                         <>
                             <CardHeader className="p-0 mb-4">
                                 <CardTitle>Verify OTP</CardTitle>
@@ -620,143 +798,156 @@ const BecomeSeller = () => {
                                     Enter the OTP for reset password.
                                 </CardDescription>
                             </CardHeader>
-                            <Form {...verifyAccountResetPasswordForm}>
-                                <form
-                                    onSubmit={verifyAccountResetPasswordForm.handleSubmit(handleVerifyAccountResetPassword)}
-                                    className="space-y-4"
-                                >
-                                    <FormField
-                                        control={verifyAccountResetPasswordForm.control}
-                                        name="otp"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>OTP</FormLabel>
-                                                <FormControl>
-                                                    <div className="flex justify-center">
-                                                        <InputOTP
-                                                            maxLength={6}
-                                                            value={field.value}
-                                                            onChange={field.onChange}
-                                                        >
-                                                            <InputOTPGroup>
-                                                                {[...Array(6)].map(
-                                                                    (_, i) => (
-                                                                        <InputOTPSlot
-                                                                            key={i}
-                                                                            index={i}
-                                                                        />
-                                                                    )
-                                                                )}
-                                                            </InputOTPGroup>
-                                                        </InputOTP>
-                                                    </div>
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <Button
-                                        type="submit"
-                                        // Delete it later
-                                        onClick={() => { setTab("reset-password"); }}
-                                        className="w-full bg-green-500 hover:bg-green-600 text-gray-200 font-semibold mt-4"
-                                        disabled={isSubmitting}
-                                    >
-                                        {isSubmitting ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Please wait...
-                                            </>
-                                        ) : (
-                                            "Verify"
-                                        )}
-                                    </Button>
-                                    <button
-                                        onClick={() => {
-                                            setOtpSent(false);
-                                            setTab("login");
-                                        }}
-                                        type="button"
-                                        className="text-sm text-green-500 hover:underline block text-center w-full cursor-pointer"
-                                    >
-                                        Back to Login
-                                    </button>
-                                </form>
-                            </Form>
-                        </>
-                    )} */}
 
-                    {/* {tab === "reset-password" && (
-                        <>
-                            <CardHeader className="p-0 mb-4">
-                                <CardTitle>Reset Password</CardTitle>
-                                <CardDescription>
-                                    Enter the new password.
-                                </CardDescription>
-                            </CardHeader>
-                            <Form {...resetPasswordForm}>
-                                <form
-                                    onSubmit={resetPasswordForm.handleSubmit(handleResetPassword)}
-                                    className="space-y-4"
-                                >
-                                    <FormField
+                            <form
+                                id="reset-password-form"
+                                onSubmit={resetPasswordForm.handleSubmit(handleResetPassword)}
+                                className="space-y-8"
+                            >
+                                <FieldGroup>
+                                    <Controller
+                                        name="code"
                                         control={resetPasswordForm.control}
+                                        render={({ field, fieldState }) => (
+                                            <Field data-invalid={fieldState.invalid}>
+                                                <FieldLabel htmlFor={field.name}>
+                                                    Verification Code
+                                                </FieldLabel>
+                                                <div className="flex justify-center">
+                                                    <InputOTP
+                                                        id={field.name}
+                                                        aria-invalid={fieldState.invalid}
+                                                        maxLength={6}
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                    >
+                                                        <InputOTPGroup>
+                                                            {[...Array(6)].map(
+                                                                (_, i) => (
+                                                                    <InputOTPSlot
+                                                                        key={i}
+                                                                        index={i}
+                                                                    />
+                                                                )
+                                                            )}
+                                                        </InputOTPGroup>
+                                                    </InputOTP>
+                                                </div>
+                                                {fieldState.invalid && (
+                                                    <FieldError errors={[fieldState.error]} />
+                                                )}
+                                            </Field>
+                                        )}
+                                    />
+
+                                    <Controller
                                         name="newPassword"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>New Password</FormLabel>
-                                                <FormControl>
-                                                    <Input type="password" placeholder="New password" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
                                         control={resetPasswordForm.control}
-                                        name="confirmPassword"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Confirm Password</FormLabel>
-                                                <FormControl>
+                                        render={({ field, fieldState }) => (
+                                            <Field data-invalid={fieldState.invalid}>
+                                                <FieldLabel htmlFor={field.name}>
+                                                    New Password
+                                                </FieldLabel>
+                                                <div className="relative">
                                                     <Input
-                                                        type="password"
-                                                        placeholder="Confirm password"
                                                         {...field}
+                                                        id={field.name}
+                                                        aria-invalid={fieldState.invalid}
+                                                        placeholder="New Password"
+                                                        autoComplete="off"
+                                                        type={
+                                                            showPassword
+                                                                ? "text"
+                                                                : "password"
+                                                        }
                                                     />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
+                                                    <button
+                                                        type="button"
+                                                        onClick={togglePasswordVisibility}
+                                                        className="cursor-pointer absolute inset-y-0 end-2.5 text-gray-400 focus:outline-hidden focus:text-blue-600 dark:text-neutral-500 dark:focus:text-blue-500"
+                                                    >
+                                                        {showPassword ? (
+                                                            <FaEye size={18} />
+                                                        ) : (
+                                                            <FaEyeSlash size={18} />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                                {fieldState.invalid && (
+                                                    <FieldError errors={[fieldState.error]} />
+                                                )}
+                                            </Field>
                                         )}
                                     />
-                                    <Button
-                                        type="submit"
-                                        className="w-full bg-green-500 hover:bg-green-600 text-gray-200 font-semibold mt-4"
-                                        disabled={isSubmitting}
-                                    >
-                                        {isSubmitting ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Please wait...
-                                            </>
-                                        ) : (
-                                            "Reset"
+
+                                    <Controller
+                                        name="confirmPassword"
+                                        control={verifyAccountRegistrationForm.control}
+                                        render={({ field, fieldState }) => (
+                                            <Field data-invalid={fieldState.invalid}>
+                                                <FieldLabel htmlFor={field.name}>
+                                                    Confirm Password
+                                                </FieldLabel>
+                                                <div className="relative">
+                                                    <Input
+                                                        {...field}
+                                                        id={field.name}
+                                                        aria-invalid={fieldState.invalid}
+                                                        placeholder="Confirm Password"
+                                                        autoComplete="off"
+                                                        type={
+                                                            showConfirmPassword
+                                                                ? "text"
+                                                                : "password"
+                                                        }
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={toggleConfirmPasswordVisibility}
+                                                        className="cursor-pointer absolute inset-y-0 end-2.5 text-gray-400 focus:outline-hidden focus:text-blue-600 dark:text-neutral-500 dark:focus:text-blue-500"
+                                                    >
+                                                        {showConfirmPassword ? (
+                                                            <FaEye size={18} />
+                                                        ) : (
+                                                            <FaEyeSlash size={18} />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                                {fieldState.invalid && (
+                                                    <FieldError errors={[fieldState.error]} />
+                                                )}
+                                            </Field>
                                         )}
-                                    </Button>
-                                    <button
-                                        onClick={() => {
-                                            setOtpSent(false);
-                                            setTab("login");
-                                        }}
-                                        type="button"
-                                        className="text-sm text-green-500 hover:underline block text-center w-full cursor-pointer"
-                                    >
-                                        Back to Login
-                                    </button>
-                                </form>
-                            </Form>
+                                    />
+                                </FieldGroup>
+
+                                <Button
+                                    type="submit"
+                                    className="flex-1 w-full font-semibold bg-green-600 hover:bg-green-700 text-white"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Please wait...
+                                        </>
+                                    ) : (
+                                        "Reset"
+                                    )}
+                                </Button>
+                                <button
+                                    onClick={() => {
+                                        setOtpSent(false);
+                                        setTab("login");
+                                    }}
+                                    type="button"
+                                    className="text-sm text-green-500 hover:underline block text-center w-full cursor-pointer"
+                                >
+                                    Back to Login
+                                </button>
+                            </form>
                         </>
-                    )} */}
+                    )}
 
                     <Separator className="my-4" />
                     <p className="text-xs text-center text-muted-foreground">
@@ -766,6 +957,39 @@ const BecomeSeller = () => {
                     </p>
                 </CardContent>
             </Card>
+
+
+            {/* ───--------------------- VERIFY DIALOG ----------------------------- */}
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Verify Your Email</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div>
+                            <Label className="mb-2">Email</Label>
+                            <Input
+                                value={emailToVerify}
+                                onChange={(e) =>
+                                    setEmailToVerify(e.target.value)
+                                }
+                            />
+                        </div>
+                        <div className="flex gap-2">
+                            <Button
+                                onClick={sendAccountVerificationCode}
+                                disabled={iSendingCode}
+                                className="flex-1 font-semibold"
+                            >
+                                {iSendingCode && (
+                                    <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                                )}
+                                Send Code
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </section>
     );
 };

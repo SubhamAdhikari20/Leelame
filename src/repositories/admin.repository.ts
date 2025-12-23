@@ -5,7 +5,7 @@ import AdminModel from "@/models/admin.model.ts";
 
 
 export class AdminRepository implements AdminRepositoryInterface {
-    createAdmin = async (admin: Admin): Promise<AdminDocument | null> => {
+    createAdmin = async (admin: Partial<Admin>): Promise<AdminDocument | null> => {
         const newAdmin = await AdminModel.create(admin);
         return newAdmin as unknown as AdminDocument | null;
     };

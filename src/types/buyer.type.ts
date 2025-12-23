@@ -13,7 +13,7 @@ export const buyerSchema = z.object({
     userId: z.string(),
 
     googleId: z.string().nullish(),
-    bio: bioValidation
+    bio: bioValidation,
 });
 
 export type Buyer = z.infer<typeof buyerSchema>;
@@ -33,7 +33,7 @@ export const googleProviderBuyerSchema = z.object({
     contact: contactValidation.nullish(),
     password: passwordValidation.nullish(),
     terms: termsAndConditionsValidation,
-    // userId: z.string(),
+    userId: z.string(),
 
     googleId: z.string().nullish(),
     bio: bioValidation
