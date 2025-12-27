@@ -89,8 +89,8 @@ export async function proxy(req: NextRequest) {
             }
         }
 
-        return NextResponse.rewrite(new URL("/not-found", req.url));
-        // return NextResponse.next();
+        // return NextResponse.rewrite(new URL("/not-found", req.url));
+        return NextResponse.next();
         // return NextResponse.redirect(new URL("/", req.url));
     }
 
@@ -141,6 +141,13 @@ export async function proxy(req: NextRequest) {
     // Case B: path with at least 2 segments
     if (segments.length >= 2) {
         const [first, second] = segments;
+        
+        if (token.role === "buyer" && second === "my-profile") {
+            if (token.username !== first) {
+                return NextResponse.redirect(new URL(`/${token.username}`, req.url));
+            }
+            return NextResponse.next();
+        }
 
         // pattern: /:username/seller/... or /:username/admin/...
         if (second === "seller" || second === "admin") {
@@ -191,4 +198,4 @@ export const config = {
         // "/:role/:path*",
         "/((?!_next|api|static|favicon.ico|images).*)",
     ]
-}
+};
