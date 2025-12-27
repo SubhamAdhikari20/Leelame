@@ -1,4 +1,4 @@
-// src/app/(auth)/layout.tsx
+// src/app/(auth)/(buyer)/layout.tsx
 import React from "react";
 import Navbar from "@/components/navbar.tsx";
 import Footer from "@/components/footer.tsx";

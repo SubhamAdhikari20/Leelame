@@ -25,11 +25,29 @@ const PUBLIC_PATHS = [
     "/about",
     "/contact",
     "/products",
-    "/become-seller"
+    "/become-seller",
+    // "/admin/login",
+    // "/admin/sign-up"
 ];
 const PUBLIC_ROOTS = ["/"];
 
-const AUTH_ENTRY_PATHS = ["/", "/login", "/sign-up", "/forgot-password", "/reset-password"];
+const AUTH_ENTRY_PATHS = [
+    "/",
+    "/login",
+    "/sign-up",
+    "/forgot-password",
+    "/reset-password",
+    // "/admin/login",
+    // "/admin/sign-up"
+];
+
+const ADMIN_AUTH_PATHS = [
+    "/admin/login",
+    "/admin/sign-up",
+    "/admin/forgot-password",
+    "/admin/verify-account",
+    "/admin/reset-password",
+];
 
 const isPublicPath = (pathname: string) => {
     if (PUBLIC_ROOTS.includes(pathname)) {
@@ -44,6 +62,10 @@ const isPublicPath = (pathname: string) => {
 const isAuthEntryPath = (path: string) => {
     return AUTH_ENTRY_PATHS.includes(path) || AUTH_ENTRY_PATHS.some(p => path.startsWith(`${p}/`));
 };
+
+const isAdminAuthPath = (pathname: string) =>
+    ADMIN_AUTH_PATHS.includes(pathname) ||
+    ADMIN_AUTH_PATHS.some(p => pathname.startsWith(`${p}/`));
 
 export async function proxy(req: NextRequest) {
     const token = (await getToken({ req: req, secret: process.env.NEXTAUTH_SECRET })) as AuthToken | null;
@@ -94,6 +116,20 @@ export async function proxy(req: NextRequest) {
         // return NextResponse.redirect(new URL("/", req.url));
     }
 
+    if (isAdminAuthPath(pathname)) {
+        if (!token) {
+            return NextResponse.next();
+        }
+
+        // already logged in
+        if (token.role === "admin") {
+            return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+        }
+
+        // logged in but not admin
+        return NextResponse.rewrite(new URL("/not-found", req.url));
+    }
+
     // Protected Routes
     if (!token) {
         // Instead of redirecting unknown routes to login, show not-found
@@ -141,7 +177,7 @@ export async function proxy(req: NextRequest) {
     // Case B: path with at least 2 segments
     if (segments.length >= 2) {
         const [first, second] = segments;
-        
+
         if (token.role === "buyer" && second === "my-profile") {
             if (token.username !== first) {
                 return NextResponse.redirect(new URL(`/${token.username}`, req.url));
