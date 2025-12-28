@@ -101,17 +101,17 @@ export class BuyerController {
 
             const result = await this.buyerService.checkUsernameUnique(validatedData.data);
 
-            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
+            // const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
 
-            if (!validatedResponseBuyerData.success) {
-                return NextResponse.json(
-                    {
-                        success: false,
-                        message: z.prettifyError(validatedResponseBuyerData.error)
-                    },
-                    { status: 400 }
-                );
-            }
+            // if (!validatedResponseBuyerData.success) {
+            //     return NextResponse.json(
+            //         {
+            //             success: false,
+            //             message: z.prettifyError(validatedResponseBuyerData.error)
+            //         },
+            //         { status: 400 }
+            //     );
+            // }
 
             return NextResponse.json(
                 {
@@ -168,7 +168,8 @@ export class BuyerController {
                 {
                     success: result?.success,
                     message: result?.message,
-                    user: result?.user,
+                    user: validatedResponseBuyerData.data,
+                    // user: result?.user,
                 },
                 { status: result?.status ?? 200 }
             );
@@ -218,7 +219,8 @@ export class BuyerController {
                 {
                     success: result?.success,
                     message: result?.message,
-                    user: result?.user,
+                    user: validatedResponseBuyerData.data,
+                    // user: result?.user,
                 },
                 { status: result?.status ?? 200 }
             );
@@ -268,7 +270,8 @@ export class BuyerController {
                 {
                     success: result?.success,
                     message: result?.message,
-                    user: result?.user,
+                    user: validatedResponseBuyerData.data,
+                    // user: result?.user,
                 },
                 { status: result?.status ?? 200 }
             );
@@ -318,7 +321,8 @@ export class BuyerController {
                 {
                     success: result?.success,
                     message: result?.message,
-                    user: result?.user,
+                    user: validatedResponseBuyerData.data,
+                    // user: result?.user,
                 },
                 { status: result?.status ?? 200 }
             );
@@ -352,17 +356,17 @@ export class BuyerController {
 
             const result = await this.buyerService.handleSendEmailForRegistration(validatedData.data);
 
-            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
+            // const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
 
-            if (!validatedResponseBuyerData.success) {
-                return NextResponse.json(
-                    {
-                        success: false,
-                        message: z.prettifyError(validatedResponseBuyerData.error)
-                    },
-                    { status: 400 }
-                );
-            }
+            // if (!validatedResponseBuyerData.success) {
+            //     return NextResponse.json(
+            //         {
+            //             success: false,
+            //             message: z.prettifyError(validatedResponseBuyerData.error)
+            //         },
+            //         { status: 400 }
+            //     );
+            // }
 
             return NextResponse.json(
                 {

@@ -71,15 +71,24 @@ const SignUp = () => {
     const signUpForm = useForm<z.infer<typeof buyerSignUpSchema>>({
         resolver: zodResolver(buyerSignUpSchema),
         defaultValues: {
-            fullName: "Subham Adhikari",
-            username: "Subham20",
-            email: "subhamadhikari20@gmail.com",
-            contact: "9746454403",
-            password: "Subham@123",
-            confirmPassword: "Subham@123",
-            terms: true,
-            // terms: false,
+            fullName: "",
+            username: "",
+            email: "",
+            contact: "",
+            password: "",
+            confirmPassword: "",
+            terms: false,
             role: "buyer",
+            
+            // fullName: "Subham Adhikari",
+            // username: "Subham20",
+            // email: "subhamadhikari20@gmail.com",
+            // contact: "9746454403",
+            // password: "Subham@123",
+            // confirmPassword: "Subham@123",
+            // terms: true,
+            // // terms: false,
+            // role: "buyer",
         },
     });
 
