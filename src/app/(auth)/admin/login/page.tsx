@@ -24,14 +24,13 @@ import { Button } from "@/components/ui/button.tsx";
 import { Label } from "@/components/ui/label.tsx";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useGoogleLogin } from "@react-oauth/google";
 import { getSession, signIn } from "next-auth/react";
 import axios, { AxiosError } from "axios";
-import { buyerLoginSchema } from "@/schemas/auth/buyer/login.schema.ts";
+import { adminLoginSchema } from "@/schemas/auth/admin/login.schema.ts";
 import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
 
 
-const Login = () => {
+const AdminLogin = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     // OTP dialog state
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -41,18 +40,17 @@ const Login = () => {
 
     const router = useRouter();
 
-    const loginForm = useForm<z.infer<typeof buyerLoginSchema>>({
-        resolver: zodResolver(buyerLoginSchema),
+    const loginForm = useForm<z.infer<typeof adminLoginSchema>>({
+        resolver: zodResolver(adminLoginSchema),
         defaultValues: {
             identifier: "",
             password: "",
-            role: "buyer"
+            role: "admin"
         },
     });
 
-
     // Login
-    const onSubmit = async (data: z.infer<typeof buyerLoginSchema>) => {
+    const onSubmit = async (data: z.infer<typeof adminLoginSchema>) => {
         setIsSubmitting(true);
         try {
             const result = await signIn("credentials", {
@@ -65,10 +63,10 @@ const Login = () => {
             if (result?.error) {
                 switch (result.error) {
                     case "MISSING_CREDENTIALS":
-                        toast.error("Login Failed", { description: "Please enter both username/email and password." });
+                        toast.error("Login Failed", { description: "Please enter both email/contact and password." });
                         break;
                     case "BUYER_NOT_FOUND":
-                        toast.error("Login Failed", { description: "Invalid username or email." });
+                        toast.error("Login Failed", { description: "Invalid email or contact." });
                         break;
                     case "INVALID_PASSWORD":
                         toast.error("Login Failed", { description: "Invalid password. Please enter correct password." });
@@ -77,19 +75,6 @@ const Login = () => {
                         toast.error("Login failed", { description: result.error });
                 }
                 return;
-
-                // if ((result.error == "CredentialsSignIn") || (result.error == "CredentialsSignin")) {
-                //     toast.error("Login Failed", {
-                //         description: "Incorrect username or password"
-                //     });
-                // }
-                // else {
-                //     toast.error("Error", {
-                //         description: result.error
-                //     });
-                //     console.error(result.error);
-                // }
-                // return;
             }
 
             const updatedSession = await getSession();
@@ -105,8 +90,8 @@ const Login = () => {
                 toast.success("Login Successful", {
                     description: `Logged in as ${user.role}`
                 });
-                if (user.role === "buyer") {
-                    router.replace(`/${user.username}`);
+                if (user.role === "admin") {
+                    router.replace("/admin/dashboard");
                 }
             }
             else {
@@ -133,31 +118,6 @@ const Login = () => {
             setIsSubmitting(false);
         }
     };
-
-    const loginWithGoogle = useGoogleLogin({
-        onSuccess: async (tokenResponse) => {
-            try {
-                const response = await axios.post<BuyerResponseDtoType>("/api/auth/google-login", { tokenResponse });
-
-                if (response.data.success) {
-                    toast.success("Google Login Successful", {
-                        description: response.data.message,
-                    });
-                    router.replace(`/`);
-                }
-            }
-            catch (error) {
-                const axiosError = error as AxiosError<BuyerResponseDtoType>;
-                console.error("Error in google login: ", axiosError);
-                toast.error("Error in google login", {
-                    description: axiosError.response?.data.message
-                });
-            }
-        },
-        onError: () => {
-            toast.error("Google login failed");
-        },
-    });
 
     const sendAccountVerificationCode = async () => {
         setIsSendingCode(true);
@@ -213,7 +173,7 @@ const Login = () => {
 
                     <div>
                         <form
-                            id="login-form"
+                            id="admin-login-form"
                             onSubmit={loginForm.handleSubmit(onSubmit)}
                             className="space-y-6"
                         >
@@ -224,13 +184,13 @@ const Login = () => {
                                     render={({ field, fieldState }) => (
                                         <Field data-invalid={fieldState.invalid}>
                                             <FieldLabel htmlFor={field.name}>
-                                                Username/Email
+                                                Email/Contact
                                             </FieldLabel>
                                             <Input
                                                 {...field}
                                                 id={field.name}
                                                 aria-invalid={fieldState.invalid}
-                                                placeholder="Username or Email"
+                                                placeholder="Email or Contact"
                                                 autoComplete="off"
                                             />
                                             {fieldState.invalid && (
@@ -356,4 +316,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default AdminLogin;

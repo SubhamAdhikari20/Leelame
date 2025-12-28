@@ -7,5 +7,6 @@ export interface AdminRepositoryInterface {
     deleteAdmin(id: string) : Promise<void | null>;
     findAdminById(id: string): Promise<AdminDocument | null>;
     findUserById(userId: string): Promise<AdminDocument | null>;
+    findAdminByContact(contact: string): Promise<AdminDocument | null>;
     getAllAdmins(): Promise<AdminDocument[] | null>;
 }

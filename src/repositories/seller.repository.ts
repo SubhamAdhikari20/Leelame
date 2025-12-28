@@ -1,16 +1,16 @@
 // src/repositories/seller.repository.ts
 import { SellerRepositoryInterface } from "@/interfaces/seller.repository.interface.ts";
-import { Seller } from "@/types/seller.type.ts";
-import SellerModel, { ISeller } from "@/models/seller.model.ts";
-import { Types } from "mongoose";
+import { Seller, SellerDocument } from "@/types/seller.type.ts";
+import SellerModel from "@/models/seller.model.ts";
+// import { Types } from "mongoose";
 
 export class SellerRepository implements SellerRepositoryInterface {
-    createSeller = async (seller: Partial<Seller>): Promise<ISeller | null> => {
+    createSeller = async (seller: Partial<Seller>): Promise<SellerDocument | null> => {
         const newSeller = await SellerModel.create(seller);
-        return newSeller as unknown as ISeller | null;
+        return newSeller;
     };
 
-    updateSeller = async (id: string, seller: Partial<Seller>): Promise<ISeller | null> => {
+    updateSeller = async (id: string, seller: Partial<Seller>): Promise<SellerDocument | null> => {
         const updatedSeller = await SellerModel.findByIdAndUpdate(id, seller, { new: true }).lean();
         return updatedSeller;
     };
@@ -19,22 +19,23 @@ export class SellerRepository implements SellerRepositoryInterface {
         await SellerModel.findByIdAndDelete(id);
     };
 
-    findSellerById = async (id: string): Promise<ISeller | null> => {
+    findSellerById = async (id: string): Promise<SellerDocument | null> => {
         const seller = await SellerModel.findById(id).lean();
         return seller;
     };
 
-    findUserById = async (userId: string): Promise<ISeller | null> => {
-        const seller = await SellerModel.findOne({ userId: new Types.ObjectId(userId) } as any).lean();
+    findUserById = async (userId: string): Promise<SellerDocument | null> => {
+        const seller = await SellerModel.findOne({ userId: userId }).lean();
+        // const seller = await SellerModel.findOne({ userId: new Types.ObjectId(userId) } as any).lean();
         return seller;
     };
 
-    findSellerByContact = async (contact: string): Promise<ISeller | null> => {
+    findSellerByContact = async (contact: string): Promise<SellerDocument | null> => {
         const seller = await SellerModel.findOne({ contact }).lean();
         return seller;
     };
 
-    getAllSellers = async (): Promise<ISeller[] | null> => {
+    getAllSellers = async (): Promise<SellerDocument[] | null> => {
         const sellers = await SellerModel.find().lean();
         return sellers;
     };

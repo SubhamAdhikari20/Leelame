@@ -1,7 +1,7 @@
 // src/schemas/auth/seller/login.schema.ts
 import { z } from "zod";
 
-const sellerIdentifierValidation = z
+const adminIdentifierValidation = z
     .string()
     .min(3, { message: "Email or Contact is required" });
 
@@ -14,9 +14,9 @@ const roleValidation = z
         error: "Role is required"
     }).optional();
 
-export const sellerLoginSchema = z.object({
+export const adminLoginSchema = z.object({
     // Identifier = Email OR Contact
-    identifier: sellerIdentifierValidation,
+    identifier: adminIdentifierValidation,
     password: passwordValidation,
     role: roleValidation
 });

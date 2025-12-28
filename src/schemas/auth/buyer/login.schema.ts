@@ -1,4 +1,4 @@
-// src/schemas/auth/buyer/login.schema.js
+// src/schemas/auth/buyer/login.schema.ts
 import { z } from "zod";
 
 const buyerIdentifierValidation = z

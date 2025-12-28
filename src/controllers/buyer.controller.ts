@@ -34,7 +34,7 @@ export class BuyerController {
             }
 
             const result = await this.buyerService.createBuyer(validatedData.data);
-
+            
             const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
 
             if (!validatedResponseBuyerData.success) {

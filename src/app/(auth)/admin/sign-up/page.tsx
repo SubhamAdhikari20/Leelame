@@ -1,0 +1,292 @@
+// src/app/(auth)/admin/sign-up/page.tsx
+"use client";
+import React, { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Controller, useForm } from "react-hook-form";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import {
+    Field,
+    FieldError,
+    FieldGroup,
+    FieldLabel
+} from "@/components/ui/field.tsx";
+import { Input } from "@/components/ui/input.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import axios, { AxiosError } from "axios";
+import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
+import { adminSignUpSchema } from "@/schemas/auth/admin/sign-up.schema.ts";
+
+
+const AdminSignUp = () => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const router = useRouter();
+
+    // zod implementation using react hook form
+    const signUpForm = useForm<z.infer<typeof adminSignUpSchema>>({
+        resolver: zodResolver(adminSignUpSchema),
+        defaultValues: {
+            fullName: "",
+            email: "",
+            contact: "",
+            password: "",
+            confirmPassword: "",
+            role: "buyer",
+            
+            // fullName: "Subham Adhikari",
+            // email: "subhamadhikari20@gmail.com",
+            // contact: "9746454403",
+            // password: "Subham@123",
+            // confirmPassword: "Subham@123",
+            // role: "buyer",
+        },
+    });
+
+    const onSubmit = async (data: z.infer<typeof adminSignUpSchema>) => {
+        setIsSubmitting(true);
+        try {
+            const response = await axios.post<BuyerResponseDtoType>("/api/users/buyer/sign-up", data);
+            if (response.data.success) {
+                toast.success("Sign Up Successful", {
+                    description: response.data.message,
+                });
+                const responeUsername = response.data.user?.username;
+                router.replace(`/verify-account/registration?username=${responeUsername}`);
+            }
+        }
+        catch (error) {
+            // console.log("Error Custom", error)
+            const axiosError = error as AxiosError<BuyerResponseDtoType>;
+            // console.log(axiosError, "axios");
+            console.error("Error in sign up of user: ", axiosError);
+            toast.error("Error signing up the user", {
+                description: axiosError.response?.data?.message || "Login validation failed",
+            });
+        }
+        finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
+    const toggleConfirmPasswordVisibility = () => setShowConfirmPassword((prev) => !prev);
+
+    return (
+        <section className="min-h-screen flex justify-center items-center px-5 py-10 sm:px-6 lg:px-8">
+            <div className="w-full max-w-md bg-white dark:bg-gray-900 border rounded-lg shadow-lg">
+                <Button
+                    variant="ghost"
+                    className="relative top-2 left-2 text-gray-600 dark:text-gray-400 hover:text-blue-950 dark:hover:text-gray-200 dark:hover:bg-gray-700"
+                    onClick={() => router.push("/")}
+                    aria-label="Back to home"
+                >
+                    <ArrowLeft size={24} />
+                </Button>
+
+                <div className="space-y-8 px-8 pb-8">
+                    <div className="text-center">
+                        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-gray-100">
+                            Admin
+                        </h1>
+                        <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                            Sign up to create admin account
+                        </p>
+                    </div>
+                    <div>
+                        <form
+                            id="admin-sign-up-form"
+                            onSubmit={signUpForm.handleSubmit(onSubmit)}
+                            className="space-y-10"
+                        >
+                            <FieldGroup>
+                                <Controller
+                                    name="fullName"
+                                    control={signUpForm.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel htmlFor={field.name}>
+                                                Full Name
+                                            </FieldLabel>
+                                            <Input
+                                                {...field}
+                                                id={field.name}
+                                                aria-invalid={fieldState.invalid}
+                                                placeholder="Full Name"
+                                            // autoComplete="off"
+                                            />
+                                            {fieldState.invalid && (
+                                                <FieldError errors={[fieldState.error]} />
+                                            )}
+                                        </Field>
+                                    )}
+                                />
+
+                                <Controller
+                                    name="contact"
+                                    control={signUpForm.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel htmlFor={field.name}>
+                                                Contact
+                                            </FieldLabel>
+                                            <Input
+                                                {...field}
+                                                id={field.name}
+                                                aria-invalid={fieldState.invalid}
+                                                placeholder="Contact"
+                                            // autoComplete="off"
+                                            />
+                                            {fieldState.invalid && (
+                                                <FieldError errors={[fieldState.error]} />
+                                            )}
+                                        </Field>
+                                    )}
+                                />
+
+                                <Controller
+                                    name="email"
+                                    control={signUpForm.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel htmlFor={field.name}>
+                                                Email Address
+                                            </FieldLabel>
+                                            <Input
+                                                {...field}
+                                                id={field.name}
+                                                aria-invalid={fieldState.invalid}
+                                                placeholder="Email"
+                                            // autoComplete="off"
+                                            />
+                                            {fieldState.invalid && (
+                                                <FieldError errors={[fieldState.error]} />
+                                            )}
+                                        </Field>
+                                    )}
+                                />
+
+                                <Controller
+                                    name="password"
+                                    control={signUpForm.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel htmlFor={field.name}>
+                                                Password
+                                            </FieldLabel>
+                                            <div className="relative">
+                                                <Input
+                                                    {...field}
+                                                    id={field.name}
+                                                    aria-invalid={fieldState.invalid}
+                                                    placeholder="Password"
+                                                    autoComplete="off"
+                                                    type={
+                                                        showPassword
+                                                            ? "text"
+                                                            : "password"
+                                                    }
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={togglePasswordVisibility}
+                                                    className="cursor-pointer absolute inset-y-0 end-2.5 text-gray-400 focus:outline-hidden focus:text-blue-600 dark:text-neutral-500 dark:focus:text-blue-500"
+                                                >
+                                                    {showPassword ? (
+                                                        <FaEye size={18} />
+                                                    ) : (
+                                                        <FaEyeSlash size={18} />
+                                                    )}
+                                                </button>
+                                            </div>
+                                            {fieldState.invalid && (
+                                                <FieldError errors={[fieldState.error]} />
+                                            )}
+                                        </Field>
+                                    )}
+                                />
+
+                                <Controller
+                                    name="confirmPassword"
+                                    control={signUpForm.control}
+                                    render={({ field, fieldState }) => (
+                                        <Field data-invalid={fieldState.invalid}>
+                                            <FieldLabel htmlFor={field.name}>
+                                                Confirm Password
+                                            </FieldLabel>
+                                            <div className="relative">
+                                                <Input
+                                                    {...field}
+                                                    id={field.name}
+                                                    aria-invalid={fieldState.invalid}
+                                                    placeholder="Confirm Password"
+                                                    autoComplete="off"
+                                                    type={
+                                                        showConfirmPassword
+                                                            ? "text"
+                                                            : "password"
+                                                    }
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={toggleConfirmPasswordVisibility}
+                                                    className="cursor-pointer absolute inset-y-0 end-2.5 text-gray-400 focus:outline-hidden focus:text-blue-600 dark:text-neutral-500 dark:focus:text-blue-500"
+                                                >
+                                                    {showConfirmPassword ? (
+                                                        <FaEye size={18} />
+                                                    ) : (
+                                                        <FaEyeSlash size={18} />
+                                                    )}
+                                                </button>
+                                            </div>
+                                            {fieldState.invalid && (
+                                                <FieldError errors={[fieldState.error]} />
+                                            )}
+                                        </Field>
+                                    )}
+                                />
+                            </FieldGroup>
+
+                            <div className="flex items-center justify-center ">
+                                <Button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="w-full font-semibold"
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Please wait
+                                        </>
+                                    ) : (
+                                        "Sign up"
+                                    )}
+                                </Button>
+                            </div>
+                        </form>
+
+                        <div className="text-center mt-4">
+                            <p className="text-sm">
+                                Already have an account?{" "}
+                                <Link
+                                    href="/admin/login"
+                                    className="text-blue-600 dark:text-blue-600 hover:underline"
+                                >
+                                    Login
+                                </Link>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section >
+    );
+};
+
+export default AdminSignUp;

@@ -18,11 +18,9 @@ import {
     InputOTPGroup,
     InputOTPSlot,
 } from "@/components/ui/input-otp.tsx";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
     Field,
-    FieldDescription,
     FieldError,
     FieldGroup,
     FieldLabel
@@ -38,10 +36,6 @@ import { Separator } from "@/components/ui/separator.tsx";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs.tsx";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
-// import { verifyAccountRegistrationSchema } from "@/schemas/auth/verifyAccountRegistrationSchema.js";
-// import { forgotPasswordSchema } from "@/schemas/auth/forgotPasswordSchema.js";
-// import { verifyAccountResetPasswordSchema } from "@/schemas/auth/verifyAccountResetPasswordSchema.js";
-// import { resetPasswordSchema } from "@/schemas/auth/resetPasswordSchema.js";
 import axios, { AxiosError } from "axios";
 import { SellerResponseDtoType } from "@/dtos/seller.dto.ts";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -180,10 +174,10 @@ const BecomeSeller = () => {
             if (result?.error) {
                 switch (result.error) {
                     case "MISSING_CREDENTIALS":
-                        toast.error("Login Failed", { description: "Please enter both username/email and password." });
+                        toast.error("Login Failed", { description: "Please enter both email/contact and password." });
                         break;
                     case "BUYER_NOT_FOUND":
-                        toast.error("Login Failed", { description: "Invalid username or email." });
+                        toast.error("Login Failed", { description: "Invalid email or contact." });
                         break;
                     case "INVALID_PASSWORD":
                         toast.error("Login Failed", { description: "Invalid password. Please enter correct password." });
@@ -208,7 +202,7 @@ const BecomeSeller = () => {
                     description: `Logged in as ${user.role}`
                 });
                 if (user.role === "seller") {
-                    router.replace(`/seller/${user._id}`);
+                    router.replace("/seller/dashboard");
                 }
             }
             else {

@@ -2,7 +2,7 @@
 import { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interface.ts";
 import { Buyer, BuyerDocument, ProviderBuyer } from "@/types/buyer.type.ts";
 import BuyerModel from "@/models/buyer.model.ts";
-import { Schema } from "mongoose";
+// import { Schema } from "mongoose";
 
 export class BuyerRepository implements BuyerRepositoryInterface {
     createBuyer = async (buyer: Buyer): Promise<BuyerDocument | null> => {
@@ -25,7 +25,8 @@ export class BuyerRepository implements BuyerRepositoryInterface {
     };
 
     findUserById = async (userId: string): Promise<BuyerDocument | null> => {
-        const buyer = await BuyerModel.findOne({ userId: new Schema.Types.ObjectId(userId) }).lean();
+        const buyer = await BuyerModel.findOne({ userId: userId }).lean();
+        // const buyer = await BuyerModel.findOne({ userId: new Schema.Types.ObjectId(userId) }).lean();
         return buyer;
     };
 
