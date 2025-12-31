@@ -11,7 +11,8 @@ export const usernameValidation = z
     .string()
     .min(3, { message: "Username must be atleast 3 characters long" })
     .max(20, { message: "Username must not exceed 20 characters" })
-    .regex(/^[a-zA-Z0-9]+$/, { message: "Username must not contain special characters" });
+    .regex(/^[a-zA-Z0-9_.]+$/, { message: "Username must not contain special characters" });
+    // .regex(/^[a-zA-Z0-9]+$/, { message: "Username must not contain special characters" });
 
 export const emailValidation = z
     .email({ message: "Invalid email address" })
@@ -65,6 +66,6 @@ export const otpValidation = z
     .length(6, { message: "Verification code must be 6 characters long" })
     .regex(/^[0-9]+$/, { message: "Verification code must contain only digits" });
 
-export const buyerIdentifierValidation = z
+export const identifierValidation = z
     .string()
-    .min(3, { message: "Username or Email is required" });
+    .min(3, { message: "Identifier is required" });

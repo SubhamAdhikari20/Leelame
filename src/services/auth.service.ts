@@ -5,7 +5,16 @@ import { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interfac
 import { SellerRepositoryInterface } from "@/interfaces/seller.repository.interface.ts";
 import { AdminRepositoryInterface } from "@/interfaces/admin.repository.interface.ts";
 import { AuthResponseDtoType, LoginUserDtoType } from "@/dtos/auth.dto.ts";
+import { HttpError } from "@/errors/http-error.ts";
 
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const usernameRegex = /^[a-zA-Z0-9_.]{3,20}$/;
+const contactRegex = /^[0-9]{10}$/;
+
+// const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+// const usernameRegex = /^[a-zA-Z0-9]{2,20}$/;
+// const contactRegex = /^[0-9]+$/;
 
 export class AuthService {
     private userRepo: UserRepositoryInterface;
@@ -44,337 +53,227 @@ export class AuthService {
     authenticate = async (loginDto: LoginUserDtoType): Promise<AuthResponseDtoType> => {
         const { identifier, password, role } = loginDto;
 
+        if (!role) {
+            throw new HttpError(400, "User role is required!");
+        }
+
         if (!identifier || !password) {
-            const response: AuthResponseDtoType = {
-                success: false,
-                message: "MISSING_CREDENTIALS",
-            };
-            return response;
+            throw new HttpError(400, "Missing credentails! Credentails are required!");
             // throw new Error("MISSING_CREDENTIALS");
         }
 
         // 1) Admin: email-only
         if (role === "admin") {
-            const user = await this.userRepo.findUserByEmail(identifier);
-            if (!user) {
-                const response: AuthResponseDtoType = {
-                    success: false,
-                    message: "ADMIN_NOT_FOUND",
-                };
-                return response;
-                // throw new Error("ADMIN_NOT_FOUND");
+            const isEmailFormat = emailRegex.test(identifier);
+
+            if (!isEmailFormat) {
+                throw new HttpError(400, "Invalid identifier! Identifier must be a valid email.");
             }
-            if (user.role !== "admin") {
-                const response: AuthResponseDtoType = {
-                    success: false,
-                    message: "NOT_ADMIN",
-                };
-                return response;
-                // throw new Error("NOT_ADMIN");
+
+            const user = await this.userRepo.findUserByEmail(identifier);
+            if (!user || user.role !== role) {
+                throw new HttpError(404, "Invalid email! No admim found with this email.");
+                // throw new Error("ADMIN_NOT_FOUND");
             }
 
             const adminProfile = await this.adminRepo.findUserById(user._id.toString());
             if (!adminProfile) {
-                const response: AuthResponseDtoType = {
-                    success: false,
-                    message: "ADMIN_NOT_FOUND",
-                };
-                return response;
+                throw new HttpError(404, "Admin user not found for this email.");
                 // throw new Error("ADMIN_NOT_FOUND");
             }
 
             const hashed = adminProfile.password;
             if (!hashed) {
-                const response: AuthResponseDtoType = {
-                    success: false,
-                    message: "ADMIN_NO_PASSWORD",
-                };
-                return response;
+                throw new HttpError(400, "Password not found for admin!");
                 // throw new Error("ADMIN_NO_PASSWORD");
             }
-            const ok = await bcrypt.compare(password, hashed);
-            if (!ok) {
-                const response: AuthResponseDtoType = {
-                    success: false,
-                    message: "INVALID_PASSWORD",
-                };
-                return response;
+
+            const isMatched = await bcrypt.compare(password, hashed);
+            if (!isMatched) {
+                throw new HttpError(400, "Invalid password! Please enter correct password.");
                 // throw new Error("INVALID_PASSWORD");
             }
 
             const response: AuthResponseDtoType = {
                 success: true,
+                message: "Logged in as admin successfully.",
                 user: this.normalizeForResponse(user, adminProfile)
-                // user: {
-                //     _id: user._id,
-                //     email: user.email,
-                //     role: user.role,
-                //     isVerified: user.isVerified,
-                //     fullName: adminProfile.fullName,
-                //     contact: adminProfile.contact,
-                //     profilePictureUrl: user.profilePictureUrl,
-                //     adminProfile: adminProfile._id,
-                //     createAt: user.createdAt,
-                //     updatedAt: user.updatedAt,
-                // }
             };
             return response;
+
         }
 
         // 2) Seller: email or contact
         if (role === "seller") {
-            // try email-based user
-            let user = await this.userRepo.findUserByEmail(identifier);
-            if (user && user.role === "seller") {
-                const sellerProfile = await this.sellerRepo.findUserById(user._id.toString());
+            const isEmailFormat = emailRegex.test(identifier);
+            const isContactFormat = contactRegex.test(identifier);
 
+            if (!isEmailFormat && !isContactFormat) {
+                throw new HttpError(400, "Invalid identifier! Identifier must be a valid email or contact.");
+            }
+
+            let user;
+            let sellerProfile;
+
+            if (isEmailFormat) {
+                user = await this.userRepo.findUserByEmail(identifier);
+                if (!user || user.role !== role) {
+                    throw new HttpError(404, "Invalid email! No seller account found with this email.");
+                    // throw new Error("USER_NOT_FOUND");
+                }
+
+                sellerProfile = await this.sellerRepo.findUserById(user._id.toString());
                 if (!sellerProfile) {
-                    const response: AuthResponseDtoType = {
-                        success: false,
-                        message: "SELLER_NOT_FOUND",
-                    };
-                    return response;
+                    throw new HttpError(404, "Seller user not found for this email.");
                     // throw new Error("SELLER_NOT_FOUND");
                 }
+
                 const hashedPassword = sellerProfile.password;
                 if (!hashedPassword) {
-                    const response: AuthResponseDtoType = {
-                        success: false,
-                        message: "SELLER_NO_PASSWORD",
-                    };
-                    return response;
+                    throw new HttpError(400, "Password not found for seller!");
                     // throw new Error("SELLER_NO_PASSWORD");
                 }
-                const isMatched = await bcrypt.compare(password, hashedPassword);
-                if (!isMatched) {
-                    const response: AuthResponseDtoType = {
-                        success: false,
-                        message: "INVALID_PASSWORD",
-                    };
-                    return response;
-                    // throw new Error("INVALID_PASSWORD");
-                }
-
-                const response: AuthResponseDtoType = {
-                    success: false,
-                    user: this.normalizeForResponse(user, sellerProfile)
-                    // user: {
-                    //     _id: user._id,
-                    //     email: user.email,
-                    //     role: user.role,
-                    //     isVerified: user.isVerified,
-                    //     fullName: sellerProfile.fullName,
-                    //     contact: sellerProfile.contact,
-                    //     profilePictureUrl: user.profilePictureUrl,
-                    //     sellerProfile: sellerProfile._id,
-                    //     createAt: user.createdAt,
-                    //     updatedAt: user.updatedAt,
-                    // }
-                };
-                return response;
-            }
-
-            // If not found by email, try contact lookup in seller collection
-            const sellerProfile = await this.sellerRepo.findSellerByContact(identifier);
-            if (!sellerProfile) {
-                const response: AuthResponseDtoType = {
-                    success: false,
-                    message: "SELLER_NOT_FOUND",
-                };
-                return response;
-                // throw new Error("SELLER_NOT_FOUND");
-            }
-
-            if (!sellerProfile.password) {
-                const response: AuthResponseDtoType = {
-                    success: false,
-                    message: "SELLER_NO_PASSWORD",
-                };
-                return response;
-                // throw new Error("SELLER_NO_PASSWORD");
-            }
-
-            const isMatched = await bcrypt.compare(password, sellerProfile.password);
-            if (!isMatched) {
-                const response: AuthResponseDtoType = {
-                    success: false,
-                    message: "INVALID_PASSWORD",
-                };
-                return response;
-                // throw new Error("INVALID_PASSWORD");
-            }
-
-            // // get linked user doc:
-            const sellerUserDoc = await this.userRepo.findUserById(sellerProfile.userId.toString());
-            if (!sellerUserDoc) {
-                const response: AuthResponseDtoType = {
-                    success: false,
-                    message: "USER_NOT_FOUND",
-                };
-                return response;
-                // throw new Error("USER_NOT_FOUND");
-            }
-
-            const response: AuthResponseDtoType = {
-                success: false,
-                user: this.normalizeForResponse(sellerUserDoc, sellerProfile)
-                // user: {
-                //     _id: sellerUserDoc._id,
-                //     email: sellerUserDoc.email,
-                //     role: sellerUserDoc.role,
-                //     isVerified: sellerUserDoc.isVerified,
-                //     fullName: sellerProfile.fullName,
-                //     contact: sellerProfile.contact,
-                //     profilePictureUrl: sellerUserDoc.profilePictureUrl,
-                //     sellerProfile: sellerProfile._id,
-                //     createAt: sellerUserDoc.createdAt,
-                //     updatedAt: sellerUserDoc.updatedAt,
-                // }
-            };
-            return response;
-        }
-
-        // 3) BUYER: email OR username
-        if (role === "buyer") {
-            let user = await this.userRepo.findUserByEmail(identifier);
-            if (user && user.role === "buyer") {
-                const buyerProfile = await this.buyerRepo.findUserById(user._id.toString());
-
-                if (!buyerProfile) {
-                    const response: AuthResponseDtoType = {
-                        success: false,
-                        message: "SELLER_NOT_FOUND",
-                    };
-                    return response;
-                    // throw new Error("SELLER_NOT_FOUND");
-                }
-
-                const hashedPassword = buyerProfile.password;
-                if (!hashedPassword) {
-                    const response: AuthResponseDtoType = {
-                        success: false,
-                        message: "BUYER_NO_PASSWORD",
-                    };
-                    return response;
-                    // throw new Error("BUYER_NO_PASSWORD");
-                }
 
                 const isMatched = await bcrypt.compare(password, hashedPassword);
                 if (!isMatched) {
-                    const response: AuthResponseDtoType = {
-                        success: false,
-                        message: "INVALID_PASSWORD",
-                    };
-                    return response;
+                    throw new HttpError(400, "Invalid password! Please enter correct password.");
                     // throw new Error("INVALID_PASSWORD");
                 }
 
                 const response: AuthResponseDtoType = {
                     success: true,
-                    user: this.normalizeForResponse(user, buyerProfile)
-                    // user: {
-                    //     _id: user._id,
-                    //     email: user.email,
-                    //     role: user.role,
-                    //     isVerified: user.isVerified,
-                    //     fullName: buyerProfile.fullName,
-                    //     username: buyerProfile.username,
-                    //     contact: buyerProfile.contact,
-                    //     profilePictureUrl: user.profilePictureUrl,
-                    //     buyerProfile: buyerProfile._id,
-                    //     googleId: buyerProfile.googleId,
-                    //     createAt: user.createdAt,
-                    //     updatedAt: user.updatedAt,
-                    // }
+                    message: "Logged in as seller successfully.",
+                    user: this.normalizeForResponse(user, sellerProfile)
                 };
                 return response;
             }
-            const buyerProfile = await this.buyerRepo.findBuyerByUsername(identifier);
-            if (!buyerProfile) {
-                const response: AuthResponseDtoType = {
-                    success: false,
-                    message: "BUYER_NOT_FOUND",
-                };
-                return response;
-                // throw new Error("BUYER_NOT_FOUND");
 
+            // If identifer is contact.
+            sellerProfile = await this.sellerRepo.findSellerByContact(identifier);
+            if (!sellerProfile) {
+                throw new HttpError(404, "Invalid phone number! No buyer account found with this phone number.");
+                // throw new Error("SELLER_NOT_FOUND");
             }
 
-            if (!buyerProfile.password) {
-                const response: AuthResponseDtoType = {
-                    success: false,
-                    message: "BUYER_NO_PASSWORD",
-                };
-                return response;
-                // throw new Error("BUYER_NO_PASSWORD");
+            if (!sellerProfile.password) {
+                throw new HttpError(400, "Password not found for seller!");
+                // throw new Error("SELLER_NO_PASSWORD");
             }
 
-            const isMatched = await bcrypt.compare(password, buyerProfile.password);
+            const isMatched = await bcrypt.compare(password, sellerProfile.password);
             if (!isMatched) {
-                const response: AuthResponseDtoType = {
-                    success: false,
-                    message: "INVALID_PASSWORD",
-                };
-                return response;
+                throw new HttpError(400, "Invalid password! Please enter correct password.");
                 // throw new Error("INVALID_PASSWORD");
             }
-            const buyerUserDoc = await this.userRepo.findUserById(buyerProfile.userId.toString());
-            if (!buyerUserDoc) {
-                const response: AuthResponseDtoType = {
-                    success: false,
-                    message: "USER_NOT_FOUND",
-                };
-                return response;
+
+            // get linked user doc
+            user = await this.userRepo.findUserById(sellerProfile.userId.toString());
+            if (!user) {
+                throw new HttpError(404, "User not found!");
                 // throw new Error("USER_NOT_FOUND");
             }
 
             const response: AuthResponseDtoType = {
                 success: true,
-                user: this.normalizeForResponse(buyerUserDoc, buyerProfile)
-                // user: {
-                //     _id: buyerUserDoc._id,
-                //     email: buyerUserDoc.email,
-                //     role: buyerUserDoc.role,
-                //     isVerified: buyerUserDoc.isVerified,
-                //     fullName: buyerProfile.fullName,
-                //     username: buyerProfile.username,
-                //     contact: buyerProfile.contact,
-                //     profilePictureUrl: buyerUserDoc.profilePictureUrl,
-                //     buyerProfile: buyerProfile._id,
-                //     createAt: buyerUserDoc.createdAt,
-                //     updatedAt: buyerUserDoc.updatedAt,
-                // }
+                message: "Logged in as seller successfully.",
+                user: this.normalizeForResponse(user, sellerProfile)
             };
             return response;
         }
 
-        const response: AuthResponseDtoType = {
-            success: false,
-            message: "UNKNOWN_ROLE",
-        };
-        return response;
+        // 3) Buyer: email OR username
+        if (role === "buyer") {
+            const isEmailFormat = emailRegex.test(identifier);
+            const isUsernameFormat = usernameRegex.test(identifier);
+
+            if (!isEmailFormat && !isUsernameFormat) {
+                throw new HttpError(400, "Invalid identifier! Identifier must be a valid username or email.");
+            }
+
+            let user;
+            let buyerProfile;
+
+            if (isEmailFormat) {
+                user = await this.userRepo.findUserByEmail(identifier);
+                if (!user || user.role !== role) {
+                    throw new HttpError(404, "Invalid email! No buyer account found with this email.");
+                    // throw new Error("USER_NOT_FOUND");
+                }
+
+                buyerProfile = await this.buyerRepo.findUserById(user._id.toString());
+                if (!buyerProfile) {
+                    throw new HttpError(404, "Buyer user not found for this email.");
+                    // throw new Error("BUYER_NOT_FOUND");
+                }
+
+                const hashedPassword = buyerProfile.password;
+                if (!hashedPassword) {
+                    throw new HttpError(400, "Password not found for buyer!");
+                    // throw new Error("BUYER_NO_PASSWORD");
+                }
+
+                const isMatched = await bcrypt.compare(password, hashedPassword);
+                if (!isMatched) {
+                    throw new HttpError(400, "Invalid password! Please enter correct password.");
+                    // throw new Error("INVALID_PASSWORD");
+                }
+
+                const response: AuthResponseDtoType = {
+                    success: true,
+                    message: "Logged in as buyer successfully.",
+                    user: this.normalizeForResponse(user, buyerProfile)
+                };
+                return response;
+            }
+
+            // If identifer is a username;
+            buyerProfile = await this.buyerRepo.findBuyerByUsername(identifier);
+            if (!buyerProfile) {
+                throw new HttpError(404, "Invalid username! No buyer account found with this username.");
+                // throw new Error("BUYER_NOT_FOUND");
+            }
+
+            if (!buyerProfile.password) {
+                throw new HttpError(400, "Password not found for buyer!");
+                // throw new Error("BUYER_NO_PASSWORD");
+            }
+
+            const isMatched = await bcrypt.compare(password, buyerProfile.password);
+            if (!isMatched) {
+                throw new HttpError(400, "Invalid password! Please enter correct password.");
+                // throw new Error("INVALID_PASSWORD");
+            }
+
+            user = await this.userRepo.findUserById(buyerProfile.userId.toString());
+            if (!user) {
+                throw new HttpError(404, "User not found!");
+                // throw new Error("USER_NOT_FOUND");
+            }
+
+            const response: AuthResponseDtoType = {
+                success: true,
+                message: "Logged in as buyer successfully.",
+                user: this.normalizeForResponse(user, buyerProfile)
+            };
+            return response;
+        }
+
+        throw new HttpError(400, "Invalid role! Role is unknown.");
         // throw new Error("UNKNOWN_ROLE");
     };
 
     // Example for provider (Google) sign-in: find or create user/buyer profile
     findOrCreateFromProvider = async (profile: any, provider: string): Promise<AuthResponseDtoType> => {
         if (!profile || !profile.id) {
-            const response: AuthResponseDtoType = {
-                success: false,
-                message: "INVALID_PROVIDER_PROFILE",
-            };
-            return response;
+            throw new HttpError(400, "Invalid provider profile! Provider profile is not valid.");
+            // throw new Error("INVALID_PROVIDER_PROFILE");
         }
 
-        const email = profile.email ?? null;
-
+        const email = profile.email;
         if (!email) {
             // In many flows you may require email from provider, otherwise return code to ask the user for email.
-            const response: AuthResponseDtoType = {
-                success: false,
-                message: "PROVIDER_EMAIL_REQUIRED",
-            };
-            return response;
+            throw new HttpError(400, "Invalid provider email! Please, provide correct provider email.");
+            // throw new Error("PROVIDER_EMAIL_REQUIRED");
         }
 
         // Try existing user by email
@@ -388,7 +287,7 @@ export class AuthService {
                 }
                 const response: AuthResponseDtoType = {
                     success: true,
-                    user: this.normalizeForResponse(user, buyerProfile ?? null),
+                    user: this.normalizeForResponse(user, buyerProfile),
                 };
                 return response;
             }
@@ -407,15 +306,12 @@ export class AuthService {
             isPermanentlyBanned: false,
             role: "buyer",
             isVerified: true,
-            profilePictureUrl: profile.picture ?? null,
+            profilePictureUrl: profile.picture,
         });
 
         if (!newUser) {
-            const response: AuthResponseDtoType = {
-                success: false,
-                message: "BUYER_NOT_FOUND",
-            };
-            return response;
+            throw new HttpError(404, "Newly created user not found.");
+            // throw new Error("USER_NOT_FOUND");
         }
 
         const newBuyer = await this.buyerRepo.createGoogleProviderBuyer({
@@ -424,6 +320,11 @@ export class AuthService {
             terms: true,
             googleId: profile.id,
         });
+
+        if (!newUser) {
+            throw new HttpError(404, "Newly created buyer user not found.");
+            // throw new Error("BUYER_NOT_FOUND");
+        }
 
         // attach buyerProfile to user
         await this.userRepo.updateUser(newUser._id.toString(), { buyerProfile: newUser._id.toString() });

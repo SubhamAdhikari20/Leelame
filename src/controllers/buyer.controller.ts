@@ -5,6 +5,7 @@ import { BuyerService } from "@/services/buyer.service.ts";
 import { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interface.ts";
 import { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
 import { z } from "zod";
+import { HttpError } from "@/errors/http-error.ts";
 
 
 export class BuyerController {
@@ -34,9 +35,8 @@ export class BuyerController {
             }
 
             const result = await this.buyerService.createBuyer(validatedData.data);
-            
-            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
 
+            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
             if (!validatedResponseBuyerData.success) {
                 return NextResponse.json(
                     {
@@ -49,7 +49,7 @@ export class BuyerController {
 
             return NextResponse.json(
                 {
-                    success: result?.success,
+                    success: true,
                     message: result?.message,
                     token: result?.token,
                     user: validatedResponseBuyerData.data,
@@ -60,10 +60,21 @@ export class BuyerController {
         }
         catch (error: any) {
             console.error("Error in buyer signup controller:", error);
+
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: false,
-                    message: error.message ?? "Internal Server Error"
+                    message: "Internal Server Error"
                 },
                 { status: 500 }
             );
@@ -101,18 +112,6 @@ export class BuyerController {
 
             const result = await this.buyerService.checkUsernameUnique(validatedData.data);
 
-            // const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
-
-            // if (!validatedResponseBuyerData.success) {
-            //     return NextResponse.json(
-            //         {
-            //             success: false,
-            //             message: z.prettifyError(validatedResponseBuyerData.error)
-            //         },
-            //         { status: 400 }
-            //     );
-            // }
-
             return NextResponse.json(
                 {
                     success: result?.success,
@@ -125,10 +124,21 @@ export class BuyerController {
         }
         catch (error: any) {
             console.error("Error checking username uniqueness controller: ", error);
+
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: false,
-                    message: `${error.toString() ?? error.message ?? "Internal Server Error"}`
+                    message: "Internal Server Error"
                 },
                 { status: 500 }
             );
@@ -176,10 +186,21 @@ export class BuyerController {
         }
         catch (error: any) {
             console.error("Error in buyer verify otp for registration controller:", error);
+
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: false,
-                    message: error.message ?? "Internal Server Error"
+                    message: "Internal Server Error"
                 },
                 { status: 500 }
             );
@@ -227,10 +248,21 @@ export class BuyerController {
         }
         catch (error: any) {
             console.error("Error in buyer forgot password controller:", error);
+
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: false,
-                    message: error.message ?? "Internal Server Error"
+                    message: "Internal Server Error"
                 },
                 { status: 500 }
             );
@@ -278,10 +310,21 @@ export class BuyerController {
         }
         catch (error: any) {
             console.error("Error in buyer verify otp for reset password controller:", error);
+
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: false,
-                    message: error.message ?? "Internal Server Error"
+                    message: "Internal Server Error"
                 },
                 { status: 500 }
             );
@@ -306,7 +349,6 @@ export class BuyerController {
             const result = await this.buyerService.resetPassword(validatedData.data);
 
             const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
-
             if (!validatedResponseBuyerData.success) {
                 return NextResponse.json(
                     {
@@ -329,10 +371,21 @@ export class BuyerController {
         }
         catch (error: any) {
             console.error("Error in buyer reset password controller:", error);
+
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: false,
-                    message: error.message ?? "Internal Server Error"
+                    message: "Internal Server Error"
                 },
                 { status: 500 }
             );
@@ -356,18 +409,6 @@ export class BuyerController {
 
             const result = await this.buyerService.handleSendEmailForRegistration(validatedData.data);
 
-            // const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
-
-            // if (!validatedResponseBuyerData.success) {
-            //     return NextResponse.json(
-            //         {
-            //             success: false,
-            //             message: z.prettifyError(validatedResponseBuyerData.error)
-            //         },
-            //         { status: 400 }
-            //     );
-            // }
-
             return NextResponse.json(
                 {
                     success: result?.success,
@@ -379,10 +420,21 @@ export class BuyerController {
         }
         catch (error: any) {
             console.error("Error in buyer sned verication email controller:", error);
+
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: false,
-                    message: error.message ?? "Internal Server Error"
+                    message: "Internal Server Error"
                 },
                 { status: 500 }
             );

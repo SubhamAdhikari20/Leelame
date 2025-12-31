@@ -1,6 +1,6 @@
 // src/app/(auth)/(buyer)/login/page.tsx
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -26,7 +26,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc"
 import { useGoogleLogin } from "@react-oauth/google";
-import { getSession, signIn, useSession } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import axios, { AxiosError } from "axios";
 import { buyerLoginSchema } from "@/schemas/auth/buyer/login.schema.ts";
 import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
@@ -41,7 +41,6 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
 
     const router = useRouter();
-    const { data: session, status } = useSession();
 
     const loginForm = useForm<z.infer<typeof buyerLoginSchema>>({
         resolver: zodResolver(buyerLoginSchema),
@@ -51,7 +50,6 @@ const Login = () => {
             role: "buyer"
         },
     });
-
 
     // Login
     const onSubmit = async (data: z.infer<typeof buyerLoginSchema>) => {
@@ -65,20 +63,23 @@ const Login = () => {
             });
 
             if (result?.error) {
-                switch (result.error) {
-                    case "MISSING_CREDENTIALS":
-                        toast.error("Login Failed", { description: "Please enter both username/email and password." });
-                        break;
-                    case "BUYER_NOT_FOUND":
-                        toast.error("Login Failed", { description: "Invalid username or email." });
-                        break;
-                    case "INVALID_PASSWORD":
-                        toast.error("Login Failed", { description: "Invalid password. Please enter correct password." });
-                        break;
-                    default:
-                        toast.error("Login failed", { description: result.error });
-                }
+                toast.error("Login failed", { description: result.error ?? "Unknown error!" });
                 return;
+
+                // switch (result.error) {
+                //     case "MISSING_CREDENTIALS":
+                //         toast.error("Login Failed", { description: "Please enter both username or email and password." });
+                //         break;
+                //     case "BUYER_NOT_FOUND":
+                //         toast.error("Login Failed", { description: "Invalid username or email." });
+                //         break;
+                //     case "INVALID_PASSWORD":
+                //         toast.error("Login Failed", { description: "Invalid password. Please enter correct password." });
+                //         break;
+                //     default:
+                //         toast.error("Login failed", { description: result.error });
+                // }
+                // return;
 
                 // if ((result.error == "CredentialsSignIn") || (result.error == "CredentialsSignin")) {
                 //     toast.error("Login Failed", {
@@ -338,7 +339,7 @@ const Login = () => {
                 </div>
             </div>
 
-            {/* ─── VERIFY DIALOG ───────────────────────────────────── */}
+            {/* --------------------------- Verify Account Dialog ---------------------------*/}
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent>
                     <DialogHeader>

@@ -7,53 +7,19 @@ import { UserRepository } from "@/repositories/user.repository.ts";
 import { BuyerRepository } from "@/repositories/buyer.repository.ts";
 import { SellerRepository } from "@/repositories/seller.repository.ts";
 import { AdminRepository } from "@/repositories/admin.repository.ts";
+import { AuthResponseDto, LoginUserDto } from "@/dtos/auth.dto.ts";
+import { HttpError } from "@/errors/http-error.ts";
+import { z } from "zod";
 
 
 type RawCredentials = {
-    identifier?: string;
-    password?: string;
-    role?: "buyer" | "seller" | "admin" | string;
+    identifier: string;
+    password: string;
+    role: "buyer" | "seller" | "admin" | string;
 };
-
-// const buildReturnUser = (user: any) => {
-//     const baseUser = user.userId ?? user;
-
-//     return {
-//         _id: typeof baseUser?._id === "object" && baseUser?._id?.toString
-//             ? baseUser._id.toString()
-//             : baseUser?._id ?? user?.id,
-//         email: baseUser?.email ?? null,
-//         role: baseUser?.role ?? "buyer",
-//         isVerified: Boolean(baseUser?.isVerified),
-//         profilePictureUrl: baseUser?.profilePictureUrl ?? null,
-//         username: baseUser.role === "buyer" ? baseUser?.buyerProfile?.username : null,
-//         googleId: baseUser.role === "buyer" ? baseUser?.buyerProfile?.googleId : null,
-//         fullName: (baseUser.role === "buyer") ? (baseUser?.buyerProfile?.fullName) : (baseUser.role === "seller") ? (baseUser?.sellerProfile?.fullName) : (baseUser.role === "admin") ? (baseUser?.adminProfile?.fullName) : null,
-//         contact: (baseUser.role === "buyer") ? (baseUser?.buyerProfile?.contact) : (baseUser.role === "seller") ? (baseUser?.sellerProfile?.contact) : (baseUser.role === "admin") ? (baseUser?.adminProfile?.contact) : null,
-
-//         buyerProfile:
-//             baseUser.role === "buyer"
-//                 ? (user.buyerProfile?._id || user._id)?.toString() || null
-//                 : null,
-
-//         sellerProfile:
-//             baseUser.role === "seller"
-//                 ? (user.sellerProfile?._id || user._id)?.toString() || null
-//                 : null,
-
-//         adminProfile:
-//             baseUser.role === "admin"
-//                 ? (user.adminProfile?._id || user._id)?.toString() || null
-//                 : null,
-//         // buyerProfile: baseUser?.buyerProfile ?? null,
-//         // sellerProfile: baseUser?.sellerProfile ?? null,
-//         // adminProfile: baseUser?.adminProfile ?? null
-//     };
-// };
 
 const buildReturnUser = (user: any) => {
     // const baseUser = user.userId ?? user;
-
     return {
         _id: typeof user?._id === "object" && user?._id?.toString
             ? user._id.toString()
@@ -101,37 +67,46 @@ export const authOptions: NextAuthOptions = {
                 role: { label: "Role", type: "text" }
             },
             async authorize(credentials?: RawCredentials): Promise<any | null> {
-                if (!credentials || !credentials.identifier) {
-                    throw new Error("MISSING_CREDENTIALS");
-                }
-                if (!credentials.identifier || !credentials.password || !credentials.role) {
-                    throw new Error("MISSING_CREDENTIALS");
+                if (!credentials?.identifier || !credentials?.password || !credentials?.role) {
+                    throw new HttpError(400, "Missing credentails! Credentails are required!");
+                    // throw new Error("MISSING_CREDENTIALS");
                 }
 
-                const identifier = credentials.identifier.trim();
-                const password = credentials.password;
-                const role = (credentials.role ?? "buyer").toString();
+                // const identifier = credentials.identifier.trim();
+                // const password = credentials.password.trim();
+                // const role = (credentials.role ?? "buyer").toString();
+
+                // if (!identifier || !password || !role) {
+                //     throw new Error("Missing credentails! Credentails are required!");
+                //     // throw new Error("MISSING_CREDENTIALS");
+                // }
 
                 try {
-                    if (!identifier || !password || !role) {
-                        throw new Error("MISSING_CREDENTIALS");
+                    const validatedData = LoginUserDto.safeParse(credentials);
+                    if (!validatedData.success) {
+                        throw new HttpError(400, z.prettifyError(validatedData.error));
+                        // throw new Error("Missing credentails! Credentails are required!");
                     }
 
-                    const response = await authService.authenticate({
-                        identifier: identifier,
-                        password: password,
-                        role: role as any ?? "buyer"
-                    });
+                    const response = await authService.authenticate(validatedData.data);
 
-                    if (response.success) {
-                        return buildReturnUser(response.user);
+                    const validatedResponseAuthData = AuthResponseDto.safeParse(response.user);
+                    if (!validatedResponseAuthData.success) {
+                        throw new HttpError(400, z.prettifyError(validatedResponseAuthData.error) ?? "Unknown error!");
                     }
 
-                    throw new Error(response.message ?? "AUTH_ERROR");
+                    return buildReturnUser(validatedResponseAuthData.data);
                 }
                 catch (error: any) {
-                    throw new Error(error.message ?? "AUTH_ERROR");
-                    // throw new Error(error);
+                    console.error("Error in login:", error);
+
+                    if (error instanceof HttpError) {
+                        throw new HttpError(error.status, error.message);
+                        // throw new Error(error.message);
+                    }
+
+                    throw new HttpError(500, "Internal Server Error");
+                    // throw new Error("Internal Server Error");
                 }
             }
         }),
@@ -147,7 +122,6 @@ export const authOptions: NextAuthOptions = {
             // user object present on first sign in (credentials or provider)
             if (user) {
                 const normalized = buildReturnUser(user);
-
                 return {
                     ...token,
                     ...normalized,
@@ -155,22 +129,28 @@ export const authOptions: NextAuthOptions = {
             }
             else if (account && profile) {
                 try {
-                    const normalized = await authService.findOrCreateFromProvider(profile as any, account.provider);
-                    if (normalized && normalized.user) {
-                        token._id = normalized.user._id ?? token._id;
-                        token.email = normalized.user.email ?? token.email;
-                        token.role = normalized.user.role as any ?? token.role;
-                        token.isVerified = token.isVerified ?? normalized.user.isVerified;
-                        token.fullName = normalized.user.fullName ?? token.fullName;
-                        token.username = normalized.user.username ?? token.username;
-                        token.profilePictureUrl = normalized.user.profilePictureUrl ?? token.profilePictureUrl;
-                        token.buyerProfile = normalized.user.buyerProfile ?? token.buyerProfile;
-                        token.googleId = normalized.user.googleId ?? token.googleId;
+                    const response = await authService.findOrCreateFromProvider(profile as any, account.provider);
+                    if (response && response.user) {
+                        token._id = response.user._id ?? token._id;
+                        token.email = response.user.email ?? token.email;
+                        token.role = response.user.role as any ?? token.role;
+                        token.isVerified = token.isVerified ?? response.user.isVerified;
+                        token.fullName = response.user.fullName ?? token.fullName;
+                        token.username = response.user.username ?? token.username;
+                        token.profilePictureUrl = response.user.profilePictureUrl ?? token.profilePictureUrl;
+                        token.buyerProfile = response.user.buyerProfile ?? token.buyerProfile;
+                        token.googleId = response.user.googleId ?? token.googleId;
+
+                        const normalized = buildReturnUser(response.user);
+                        return {
+                            ...token,
+                            ...normalized,
+                        };
                     }
                 }
                 catch (error: any) {
                     console.error("Error in provider findOrCreate: ", error)
-                    throw new Error(`Error in provider findOrCreate: ${error}`);
+                    throw new Error(`Error in provider findOrCreate: ${error.message}`);
                 }
             }
             return token;

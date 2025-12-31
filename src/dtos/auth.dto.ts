@@ -1,10 +1,10 @@
 // src/dtos/auth.dto.ts
 import { z } from "zod";
-import { buyerIdentifierValidation, roleValidation, passwordValidation } from "@/schemas/user.schema.ts";
+import { identifierValidation, roleValidation, passwordValidation } from "@/schemas/user.schema.ts";
 
 // Login Buyer DTO
 export const LoginUserDto = z.object({
-    identifier: buyerIdentifierValidation,
+    identifier: identifierValidation,
     password: passwordValidation,
     role: roleValidation
 });
@@ -32,5 +32,6 @@ export const AuthResponseDto = z.object({
 export type AuthResponseDtoType = {
     success: boolean;
     message?: string | null;
+    status?: number | null;
     user?: z.infer<typeof AuthResponseDto> | null;
 };

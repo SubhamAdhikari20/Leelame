@@ -4,6 +4,7 @@ import dbConnection from "@/lib/db-connect.ts";
 import { BuyerRepository } from "@/repositories/buyer.repository.ts";
 import { UserRepository } from "@/repositories/user.repository.ts";
 import { BuyerController } from "@/controllers/buyer.controller.ts";
+import { HttpError } from "@/errors/http-error.ts";
 
 export const POST = async (req: NextRequest) => {
     try {
@@ -16,9 +17,20 @@ export const POST = async (req: NextRequest) => {
     }
     catch (error: any) {
         console.error("Error in buyer signup route:", error);
+
+        if (error instanceof HttpError) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: error.message
+                },
+                { status: error.status }
+            );
+        }
+
         return NextResponse.json({
             success: false,
-            message: `${error.toString() ?? error.message ?? "Internal Server Error"}`
+            message: "Internal Server Error"
         }, { status: 500 });
     }
 };
