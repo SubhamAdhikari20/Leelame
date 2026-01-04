@@ -1,28 +1,28 @@
-// src/controllers/buyer.controller.ts
+// src/controllers/admin.controller.ts
 import { NextRequest, NextResponse } from "next/server";
-import { BuyerResponseDto, CheckUsernameUniqueDto, CreatedBuyerDto, ForgotPasswordDto, ResetPasswordDto, SendEmailForRegistrationDto, VerifyOtpForRegistrationDto, VerifyOtpForResetPasswordDto } from "@/dtos/buyer.dto.ts";
-import { BuyerService } from "@/services/buyer.service.ts";
-import { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interface.ts";
+import { AdminResponseDto, CreatedAdminDto, ForgotPasswordDto, ResetPasswordDto, SendEmailForRegistrationDto, VerifyOtpForRegistrationDto, VerifyOtpForResetPasswordDto } from "@/dtos/admin.dto.ts";
+import { AdminService } from "@/services/admin.service.ts";
+import { AdminRepositoryInterface } from "@/interfaces/admin.repository.interface.ts";
 import { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
 import { z } from "zod";
 import { HttpError } from "@/errors/http-error.ts";
 
 
-export class BuyerController {
-    private buyerRepo: BuyerRepositoryInterface;
+export class AdminController {
+    private adminRepo: AdminRepositoryInterface;
     private userRepo: UserRepositoryInterface;
-    private buyerService: BuyerService;
+    private adminService: AdminService;
 
-    constructor(userRepo: UserRepositoryInterface, buyerRepo: BuyerRepositoryInterface) {
-        this.buyerRepo = buyerRepo;
+    constructor(userRepo: UserRepositoryInterface, adminRepo: AdminRepositoryInterface) {
+        this.adminRepo = adminRepo;
         this.userRepo = userRepo;
-        this.buyerService = new BuyerService(this.buyerRepo, this.userRepo);
+        this.adminService = new AdminService(this.adminRepo, this.userRepo);
     }
 
-    createBuyer = async (req: NextRequest) => {
+    createAdmin = async (req: NextRequest) => {
         try {
             const body = await req.json();
-            const validatedData = CreatedBuyerDto.safeParse(body);
+            const validatedData = CreatedAdminDto.safeParse(body);
 
             if (!validatedData.success) {
                 return NextResponse.json(
@@ -34,14 +34,14 @@ export class BuyerController {
                 );
             }
 
-            const result = await this.buyerService.createBuyer(validatedData.data);
+            const result = await this.adminService.createAdmin(validatedData.data);
 
-            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
-            if (!validatedResponseBuyerData.success) {
+            const validatedResponseAdminData = AdminResponseDto.safeParse(result?.user);
+            if (!validatedResponseAdminData.success) {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: z.prettifyError(validatedResponseBuyerData.error)
+                        message: z.prettifyError(validatedResponseAdminData.error)
                     },
                     { status: 400 }
                 );
@@ -52,75 +52,13 @@ export class BuyerController {
                     success: result?.success,
                     message: result?.message,
                     token: result?.token,
-                    user: validatedResponseBuyerData.data,
+                    user: validatedResponseAdminData.data,
                 },
                 { status: result?.status ?? 200 }
             );
         }
         catch (error: any) {
-            console.error("Error in buyer signup controller:", error);
-
-            if (error instanceof HttpError) {
-                return NextResponse.json(
-                    {
-                        success: false,
-                        message: error.message
-                    },
-                    { status: error.status }
-                );
-            }
-
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Internal Server Error"
-                },
-                { status: 500 }
-            );
-        }
-    };
-
-    checkUsernameUnique = async (req: NextRequest) => {
-        try {
-            const { searchParams } = new URL(req.url);
-            const queryParam = {
-                username: searchParams.get("username")
-            };
-
-            if (!queryParam) {
-                return NextResponse.json(
-                    { success: false, message: "Username query parameter is required" },
-                    { status: 400 }
-                );
-            }
-
-            const validatedData = CheckUsernameUniqueDto.safeParse(queryParam);
-
-            if (!validatedData.success) {
-                const formatted = z.treeifyError(validatedData.error);
-                const usernameErrors = formatted.properties?.username?.errors || [];
-                return NextResponse.json(
-                    {
-                        success: false,
-                        message: usernameErrors.length > 0 ? usernameErrors.join(", ") : "Invalid query parameters"
-                    },
-                    { status: 400 }
-                );
-                // return NextResponse.json({ success: false, message: z.prettifyError(validatedData.error) }, { status: 400 });
-            }
-
-            const result = await this.buyerService.checkUsernameUnique(validatedData.data);
-
-            return NextResponse.json(
-                {
-                    success: result?.success,
-                    message: result?.message,
-                },
-                { status: result?.status ?? 200 }
-            );
-        }
-        catch (error: any) {
-            console.error("Error checking username uniqueness controller: ", error);
+            console.error("Error in admin signup controller:", error);
 
             if (error instanceof HttpError) {
                 return NextResponse.json(
@@ -157,7 +95,7 @@ export class BuyerController {
                 );
             }
 
-            const result = await this.buyerService.verifyOtpForRegistration(validatedData.data);
+            const result = await this.adminService.verifyOtpForRegistration(validatedData.data);
 
             return NextResponse.json(
                 {
@@ -168,7 +106,7 @@ export class BuyerController {
             );
         }
         catch (error: any) {
-            console.error("Error in buyer verify otp for registration controller:", error);
+            console.error("Error in admin verify otp for registration controller:", error);
 
             if (error instanceof HttpError) {
                 return NextResponse.json(
@@ -205,7 +143,7 @@ export class BuyerController {
                 );
             }
 
-            const result = await this.buyerService.forgotPassword(validatedData.data);
+            const result = await this.adminService.forgotPassword(validatedData.data);
 
             return NextResponse.json(
                 {
@@ -216,7 +154,7 @@ export class BuyerController {
             );
         }
         catch (error: any) {
-            console.error("Error in buyer forgot password controller:", error);
+            console.error("Error in admin forgot password controller:", error);
 
             if (error instanceof HttpError) {
                 return NextResponse.json(
@@ -253,7 +191,7 @@ export class BuyerController {
                 );
             }
 
-            const result = await this.buyerService.verifyOtpForResetpassword(validatedData.data);
+            const result = await this.adminService.verifyOtpForResetpassword(validatedData.data);
 
             return NextResponse.json(
                 {
@@ -264,7 +202,7 @@ export class BuyerController {
             );
         }
         catch (error: any) {
-            console.error("Error in buyer verify otp for reset password controller:", error);
+            console.error("Error in admin verify otp for reset password controller:", error);
 
             if (error instanceof HttpError) {
                 return NextResponse.json(
@@ -301,7 +239,7 @@ export class BuyerController {
                 );
             }
 
-            const result = await this.buyerService.resetPassword(validatedData.data);
+            const result = await this.adminService.resetPassword(validatedData.data);
 
             return NextResponse.json(
                 {
@@ -312,7 +250,7 @@ export class BuyerController {
             );
         }
         catch (error: any) {
-            console.error("Error in buyer reset password controller:", error);
+            console.error("Error in admin reset password controller:", error);
 
             if (error instanceof HttpError) {
                 return NextResponse.json(
@@ -349,14 +287,14 @@ export class BuyerController {
                 );
             }
 
-            const result = await this.buyerService.handleSendEmailForRegistration(validatedData.data);
+            const result = await this.adminService.handleSendEmailForRegistration(validatedData.data);
 
-            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
-            if (!validatedResponseBuyerData.success) {
+            const validatedResponseAdminData = AdminResponseDto.safeParse(result?.user);
+            if (!validatedResponseAdminData.success) {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: z.prettifyError(validatedResponseBuyerData.error)
+                        message: z.prettifyError(validatedResponseAdminData.error)
                     },
                     { status: 400 }
                 );
@@ -366,13 +304,13 @@ export class BuyerController {
                 {
                     success: result?.success,
                     message: result?.message,
-                    user: validatedResponseBuyerData.data,
+                    user: validatedResponseAdminData.data,
                 },
                 { status: result?.status ?? 200 }
             );
         }
         catch (error: any) {
-            console.error("Error in buyer send verication email controller:", error);
+            console.error("Error in admin send verication email controller:", error);
 
             if (error instanceof HttpError) {
                 return NextResponse.json(

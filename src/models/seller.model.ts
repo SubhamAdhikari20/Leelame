@@ -38,7 +38,7 @@ const sellerSchema: Schema<ISeller> = new Schema({
     fullName: {
         type: String,
         required: [true, "Full name is required"],
-        trim: true,
+        trim: true
     },
     contact: {
         type: String,
@@ -50,46 +50,45 @@ const sellerSchema: Schema<ISeller> = new Schema({
     },
     password: {
         type: String,
-        // required: [true, "Password is required"],
         minLength: [8, "Password must be at least 8 characters"],
-        default: null,
+        default: null
     },
     sellerNotes: {
         type: String,
-        default: null,
+        default: null
     },
     sellerStatus: {
         type: String,
         enum: ["none", "pending", "verified", "rejected"],
-        default: "none",
+        default: "none"
     },
     sellerVerificationDate: {
         type: Date,
-        default: null,
+        default: null
     },
     sellerAttemptCount: {
         type: Number,
-        default: 0,
+        default: 0
     },
     sellerRuleViolationCount: {
         type: Number,
-        default: 0,
+        default: 0
     },
     isSellerPermanentlyBanned: {
         type: Boolean,
-        default: false,
+        default: false
     },
     sellerBannedAt: {
         type: Date,
-        default: null,
+        default: null
     },
     sellerBannedDateFrom: {
         type: Date,
-        default: null,
+        default: null
     },
     sellerBannedDateTo: {
         type: Date,
-        default: null,
+        default: null
     },
 },
     {

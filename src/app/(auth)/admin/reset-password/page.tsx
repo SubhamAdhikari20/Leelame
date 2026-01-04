@@ -1,4 +1,4 @@
-// src/app/(auth)/(buyer)/reset-password/[email]/page.tsx
+// src/app/(auth)/admin/reset-password/[email]/page.tsx
 "use client";
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -17,8 +17,8 @@ import { Button } from "@/components/ui/button.tsx";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Loader2 } from "lucide-react";
 import axios, { AxiosError } from "axios";
-import { resetPasswordSchema } from "@/schemas/auth/buyer/reset-password.schema.ts";
-import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
+import { resetPasswordSchema } from "@/schemas/auth/admin/reset-password.schema.ts";
+import { AdminResponseDtoType } from "@/dtos/admin.dto.ts";
 
 
 const ResetPassword = () => {
@@ -41,7 +41,7 @@ const ResetPassword = () => {
     const onSubmit = async (data: z.infer<typeof resetPasswordSchema>) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.put<BuyerResponseDtoType>("/api/users/buyer/reset-password", {
+            const response = await axios.put<AdminResponseDtoType>("/api/users/admin/reset-password", {
                 email: email,
                 newPassword: data.newPassword,
             });
@@ -55,10 +55,10 @@ const ResetPassword = () => {
             toast.success("Success", {
                 description: response.data.message,
             });
-            router.replace(`/login`);
+            router.replace(`/admin/login`);
         }
         catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
+            const axiosError = error as AxiosError<AdminResponseDtoType>;
             console.error("Error in reseting password of the user", axiosError);
             toast("Reset Password failed", {
                 description: axiosError.response?.data.message,

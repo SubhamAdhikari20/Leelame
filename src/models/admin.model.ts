@@ -21,19 +21,19 @@ const adminSchema: Schema<IAdmin> = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
         ref: "users",
-        required: true
+        required: true,
+        unique: true
     },
     fullName: {
         type: String,
         required: [true, "Full name is required"],
-        trim: true,
+        trim: true
     },
     contact: {
         type: String,
-        unique: true,
-        sparse: true,
-        trim: true,
         required: [true, "Contact is required"],
+        unique: true,
+        trim: true,
         minLength: [10, "Contact must be 10 digits"],
         maxLength: [10, "Contact must be 10 digits"],
     },

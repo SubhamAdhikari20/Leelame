@@ -142,7 +142,6 @@ export class SellerService {
             throw new HttpError(500, emailResponse.message ?? "Failed to send verification email!");
         }
 
-        // newUser = await this.userRepo.findUserById(newUser._id.toString());
         newUser = await this.userRepo.updateUser(newUser._id.toString(), {
             sellerProfile: sellerProfile._id.toString()
         });

@@ -23,13 +23,12 @@ import { adminSignUpSchema } from "@/schemas/auth/admin/sign-up.schema.ts";
 
 
 const AdminSignUp = () => {
+    const router = useRouter();
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const router = useRouter();
-
-    // zod implementation using react hook form
     const signUpForm = useForm<z.infer<typeof adminSignUpSchema>>({
         resolver: zodResolver(adminSignUpSchema),
         defaultValues: {
@@ -38,36 +37,31 @@ const AdminSignUp = () => {
             contact: "",
             password: "",
             confirmPassword: "",
-            role: "buyer",
-            
-            // fullName: "Subham Adhikari",
-            // email: "subhamadhikari20@gmail.com",
-            // contact: "9746454403",
-            // password: "Subham@123",
-            // confirmPassword: "Subham@123",
-            // role: "buyer",
+            role: "admin",
         },
     });
 
     const onSubmit = async (data: z.infer<typeof adminSignUpSchema>) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.post<BuyerResponseDtoType>("/api/users/buyer/sign-up", data);
-            if (response.data.success) {
-                toast.success("Sign Up Successful", {
+            const response = await axios.post<BuyerResponseDtoType>("/api/users/admin/sign-up", data);
+
+            if (!response.data.success) {
+                toast.error("Sign Up Failed", {
                     description: response.data.message,
                 });
-                const responeUsername = response.data.user?.username;
-                router.replace(`/verify-account/registration?username=${responeUsername}`);
             }
+
+            toast.success("Sign Up Successful", {
+                description: response.data.message,
+            });
+            router.replace(`/admin/verify-account/registration?email=${data.email}`);
         }
         catch (error) {
-            // console.log("Error Custom", error)
             const axiosError = error as AxiosError<BuyerResponseDtoType>;
-            // console.log(axiosError, "axios");
             console.error("Error in sign up of user: ", axiosError);
             toast.error("Error signing up the user", {
-                description: axiosError.response?.data?.message || "Login validation failed",
+                description: axiosError.response?.data.message,
             });
         }
         finally {

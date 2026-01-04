@@ -1,24 +1,18 @@
 // src/dtos/buyer.dto.ts
 import { z } from "zod";
-import { buyerSchema } from "@/types/buyer.type.ts";
-import { emailValidation, roleValidation, usernameValidation, passwordValidation, otpValidation, fullNameValidation, contactValidation } from "@/schemas/user.schema.ts";
-import { BuyerDocument } from "@/types/buyer.type.ts";
-import { UserDocument } from "@/types/user.type.ts";
+import { fullNameValidation, usernameValidation, contactValidation, emailValidation, passwordValidation, roleValidation, otpValidation, termsAndConditionsValidation } from "@/schemas/user.schema.ts";
+
 
 // Create Buyer DTO
-// export const CreatedBuyerDto = buyerSchema.extend({
-//     email: emailValidation,
-//     role: roleValidation
-// });
-export const CreatedBuyerDto = buyerSchema
-    .omit({ userId: true })
-    .extend({
-        username: usernameValidation,
-        contact: contactValidation,
-        password: passwordValidation,
-        email: emailValidation,
-        role: roleValidation,
-    });
+export const CreatedBuyerDto = z.object({
+    fullName: fullNameValidation,
+    username: usernameValidation,
+    contact: contactValidation,
+    password: passwordValidation,
+    email: emailValidation,
+    role: roleValidation,
+    terms: termsAndConditionsValidation,
+});
 export type CreatedBuyerDtoType = z.infer<typeof CreatedBuyerDto>;
 
 // Check Username Unique DTO

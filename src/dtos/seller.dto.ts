@@ -1,7 +1,6 @@
 // src/dtos/seller.dto.ts
 import { z } from "zod";
 import { fullNameValidation, emailValidation, contactValidation, otpValidation, passwordValidation, roleValidation } from "@/schemas/user.schema.ts";
-// import { sellerSchema } from "@/types/seller.type.ts";
 
 
 // Create Seller DTO
@@ -11,12 +10,6 @@ export const CreatedSellerDto = z.object({
     email: emailValidation,
     role: roleValidation
 });
-// export const CreatedSellerDto = sellerSchema
-//     .omit({ userId: true })
-//     .extend({
-//         email: emailValidation,
-//         role: roleValidation
-//     });
 export type CreatedSellerDtoType = z.infer<typeof CreatedSellerDto>;
 
 // Verify OTP for Registration DTO

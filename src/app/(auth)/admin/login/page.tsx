@@ -54,26 +54,14 @@ const AdminLogin = () => {
         setIsSubmitting(true);
         try {
             const result = await signIn("credentials", {
-                redirect: false,
                 identifier: data.identifier,
                 password: data.password,
                 role: data.role,
+                redirect: false,
             });
 
             if (result?.error) {
-                switch (result.error) {
-                    case "MISSING_CREDENTIALS":
-                        toast.error("Login Failed", { description: "Please enter both email/contact and password." });
-                        break;
-                    case "BUYER_NOT_FOUND":
-                        toast.error("Login Failed", { description: "Invalid email or contact." });
-                        break;
-                    case "INVALID_PASSWORD":
-                        toast.error("Login Failed", { description: "Invalid password. Please enter correct password." });
-                        break;
-                    default:
-                        toast.error("Login failed", { description: result.error });
-                }
+                toast.error("Login failed", { description: result.error ?? "Unknown error!" });
                 return;
             }
 

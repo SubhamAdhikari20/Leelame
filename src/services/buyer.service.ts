@@ -162,7 +162,6 @@ export class BuyerService {
             throw new HttpError(500, emailResponse.message ?? "Failed to send verification email!");
         }
 
-        // newUser = await this.userRepo.findUserById(newUser._id.toString());
         newUser = await this.userRepo.updateUser(newUser._id.toString(), {
             buyerProfile: buyerProfile._id.toString()
         });
@@ -182,6 +181,7 @@ export class BuyerService {
                 email: newUser.email,
                 fullName: buyerProfile.fullName,
                 username: buyerProfile.username,
+                contact: buyerProfile.contact,
                 role: newUser.role,
                 isVerified: newUser.isVerified,
                 isPermanentlyBanned: newUser.isPermanentlyBanned,
@@ -309,7 +309,7 @@ export class BuyerService {
         });
 
         if (!updatedUser) {
-            throw new HttpError(404, "User is not updated and not availabale!");
+            throw new HttpError(404, "User is not updated and not found!");
         }
 
         const emailResponse = await sendResetPasswordVerificationEmail(
@@ -438,11 +438,11 @@ export class BuyerService {
 
     handleSendEmailForRegistration = async (sendEmailForRegistrationDto: SendEmailForRegistrationDtoType): Promise<BuyerResponseDtoType> => {
         const { email } = sendEmailForRegistrationDto;
+
         if (!email) {
             throw new HttpError(400, "Email is required!");
         }
 
-        // const decodedEmail = decodeURIComponent(email);
         const existingUserByEmail = await this.userRepo.findUserByEmail(email);
         if (!existingUserByEmail) {
             throw new HttpError(404, "User with email not found!");
@@ -463,7 +463,6 @@ export class BuyerService {
         expiryDate.setMinutes(expiryDate.getMinutes() + 10);    // Add 10 mins from 'now'
 
         const updatedUser = await this.userRepo.updateUser(existingUserByEmail._id.toString(), {
-            isVerified: false,
             verifyCode: otp,
             verifyCodeExpiryDate: expiryDate
         });
@@ -487,6 +486,7 @@ export class BuyerService {
                 email: existingUserByEmail.email,
                 fullName: existingBuyerByBaseUserId.fullName,
                 username: existingBuyerByBaseUserId.username,
+                contact: existingBuyerByBaseUserId.contact,
                 role: existingUserByEmail.role,
                 isVerified: existingUserByEmail.isVerified,
                 isPermanentlyBanned: existingUserByEmail.isPermanentlyBanned,
