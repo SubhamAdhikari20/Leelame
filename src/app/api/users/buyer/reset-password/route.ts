@@ -16,7 +16,7 @@ export const PUT = async (req: NextRequest) => {
         return await buyerController.resetPassword(req);
     }
     catch (error: any) {
-        console.error("Error resetting password route: ", error);
+        console.error("Error resetting password in buyer route: ", error);
 
         if (error instanceof HttpError) {
             return NextResponse.json(

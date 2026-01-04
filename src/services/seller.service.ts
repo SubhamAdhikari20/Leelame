@@ -160,10 +160,10 @@ export class SellerService {
                 _id: sellerProfile._id.toString(),
                 userId: sellerProfile.userId.toString(),
                 email: newUser.email,
-                isVerified: newUser.isVerified,
                 fullName: sellerProfile.fullName,
                 contact: sellerProfile.contact,
                 role: newUser.role,
+                isVerified: newUser.isVerified,
                 isPermanentlyBanned: newUser.isPermanentlyBanned,
                 createdAt: sellerProfile.createdAt,
                 updatedAt: sellerProfile.updatedAt,
@@ -188,9 +188,7 @@ export class SellerService {
             throw new HttpError(400, "Password is required!");
         }
 
-        // const decodedEmail = decodeURIComponent(email);
         const existingUserByEmail = await this.userRepo.findUserByEmail(email);
-
         if (!existingUserByEmail) {
             throw new HttpError(404, "User with this email does not exist!");
         }
@@ -252,11 +250,9 @@ export class SellerService {
             throw new HttpError(400, "Email is required!");
         }
 
-        const decodedEmail = decodeURIComponent(email);
-        const existingUserByEmail = await this.userRepo.findUserByEmail(decodedEmail);
-
+        const existingUserByEmail = await this.userRepo.findUserByEmail(email);
         if (!existingUserByEmail) {
-            throw new HttpError(404, "Invalid email address! User not availabale.");
+            throw new HttpError(404, "User with this email does not exist!");
         }
 
         if (!existingUserByEmail.isVerified) {
@@ -315,9 +311,7 @@ export class SellerService {
             throw new HttpError(400, "New password is required!");
         }
 
-        const decodedEmail = decodeURIComponent(email);
-        const existingUserByEmail = await this.userRepo.findUserByEmail(decodedEmail);
-
+        const existingUserByEmail = await this.userRepo.findUserByEmail(email);
         if (!existingUserByEmail) {
             throw new HttpError(404, "User with this email does not exist!");
         }
@@ -333,15 +327,6 @@ export class SellerService {
         if (existingUserByEmail.verifyEmailResetPassword !== otp) {
             throw new HttpError(400, "Invalid OTP! Please try again.");
         }
-
-        // if (!existingUserByEmail.sellerProfile) {
-        //     throw new HttpError(400, "Seller profile and id not found");
-        // }
-
-        // const sellerProfile = await this.sellerRepo.findSellerById(existingUserByEmail.sellerProfile.toString());
-        // if (!sellerProfile) {
-        //     throw new HttpError(404, "Seller user not found!");
-        // }
 
         const existingSellerByBaseUserId = await this.sellerRepo.findUserById(existingUserByEmail._id.toString());
         if (!existingSellerByBaseUserId) {
@@ -382,9 +367,7 @@ export class SellerService {
             throw new HttpError(400, "Email is required!");
         }
 
-        const decodedEmail = decodeURIComponent(email);
-        const existingUserByEmail = await this.userRepo.findUserByEmail(decodedEmail);
-
+        const existingUserByEmail = await this.userRepo.findUserByEmail(email);
         if (!existingUserByEmail) {
             throw new HttpError(404, "User with email not found!");
         }

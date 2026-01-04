@@ -16,7 +16,7 @@ export const GET = async (req: NextRequest) => {
         return await buyerController.checkUsernameUnique(req);
     }
     catch (error: any) {
-        console.error("Error checking username uniqueness route: ", error);
+        console.error("Error checking username uniqueness in buyer route: ", error);
 
         if (error instanceof HttpError) {
             return NextResponse.json(

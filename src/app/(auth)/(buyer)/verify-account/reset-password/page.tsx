@@ -47,7 +47,7 @@ const VerifyAccountResetPassword = () => {
             });
 
             if (!response.data.success) {
-                toast.success("Failed", {
+                toast.error("Failed", {
                     description: response.data.message,
                 });
             }

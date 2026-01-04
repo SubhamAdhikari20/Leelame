@@ -47,12 +47,12 @@ const ResetPassword = () => {
             });
 
             if (!response.data.success) {
-                toast.success("Failed", {
+                toast.error("Failed", {
                     description: response.data.message,
                 });
             }
 
-            toast("Success", {
+            toast.success("Success", {
                 description: response.data.message,
             });
             router.replace(`/login`);

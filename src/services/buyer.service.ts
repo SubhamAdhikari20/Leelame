@@ -33,13 +33,13 @@ export class BuyerService {
             existingBuyerByUsername &&
             existingUserByEmail?.isVerified === true
         ) {
-            throw new HttpError(400, "Username already exists");
+            throw new HttpError(400, "Username already exists!");
         }
 
         // Check for existing contact number
         const existingBuyerByContact = await this.buyerRepo.findBuyerByContact(contact);
         if (existingBuyerByContact && existingUserByEmail?.isVerified === true) {
-            throw new HttpError(400, "Contact already exists");
+            throw new HttpError(400, "Contact already exists!");
         }
 
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -56,7 +56,7 @@ export class BuyerService {
         // Check for existing email
         if (existingUserByEmail) {
             if (existingUserByEmail?.isVerified) {
-                throw new HttpError(400, "Email already registered");
+                throw new HttpError(400, "Email already registered!");
             }
 
             // Update existing unverified user
@@ -67,7 +67,7 @@ export class BuyerService {
             });
 
             if (!newUser) {
-                throw new HttpError(404, "User with this id not found");
+                throw new HttpError(404, "User with this id not found!");
             }
 
             // If buyerProfile does not exist for this user, create one
@@ -108,7 +108,7 @@ export class BuyerService {
             });
 
             if (!newUser) {
-                throw new HttpError(404, "User with this id not found");
+                throw new HttpError(404, "User with this id not found!");
             }
 
             buyerProfile = await this.buyerRepo.createBuyer({
@@ -124,7 +124,7 @@ export class BuyerService {
         }
 
         if (!buyerProfile) {
-            throw new HttpError(404, "Buyer with this id not found");
+            throw new HttpError(404, "Buyer with this id not found!");
         }
 
         // JWT Expiry Calculation in seconds for Signup Token
@@ -159,7 +159,7 @@ export class BuyerService {
                     await this.buyerRepo.deleteBuyer(buyerProfile._id.toString());
                 }
             }
-            throw new HttpError(500, emailResponse.message ?? "Failed to send verification email");
+            throw new HttpError(500, emailResponse.message ?? "Failed to send verification email!");
         }
 
         // newUser = await this.userRepo.findUserById(newUser._id.toString());
@@ -168,22 +168,22 @@ export class BuyerService {
         });
 
         if (!newUser) {
-            throw new HttpError(404, "User with this id not found");
+            throw new HttpError(404, "User with this id not found!");
         }
 
         const respose: BuyerResponseDtoType = {
             success: true,
-            message: "User registered successfully, please verify your email.",
+            message: "User registered successfully. Please verify your email.",
             status: 201,
             token,
             user: {
                 _id: buyerProfile._id.toString(),
                 userId: buyerProfile.userId.toString(),
                 email: newUser.email,
-                isVerified: newUser.isVerified,
                 fullName: buyerProfile.fullName,
                 username: buyerProfile.username,
                 role: newUser.role,
+                isVerified: newUser.isVerified,
                 isPermanentlyBanned: newUser.isPermanentlyBanned,
                 createdAt: buyerProfile.createdAt,
                 updatedAt: buyerProfile.updatedAt,
@@ -224,39 +224,39 @@ export class BuyerService {
         const { username, otp } = verifyOtpForRegistrationDto;
 
         if (!username || username.trim() === "") {
-            throw new HttpError(400, "Username is required");
+            throw new HttpError(400, "Username is required!");
         }
 
         if (!otp || otp.trim() === "") {
-            throw new HttpError(400, "OTP is required");
+            throw new HttpError(400, "OTP is required!");
         }
 
         const decodedUsername = decodeURIComponent(username);
         const existingBuyerByUsername = await this.buyerRepo.findBuyerByUsername(decodedUsername);
 
         if (!existingBuyerByUsername) {
-            throw new HttpError(404, "Buyer with this username does not exist.");
+            throw new HttpError(404, "Buyer with this username does not exist!");
         }
 
         const existingUserById = await this.userRepo.findUserById(existingBuyerByUsername.userId.toString());
         if (!existingUserById) {
-            throw new HttpError(404, "User with this id does not exist.");
+            throw new HttpError(404, "User with this id does not exist!");
         }
 
         if (existingUserById.isVerified) {
-            throw new HttpError(400, "This account is already verified. Please login.");
+            throw new HttpError(400, "This account is already verified! Please login.");
         }
 
         if (!existingUserById.verifyCode || !existingUserById.verifyCodeExpiryDate) {
-            throw new HttpError(400, "No OTP request found. Please request for a new OTP.");
-        }
-
-        if (existingUserById.verifyCode !== otp) {
-            throw new HttpError(400, "Invalid OTP. Please try again.");
+            throw new HttpError(400, "No OTP request found! Please request for a new OTP.");
         }
 
         if (new Date() > existingUserById.verifyCodeExpiryDate) {
-            throw new HttpError(400, "OTP has expired. Please request for a new OTP.");
+            throw new HttpError(400, "OTP has expired! Please request for a new OTP.");
+        }
+
+        if (existingUserById.verifyCode !== otp) {
+            throw new HttpError(400, "Invalid OTP! Please try again.");
         }
 
         const updatedUser = await this.userRepo.updateUser(existingUserById._id.toString(), {
@@ -281,27 +281,21 @@ export class BuyerService {
         const { email } = forgotPasswordDto;
 
         if (!email || email.trim() === "") {
-            throw new HttpError(400, "Email is required");
+            throw new HttpError(400, "Email is required!");
         }
 
-        const decodedEmail = decodeURIComponent(email);
-        const existingUserByEmail = await this.userRepo.findUserByEmail(decodedEmail);
-
+        const existingUserByEmail = await this.userRepo.findUserByEmail(email);
         if (!existingUserByEmail) {
-            throw new HttpError(404, "Invalid email address. User not availabale!");
+            throw new HttpError(404, "User with this email does not exist!");
         }
 
         if (!existingUserByEmail.isVerified) {
-            throw new HttpError(400, "This account is not verified. Please verify your email first.");
+            throw new HttpError(400, "This account is not verified! Please verify your email first.");
         }
 
-        if (!existingUserByEmail.buyerProfile) {
-            throw new HttpError(400, "Buyer profile and id not found");
-        }
-
-        const buyerProfile = await this.buyerRepo.findBuyerById(existingUserByEmail.buyerProfile.toString());
-        if (!buyerProfile) {
-            throw new HttpError(404, "Buyer user not found.");
+        const existingBuyerByBaseUserId = await this.buyerRepo.findUserById(existingUserByEmail._id.toString());
+        if (!existingBuyerByBaseUserId) {
+            throw new HttpError(404, "Buyer with this base user id not found!");
         }
 
         // send verfication email for reseting password
@@ -319,7 +313,7 @@ export class BuyerService {
         }
 
         const emailResponse = await sendResetPasswordVerificationEmail(
-            buyerProfile.fullName,
+            existingBuyerByBaseUserId.fullName,
             email,
             otp
         );
@@ -340,40 +334,40 @@ export class BuyerService {
         const { email, otp } = verifyOtpForResetPasswordDto;
 
         if (!email || email.trim() === '') {
-            throw new HttpError(400, "Email is required");
+            throw new HttpError(400, "Email is required!");
         }
 
         if (!otp || otp.trim() === '') {
-            throw new HttpError(400, "OTP is required");
+            throw new HttpError(400, "OTP is required!");
         }
 
         const decodedEmail = decodeURIComponent(email);
-
         const existingUserByEmail = await this.userRepo.findUserByEmail(decodedEmail);
+
         if (!existingUserByEmail) {
-            throw new HttpError(404, "User with this email does not exist.");
+            throw new HttpError(404, "User with this email does not exist!");
         }
 
         if (!existingUserByEmail.verifyEmailResetPassword || !existingUserByEmail.verifyEmailResetPasswordExpiryDate) {
-            throw new HttpError(400, "No OTP request found. Please request for a new OTP.");
-        }
-
-        if (existingUserByEmail.verifyEmailResetPassword !== otp) {
-            throw new HttpError(400, "Invalid OTP. Please try again.");
+            throw new HttpError(400, "No OTP request found! Please request for a new OTP.");
         }
 
         if (new Date() > existingUserByEmail.verifyEmailResetPasswordExpiryDate) {
-            throw new HttpError(400, "OTP has expired. Please request for a new OTP.");
+            throw new HttpError(400, "OTP has expired! Please request for a new OTP.");
         }
 
-        if (!existingUserByEmail.buyerProfile) {
-            throw new HttpError(400, "Buyer profile and id not found");
+        if (existingUserByEmail.verifyEmailResetPassword !== otp) {
+            throw new HttpError(400, "Invalid OTP! Please try again.");
         }
 
-        const buyerProfile = await this.buyerRepo.findBuyerById(existingUserByEmail.buyerProfile.toString());
-        if (!buyerProfile) {
-            throw new HttpError(404, "Buyer user not found.");
-        }
+        // const updatedUser = await this.userRepo.updateUser(existingUserByEmail._id.toString(), {
+        //     verifyEmailResetPassword: null,
+        //     verifyEmailResetPasswordExpiryDate: null,
+        // });
+
+        // if (!updatedUser) {
+        //     throw new HttpError(404, "User is not updated and not found!");
+        // }
 
         const response: BuyerResponseDtoType = {
             success: true,
@@ -387,35 +381,31 @@ export class BuyerService {
         const { email, newPassword } = resetPasswordDto;
 
         if (!email || email.trim() === "") {
-            throw new HttpError(400, "Email is required");
+            throw new HttpError(400, "Email is required!");
         }
 
         if (!newPassword || newPassword.trim() === "") {
-            throw new HttpError(400, "New password is required");
+            throw new HttpError(400, "New password is required!");
         }
 
         const decodedEmail = decodeURIComponent(email);
         const existingUserByEmail = await this.userRepo.findUserByEmail(decodedEmail);
 
         if (!existingUserByEmail) {
-            throw new HttpError(404, "User with this email does not exist.");
+            throw new HttpError(404, "User with this email does not exist!");
         }
 
         if (!existingUserByEmail.verifyEmailResetPassword || !existingUserByEmail.verifyEmailResetPasswordExpiryDate) {
-            throw new HttpError(400, "No OTP request found. Please request for a new OTP.");
+            throw new HttpError(400, "No OTP request found! Please request for a new OTP.");
         }
 
         if (new Date() > existingUserByEmail.verifyEmailResetPasswordExpiryDate) {
-            throw new HttpError(400, "OTP has expired. Please request for a new OTP.");
+            throw new HttpError(400, "OTP has expired! Please request for a new OTP.");
         }
 
-        if (!existingUserByEmail.buyerProfile) {
-            throw new HttpError(400, "Buyer profile and id not found");
-        }
-
-        const buyerProfile = await this.buyerRepo.findBuyerById(existingUserByEmail.buyerProfile.toString());
-        if (!buyerProfile) {
-            throw new HttpError(404, "Buyer user not found.");
+        const existingBuyerByBaseUserId = await this.buyerRepo.findUserById(existingUserByEmail._id.toString());
+        if (!existingBuyerByBaseUserId) {
+            throw new HttpError(404, "Buyer with this base user id not found!");
         }
 
         const updatedUser = await this.userRepo.updateUser(existingUserByEmail._id.toString(), {
@@ -430,11 +420,11 @@ export class BuyerService {
         const salt = bcrypt.genSaltSync(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-        const updatedBuer = await this.buyerRepo.updateBuyer(buyerProfile._id.toString(), {
+        const updatedBuyer = await this.buyerRepo.updateBuyer(existingBuyerByBaseUserId._id.toString(), {
             password: hashedPassword
         });
 
-        if (!updatedBuer) {
+        if (!updatedBuyer) {
             throw new HttpError(404, "Buyer is not updated and not found!");
         }
 
@@ -449,23 +439,22 @@ export class BuyerService {
     handleSendEmailForRegistration = async (sendEmailForRegistrationDto: SendEmailForRegistrationDtoType): Promise<BuyerResponseDtoType> => {
         const { email } = sendEmailForRegistrationDto;
         if (!email) {
-            throw new HttpError(400, "Email is required");
+            throw new HttpError(400, "Email is required!");
         }
 
-        const decodedEmail = decodeURIComponent(email);
-        const user = await this.userRepo.findUserByEmail(decodedEmail);
-
-        if (!user) {
-            throw new HttpError(404, "User with email not found");
+        // const decodedEmail = decodeURIComponent(email);
+        const existingUserByEmail = await this.userRepo.findUserByEmail(email);
+        if (!existingUserByEmail) {
+            throw new HttpError(404, "User with email not found!");
         }
 
-        if (user.isVerified) {
-            throw new HttpError(400, "This account is already verified. Please login.");
+        if (existingUserByEmail.isVerified) {
+            throw new HttpError(400, "This account is already verified! Please login.");
         }
 
-        const buyerProfile = await this.buyerRepo.findUserById(user._id.toString());
-        if (!buyerProfile) {
-            throw new HttpError(404, "Buyer user not found.");
+        const existingBuyerByBaseUserId = await this.buyerRepo.findUserById(existingUserByEmail._id.toString());
+        if (!existingBuyerByBaseUserId) {
+            throw new HttpError(404, "Buyer with this base user id not found!");
         }
 
         // generate 6‑digit OTP and expiry date
@@ -473,25 +462,37 @@ export class BuyerService {
         const expiryDate = new Date();
         expiryDate.setMinutes(expiryDate.getMinutes() + 10);    // Add 10 mins from 'now'
 
-        const updatedUser = await this.userRepo.updateUser(user._id.toString(), {
+        const updatedUser = await this.userRepo.updateUser(existingUserByEmail._id.toString(), {
             isVerified: false,
             verifyCode: otp,
             verifyCodeExpiryDate: expiryDate
         });
 
         if (!updatedUser) {
-            throw new HttpError(404, "User is not updated and not availabale!");
+            throw new HttpError(404, "User is not updated and not found!");
         }
 
-        const emailResponse = await sendVerificationEmail(buyerProfile.fullName, email, otp);
+        const emailResponse = await sendVerificationEmail(existingBuyerByBaseUserId.fullName, email, otp);
         if (!emailResponse.success) {
-            throw new HttpError(500, emailResponse.message ?? "Failed to send verification email. Try again later.");
+            throw new HttpError(500, emailResponse.message ?? "Failed to send verification email! Try again later.");
         }
 
         const response: BuyerResponseDtoType = {
             success: true,
             message: emailResponse.message ?? "Verification email sent successfully. Please check your inbox.",
-            status: 200
+            status: 200,
+            user: {
+                _id: existingBuyerByBaseUserId._id.toString(),
+                userId: existingBuyerByBaseUserId.userId.toString(),
+                email: existingUserByEmail.email,
+                fullName: existingBuyerByBaseUserId.fullName,
+                username: existingBuyerByBaseUserId.username,
+                role: existingUserByEmail.role,
+                isVerified: existingUserByEmail.isVerified,
+                isPermanentlyBanned: existingUserByEmail.isPermanentlyBanned,
+                createdAt: existingBuyerByBaseUserId.createdAt,
+                updatedAt: existingBuyerByBaseUserId.updatedAt,
+            }
         };
         return response;
     };

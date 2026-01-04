@@ -352,11 +352,22 @@ export class BuyerController {
 
             const result = await this.buyerService.handleSendEmailForRegistration(validatedData.data);
 
+            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
+            if (!validatedResponseBuyerData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedResponseBuyerData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: result?.success,
                     message: result?.message,
-                    user: result?.user,
+                    user: validatedResponseBuyerData.data,
                 },
                 { status: result?.status ?? 200 }
             );

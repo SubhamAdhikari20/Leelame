@@ -56,10 +56,10 @@ const Login = () => {
         setIsSubmitting(true);
         try {
             const result = await signIn("credentials", {
-                redirect: false,
                 identifier: data.identifier,
                 password: data.password,
                 role: data.role,
+                redirect: false,
             });
 
             if (result?.error) {
@@ -113,8 +113,8 @@ const Login = () => {
                 }
             }
             else {
-                toast.warning('Account Not Verified', {
-                    description: `Do you want to verify your account?`,
+                toast.warning("Account Not Verified", {
+                    description: "Do you want to verify your account?",
                     action: {
                         label: "Yes",
                         onClick: () => {
@@ -169,13 +169,17 @@ const Login = () => {
                 email: emailToVerify,
             });
 
-            if (response.data.success) {
-                toast.success("Success", {
+            if (!response.data.success || response.data.user == null) {
+                toast.error("Failed", {
                     description: response.data.message
                 });
-                const buyer = response.data.user;
-                router.replace(`/verify-account/registration?username=${buyer?.username}`);
             }
+
+            toast.success("Success", {
+                description: response.data.message
+            });
+            const buyer = response.data.user;
+            router.replace(`/verify-account/registration?username=${buyer?.username}`);
         }
         catch (error) {
             const axiosError = error as AxiosError<BuyerResponseDtoType>;

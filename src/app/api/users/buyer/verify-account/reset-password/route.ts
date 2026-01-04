@@ -16,7 +16,7 @@ export const PUT = async (req: NextRequest) => {
         return await buyerController.verifyOtpForResetPassword(req);
     }
     catch (error: any) {
-        console.error("Error verifying OTP for reset password route: ", error);
+        console.error("Error verifying OTP for reset password buyer route: ", error);
 
         if (error instanceof HttpError) {
             return NextResponse.json(
