@@ -150,7 +150,14 @@ export const authOptions: NextAuthOptions = {
                 }
                 catch (error: any) {
                     console.error("Error in provider findOrCreate: ", error)
-                    throw new Error(`Error in provider findOrCreate: ${error.message}`);
+
+                    if (error instanceof HttpError) {
+                        throw new HttpError(error.status, error.message);
+                        // throw new Error(error.message);
+                    }
+
+                    throw new HttpError(500, "Internal Server Error");
+                    // throw new Error("Internal Server Error");
                 }
             }
             return token;
