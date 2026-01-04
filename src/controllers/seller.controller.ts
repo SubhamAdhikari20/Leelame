@@ -1,10 +1,11 @@
 // src/controllers/seller.controller.ts
 import { NextRequest, NextResponse } from "next/server";
-import { SellerResponseDto, CreatedSellerDto, VerifyOtpForRegistrationDto } from "@/dtos/seller.dto.ts";
+import { SellerResponseDto, CreatedSellerDto, VerifyOtpForRegistrationDto, ForgotPasswordDto, ResetPasswordDto, SendEmailForRegistrationDto } from "@/dtos/seller.dto.ts";
 import { SellerService } from "@/services/seller.service.ts";
 import { SellerRepositoryInterface } from "@/interfaces/seller.repository.interface.ts";
 import { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
 import { z } from "zod";
+import { HttpError } from "@/errors/http-error.ts";
 
 
 export class SellerController {
@@ -36,7 +37,6 @@ export class SellerController {
             const result = await this.sellerService.createSeller(validatedData.data);
 
             const validatedResponseSellerData = SellerResponseDto.safeParse(result?.user);
-
             if (!validatedResponseSellerData.success) {
                 return NextResponse.json(
                     {
@@ -53,17 +53,27 @@ export class SellerController {
                     message: result?.message,
                     token: result?.token,
                     user: validatedResponseSellerData.data,
-                    // user: result?.user,
                 },
                 { status: result?.status ?? 200 }
             );
         }
         catch (error: any) {
-            console.error("Error in seller signup controller:", error);
+            console.error("Error in seller signup controller: ", error);
+
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: false,
-                    message: error.message ?? "Internal Server Error"
+                    message: "Internal Server Error"
                 },
                 { status: 500 }
             );
@@ -87,236 +97,178 @@ export class SellerController {
 
             const result = await this.sellerService.verifyOtpForRegistration(validatedData.data);
 
-            const validatedResponseSellerData = SellerResponseDto.safeParse(result?.user);
-
-            if (!validatedResponseSellerData.success) {
-                return NextResponse.json(
-                    {
-                        success: false,
-                        message: z.prettifyError(validatedResponseSellerData.error)
-                    },
-                    { status: 400 }
-                );
-            }
-
             return NextResponse.json(
                 {
                     success: result?.success,
                     message: result?.message,
-                    user: result?.user,
                 },
                 { status: result?.status ?? 200 }
             );
         }
         catch (error: any) {
-            console.error("Error in seller verify otp for registration controller:", error);
+            console.error("Error verifying otp for registration for seller controller: ", error);
+
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
+
             return NextResponse.json(
                 {
                     success: false,
-                    message: error.message ?? "Internal Server Error"
+                    message: "Internal Server Error"
                 },
                 { status: 500 }
             );
         }
     };
 
-    // forgotPassword = async (req: NextRequest) => {
-    //     try {
-    //         const body = await req.json();
-    //         const validatedData = ForgotPasswordDto.safeParse(body);
+    forgotPassword = async (req: NextRequest) => {
+        try {
+            const body = await req.json();
+            const validatedData = ForgotPasswordDto.safeParse(body);
 
-    //         if (!validatedData.success) {
-    //             return NextResponse.json(
-    //                 {
-    //                     success: false,
-    //                     message: validatedData.error
-    //                 },
-    //                 { status: 400 }
-    //             );
-    //         }
+            if (!validatedData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: validatedData.error
+                    },
+                    { status: 400 }
+                );
+            }
 
-    //         const result = await this.sellerService.forgotPassword(validatedData.data);
+            const result = await this.sellerService.forgotPassword(validatedData.data);
 
-    //         const validatedResponseSellerData = SellerResponseDto.safeParse(result?.user);
+            return NextResponse.json(
+                {
+                    success: result?.success,
+                    message: result?.message,
+                },
+                { status: result?.status ?? 200 }
+            );
+        }
+        catch (error: any) {
+            console.error("Error in seller forgot password controller: ", error);
 
-    //         if (!validatedResponseSellerData.success) {
-    //             return NextResponse.json(
-    //                 {
-    //                     success: false,
-    //                     message: z.prettifyError(validatedResponseSellerData.error)
-    //                 },
-    //                 { status: 400 }
-    //             );
-    //         }
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
 
-    //         return NextResponse.json(
-    //             {
-    //                 success: result?.success,
-    //                 message: result?.message,
-    //                 user: result?.user,
-    //             },
-    //             { status: result?.status ?? 200 }
-    //         );
-    //     }
-    //     catch (error: any) {
-    //         console.error("Error in seller forgot password controller:", error);
-    //         return NextResponse.json(
-    //             {
-    //                 success: false,
-    //                 message: error.message ?? "Internal Server Error"
-    //             },
-    //             { status: 500 }
-    //         );
-    //     }
-    // };
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Internal Server Error"
+                },
+                { status: 500 }
+            );
+        }
+    };
 
-    // verifyOtpForResetPassword = async (req: NextRequest) => {
-    //     try {
-    //         const body = await req.json();
-    //         const validatedData = VerifyOtpForResetPasswordDto.safeParse(body);
+    resetPassword = async (req: NextRequest) => {
+        try {
+            const body = await req.json();
+            const validatedData = ResetPasswordDto.safeParse(body);
 
-    //         if (!validatedData.success) {
-    //             return NextResponse.json(
-    //                 {
-    //                     success: false,
-    //                     message: validatedData.error
-    //                 },
-    //                 { status: 400 }
-    //             );
-    //         }
+            if (!validatedData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: validatedData.error
+                    },
+                    { status: 400 }
+                );
+            }
 
-    //         const result = await this.sellerService.verifyOtpForResetpassword(validatedData.data);
+            const result = await this.sellerService.resetPassword(validatedData.data);
 
-    //         const validatedResponseSellerData = SellerResponseDto.safeParse(result?.user);
+            return NextResponse.json(
+                {
+                    success: result?.success,
+                    message: result?.message,
+                },
+                { status: result?.status ?? 200 }
+            );
+        }
+        catch (error: any) {
+            console.error("Error reseting password for seller controller: ", error);
 
-    //         if (!validatedResponseSellerData.success) {
-    //             return NextResponse.json(
-    //                 {
-    //                     success: false,
-    //                     message: z.prettifyError(validatedResponseSellerData.error)
-    //                 },
-    //                 { status: 400 }
-    //             );
-    //         }
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
 
-    //         return NextResponse.json(
-    //             {
-    //                 success: result?.success,
-    //                 message: result?.message,
-    //                 user: result?.user,
-    //             },
-    //             { status: result?.status ?? 200 }
-    //         );
-    //     }
-    //     catch (error: any) {
-    //         console.error("Error in seller verify otp for reset password controller:", error);
-    //         return NextResponse.json(
-    //             {
-    //                 success: false,
-    //                 message: error.message ?? "Internal Server Error"
-    //             },
-    //             { status: 500 }
-    //         );
-    //     }
-    // };
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Internal Server Error"
+                },
+                { status: 500 }
+            );
+        }
+    };
 
-    // resetPassword = async (req: NextRequest) => {
-    //     try {
-    //         const body = await req.json();
-    //         const validatedData = ResetPasswordDto.safeParse(body);
+    handleSendEmailForRegistration = async (req: NextRequest) => {
+        try {
+            const body = await req.json();
+            const validatedData = SendEmailForRegistrationDto.safeParse(body);
 
-    //         if (!validatedData.success) {
-    //             return NextResponse.json(
-    //                 {
-    //                     success: false,
-    //                     message: validatedData.error
-    //                 },
-    //                 { status: 400 }
-    //             );
-    //         }
+            if (!validatedData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: validatedData.error
+                    },
+                    { status: 400 }
+                );
+            }
 
-    //         const result = await this.sellerService.resetPassword(validatedData.data);
+            const result = await this.sellerService.handleSendEmailForRegistration(validatedData.data);
 
-    //         const validatedResponseSellerData = SellerResponseDto.safeParse(result?.user);
+            return NextResponse.json(
+                {
+                    success: result?.success,
+                    message: result?.message,
+                },
+                { status: result?.status ?? 200 }
+            );
+        }
+        catch (error: any) {
+            console.error("Error sending verication email for seller controller: ", error);
 
-    //         if (!validatedResponseSellerData.success) {
-    //             return NextResponse.json(
-    //                 {
-    //                     success: false,
-    //                     message: z.prettifyError(validatedResponseSellerData.error)
-    //                 },
-    //                 { status: 400 }
-    //             );
-    //         }
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
 
-    //         return NextResponse.json(
-    //             {
-    //                 success: result?.success,
-    //                 message: result?.message,
-    //                 user: result?.user,
-    //             },
-    //             { status: result?.status ?? 200 }
-    //         );
-    //     }
-    //     catch (error: any) {
-    //         console.error("Error in seller reset password controller:", error);
-    //         return NextResponse.json(
-    //             {
-    //                 success: false,
-    //                 message: error.message ?? "Internal Server Error"
-    //             },
-    //             { status: 500 }
-    //         );
-    //     }
-    // };
-
-    // handleSendEmailForRegistration = async (req: NextRequest) => {
-    //     try {
-    //         const body = await req.json();
-    //         const validatedData = SendEmailForRegistrationDto.safeParse(body);
-
-    //         if (!validatedData.success) {
-    //             return NextResponse.json(
-    //                 {
-    //                     success: false,
-    //                     message: validatedData.error
-    //                 },
-    //                 { status: 400 }
-    //             );
-    //         }
-
-    //         const result = await this.sellerService.handleSendEmailForRegistration(validatedData.data);
-
-    //         const validatedResponseSellerData = SellerResponseDto.safeParse(result?.user);
-
-    //         if (!validatedResponseSellerData.success) {
-    //             return NextResponse.json(
-    //                 {
-    //                     success: false,
-    //                     message: z.prettifyError(validatedResponseSellerData.error)
-    //                 },
-    //                 { status: 400 }
-    //             );
-    //         }
-
-    //         return NextResponse.json(
-    //             {
-    //                 success: result?.success,
-    //                 message: result?.message,
-    //                 user: result?.user,
-    //             },
-    //             { status: result?.status ?? 200 }
-    //         );
-    //     }
-    //     catch (error: any) {
-    //         console.error("Error in seller sned verication email controller:", error);
-    //         return NextResponse.json(
-    //             {
-    //                 success: false,
-    //                 message: error.message ?? "Internal Server Error"
-    //             },
-    //             { status: 500 }
-    //         );
-    //     }
-    // };
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Internal Server Error"
+                },
+                { status: 500 }
+            );
+        }
+    };
 }

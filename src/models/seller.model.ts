@@ -4,7 +4,7 @@ import type { IUser } from "./user.model.ts";
 import type { Seller } from "@/types/seller.type.ts";
 
 export interface ISeller extends Omit<Seller, 'userId'>, Document {
-// export interface ISeller extends Seller, Document {
+    // export interface ISeller extends Seller, Document {
     userId: Schema.Types.ObjectId | string,
     // fullName: string;
     // contact: string;
@@ -32,7 +32,8 @@ const sellerSchema: Schema<ISeller> = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
         ref: "users",
-        required: true
+        required: true,
+        unique: true
     },
     fullName: {
         type: String,
@@ -41,17 +42,17 @@ const sellerSchema: Schema<ISeller> = new Schema({
     },
     contact: {
         type: String,
-        unique: true,
-        sparse: true,
-        trim: true,
         required: [true, "Contact is required"],
+        unique: true,
+        trim: true,
         minLength: [10, "Contact must be 10 digits"],
         maxLength: [10, "Contact must be 10 digits"],
     },
     password: {
         type: String,
-        required: [true, "Password is required"],
+        // required: [true, "Password is required"],
         minLength: [8, "Password must be at least 8 characters"],
+        default: null,
     },
     sellerNotes: {
         type: String,

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { otpValidation, passwordValidation, confirmPasswordValidation } from "../../user.schema.ts";
 
 export const sellerVerifyAccountRegistrationSchema = z.object({
-    code: otpValidation,
+    otp: otpValidation,
     password: passwordValidation,
     confirmPassword: confirmPasswordValidation
 }).superRefine((values, ctx) => {
@@ -14,4 +14,8 @@ export const sellerVerifyAccountRegistrationSchema = z.object({
             path: ["confirmPassword"],
         });
     }
+});
+
+export const sellerVerifyAccountRegistrationFromVerifyDialogBoxFromLoginSchema = z.object({
+    otp: otpValidation
 });

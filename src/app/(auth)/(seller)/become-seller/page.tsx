@@ -1,6 +1,6 @@
 // src/app/(auth)/(seller)/become-seller/page.tsx
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -48,26 +48,20 @@ import { getSession, signIn } from "next-auth/react";
 
 
 const BecomeSeller = () => {
-    const [tab, setTab] = useState("sign-up");
-    const [otpSent, setOtpSent] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [emailToVerify, setEmailToVerify] = useState("");
-    const [iSendingCode, setIsSendingCode] = useState(false);
-
     const router = useRouter();
 
-    const loginForm = useForm<z.infer<typeof sellerLoginSchema>>({
-        resolver: zodResolver(sellerLoginSchema),
-        defaultValues: {
-            identifier: "",
-            password: "",
-            role: "seller"
-        },
-    });
+    const [tab, setTab] = useState("sign-up");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showSignUpPassword, setShowSignUpPassword] = useState(false);
+    const [showLoginPassword, setShowLoginPassword] = useState(false);
+    const [showResetNewPassword, setShowResetNewPassword] = useState(false);
+
+    const [showSignUpConfirmPassword, setShowSignUpConfirmPassword] = useState(false);
+    const [showResetConfirmPassword, setShowResetConfirmPassword] = useState(false);
+
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [email, setEmail] = useState("");
+    const [iSendingCode, setIsSendingCode] = useState(false);
 
     const signUpForm = useForm<z.infer<typeof sellerSignUpSchema>>({
         resolver: zodResolver(sellerSignUpSchema),
@@ -75,16 +69,25 @@ const BecomeSeller = () => {
             fullName: "",
             contact: "",
             email: "",
-            role: "buyer",
+            role: "seller",
         },
     });
 
     const verifyAccountRegistrationForm = useForm<z.infer<typeof sellerVerifyAccountRegistrationSchema>>({
         resolver: zodResolver(sellerVerifyAccountRegistrationSchema),
         defaultValues: {
-            code: "",
+            otp: "",
             password: "",
             confirmPassword: ""
+        },
+    });
+
+    const loginForm = useForm<z.infer<typeof sellerLoginSchema>>({
+        resolver: zodResolver(sellerLoginSchema),
+        defaultValues: {
+            identifier: "",
+            password: "",
+            role: "seller"
         },
     });
 
@@ -98,27 +101,28 @@ const BecomeSeller = () => {
     const resetPasswordForm = useForm({
         resolver: zodResolver(sellerResetPasswordSchema),
         defaultValues: {
-            code: "",
+            otp: "",
             newPassword: "",
             confirmPassword: ""
         },
     });
 
     const handleSignUp = async (data: z.infer<typeof sellerSignUpSchema>) => {
-        // setTab("verify-otp-register");
         setIsSubmitting(true);
         try {
             const response = await axios.post<SellerResponseDtoType>("/api/users/seller/sign-up", data);
-            if (response.data.success) {
-                toast.success("Sign Up Successful", {
+
+            if (!response.data.success) {
+                toast.error("Sign Up Failed", {
                     description: response.data.message,
                 });
-                setTab("verify-otp-register");
             }
 
-            toast.success("Sign Up Failed", {
+            toast.success("Sign Up Successful", {
                 description: response.data.message,
             });
+            setEmail(data.email);
+            setTab("verify-otp-register");
         }
         catch (error) {
             const axiosError = error as AxiosError<SellerResponseDtoType>;
@@ -135,19 +139,23 @@ const BecomeSeller = () => {
     const handleVerifyAccountRegistration = async (data: z.infer<typeof sellerVerifyAccountRegistrationSchema>) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.post<SellerResponseDtoType>("/api/users/seller/sign-up", data);
+            const response = await axios.put<SellerResponseDtoType>("/api/users/seller/verify-account-registration", {
+                email: email,
+                otp: data.otp,
+                password: data.password,
+            });
 
-            if (response.data.success) {
-                toast.success("Success", {
+            if (!response.data.success) {
+                toast.error("Failed", {
                     description: response.data.message,
                 });
-                setTab("login");
-                // setOtpSent(false);
             }
 
-            toast.success("Failed", {
+            toast.success("Success", {
                 description: response.data.message,
             });
+            setEmail("");
+            setTab("login");
         }
         catch (error) {
             const axiosError = error as AxiosError<SellerResponseDtoType>;
@@ -165,26 +173,14 @@ const BecomeSeller = () => {
         setIsSubmitting(true);
         try {
             const result = await signIn("credentials", {
-                redirect: false,
                 identifier: data.identifier,
                 password: data.password,
                 role: data.role,
+                redirect: false,
             });
 
             if (result?.error) {
-                switch (result.error) {
-                    case "MISSING_CREDENTIALS":
-                        toast.error("Login Failed", { description: "Please enter both email/contact and password." });
-                        break;
-                    case "BUYER_NOT_FOUND":
-                        toast.error("Login Failed", { description: "Invalid email or contact." });
-                        break;
-                    case "INVALID_PASSWORD":
-                        toast.error("Login Failed", { description: "Invalid password. Please enter correct password." });
-                        break;
-                    default:
-                        toast.error("Login failed", { description: result.error });
-                }
+                toast.error("Login failed", { description: result.error ?? "Unknown error!" });
                 return;
             }
 
@@ -211,7 +207,7 @@ const BecomeSeller = () => {
                     action: {
                         label: "Yes",
                         onClick: () => {
-                            setEmailToVerify(user.email);
+                            setEmail(user.email);
                             setDialogOpen(true);
                         }
                     }
@@ -220,9 +216,73 @@ const BecomeSeller = () => {
         }
         catch (error) {
             const axiosError = error as AxiosError<SellerResponseDtoType>;
-            console.error("Error in user login: ", axiosError);
-            toast.error("Error in user login", {
+            console.error("Error in seller user login: ", axiosError);
+            toast.error("Error in seller user login", {
                 description: axiosError.response?.data.message
+            });
+        }
+        finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleForgotPassword = async (data: z.infer<typeof sellerForgotPasswordSchema>) => {
+        setIsSubmitting(true);
+        try {
+            const response = await axios.put<SellerResponseDtoType>("/api/users/seller/forgot-password", {
+                email: data.email,
+            });
+
+            if (!response.data.success) {
+                toast.error("Failed", {
+                    description: response.data.message,
+                });
+            }
+
+            toast.success("Success", {
+                description: response.data.message
+            });
+            setEmail(data.email);
+            setTab("reset-password");
+        }
+        catch (error) {
+            const axiosError = error as AxiosError<SellerResponseDtoType>;
+            console.error("Error sending forgot password request", axiosError);
+            toast.error("Failed", {
+                description: axiosError.response?.data.message || "Failed to send reset instructions",
+            });
+        }
+        finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleResetPassword = async (data: z.infer<typeof sellerResetPasswordSchema>) => {
+        setIsSubmitting(true);
+        try {
+            const response = await axios.put<SellerResponseDtoType>("/api/users/seller/reset-password", {
+                email: email,
+                otp: data.otp,
+                newPassword: data.newPassword,
+            });
+
+            if (!response.data.success) {
+                toast.error("Failed", {
+                    description: response.data.message,
+                });
+            }
+
+            toast.success("Success", {
+                description: response.data.message,
+            });
+            setEmail("");
+            setTab("login");
+        }
+        catch (error) {
+            const axiosError = error as AxiosError<SellerResponseDtoType>;
+            console.error("Error in verifying OTP for reseting password: ", axiosError);
+            toast.error("Failed to verify OTP", {
+                description: axiosError.response?.data.message,
             });
         }
         finally {
@@ -234,19 +294,19 @@ const BecomeSeller = () => {
         setIsSendingCode(true);
         try {
             const response = await axios.put<SellerResponseDtoType>("/api/users/seller/send-account-registration-email", {
-                email: emailToVerify,
+                email: email,
             });
 
-            if (response.data.success) {
-                toast.success("Success", {
-                    description: response.data.message
+            if (!response.data.success) {
+                toast.error("Failed", {
+                    description: response.data.message,
                 });
-                setTab("verify-otp-register");
             }
 
-            toast.success("Failed", {
-                description: response.data.message,
+            toast.success("Success", {
+                description: response.data.message
             });
+            setTab("verify-otp-register");
         }
         catch (error) {
             const axiosError = error as AxiosError<SellerResponseDtoType>;
@@ -260,50 +320,12 @@ const BecomeSeller = () => {
         }
     };
 
-    const handleForgotPassword = async (data: z.infer<typeof sellerForgotPasswordSchema>) => {
-        setIsSubmitting(true);
-        try {
-            const response = await axios.put<SellerResponseDtoType>("/api/users/seller/forgot-password", {
-                email: data.email,
-            });
+    const toggleSignUpPasswordVisibility = () => setShowSignUpPassword((prev) => !prev);
+    const toggleLoginPasswordVisibility = () => setShowLoginPassword((prev) => !prev);
+    const toggleResetNewPasswordVisibility = () => setShowResetNewPassword((prev) => !prev);
 
-            if (response.data.success) {
-                toast.success("Success", {
-                    description: response.data.message
-                });
-
-                setTab("reset-password");
-            }
-
-            toast.success("Failed", {
-                description: response.data.message,
-            });
-        }
-        catch (error) {
-            const axiosError = error as AxiosError<SellerResponseDtoType>;
-            console.error("Error sending forgot password request", axiosError);
-            toast("Failed", {
-                description:
-                    axiosError.response?.data.message ||
-                    "Failed to send reset instructions",
-            });
-        }
-        finally {
-            setIsSubmitting(false);
-        }
-
-        toast.success(`OTP sent to ${data.email}`);
-        setOtpSent(true);
-    };
-
-
-    const handleResetPassword = (data: z.infer<typeof sellerResetPasswordSchema>) => {
-        setOtpSent(false);
-        setTab("login");
-    };
-
-    const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
-    const toggleConfirmPasswordVisibility = () => setShowConfirmPassword((prev) => !prev);
+    const toggleSignUpConfirmPasswordVisibility = () => setShowSignUpConfirmPassword((prev) => !prev);
+    const toggleResetConfirmPasswordVisibility = () => setShowResetConfirmPassword((prev) => !prev);
 
     return (
         <section className="min-h-screen flex items-center justify-center px-5 py-15 sm:px-6 lg:px-8">
@@ -318,7 +340,7 @@ const BecomeSeller = () => {
                         <ArrowLeft size={24} />
                     </Button>
                 </div>
-                <Card className="border-0 grid md:grid-cols-2">
+                <Card className="border-0 grid md:grid-cols-2 shadow-none">
                     {/* Left banner section */}
                     <div className="hidden md:flex flex-col justify-center bg-green-600 text-white px-10 py-12 space-y-4">
                         <h1 className="text-4xl font-extrabold leading-tight">
@@ -349,7 +371,7 @@ const BecomeSeller = () => {
                                     <TabsTrigger value="login">Login</TabsTrigger>
                                 </TabsList>
 
-                                {/* Signup */}
+                                {/* Sign Up */}
                                 <TabsContent value="sign-up">
                                     <CardHeader className="p-0 mb-4">
                                         <CardTitle>Sign up as a Leelame Seller</CardTitle>
@@ -514,17 +536,17 @@ const BecomeSeller = () => {
                                                                 placeholder="Password"
                                                                 autoComplete="off"
                                                                 type={
-                                                                    showPassword
+                                                                    showLoginPassword
                                                                         ? "text"
                                                                         : "password"
                                                                 }
                                                             />
                                                             <button
                                                                 type="button"
-                                                                onClick={togglePasswordVisibility}
+                                                                onClick={toggleLoginPasswordVisibility}
                                                                 className="cursor-pointer absolute inset-y-0 end-2.5 text-gray-400 focus:outline-hidden focus:text-blue-600 dark:text-neutral-500 dark:focus:text-blue-500"
                                                             >
-                                                                {showPassword ? (
+                                                                {showLoginPassword ? (
                                                                     <FaEye size={18} />
                                                                 ) : (
                                                                     <FaEyeSlash size={18} />
@@ -585,7 +607,7 @@ const BecomeSeller = () => {
                                 >
                                     <FieldGroup>
                                         <Controller
-                                            name="code"
+                                            name="otp"
                                             control={verifyAccountRegistrationForm.control}
                                             render={({ field, fieldState }) => (
                                                 <Field data-invalid={fieldState.invalid}>
@@ -635,17 +657,17 @@ const BecomeSeller = () => {
                                                             placeholder="Password"
                                                             autoComplete="off"
                                                             type={
-                                                                showPassword
+                                                                showSignUpPassword
                                                                     ? "text"
                                                                     : "password"
                                                             }
                                                         />
                                                         <button
                                                             type="button"
-                                                            onClick={togglePasswordVisibility}
+                                                            onClick={toggleSignUpPasswordVisibility}
                                                             className="cursor-pointer absolute inset-y-0 end-2.5 text-gray-400 focus:outline-hidden focus:text-blue-600 dark:text-neutral-500 dark:focus:text-blue-500"
                                                         >
-                                                            {showPassword ? (
+                                                            {showSignUpPassword ? (
                                                                 <FaEye size={18} />
                                                             ) : (
                                                                 <FaEyeSlash size={18} />
@@ -675,17 +697,17 @@ const BecomeSeller = () => {
                                                             placeholder="Confirm Password"
                                                             autoComplete="off"
                                                             type={
-                                                                showConfirmPassword
+                                                                showSignUpConfirmPassword
                                                                     ? "text"
                                                                     : "password"
                                                             }
                                                         />
                                                         <button
                                                             type="button"
-                                                            onClick={toggleConfirmPasswordVisibility}
+                                                            onClick={toggleSignUpConfirmPasswordVisibility}
                                                             className="cursor-pointer absolute inset-y-0 end-2.5 text-gray-400 focus:outline-hidden focus:text-blue-600 dark:text-neutral-500 dark:focus:text-blue-500"
                                                         >
-                                                            {showConfirmPassword ? (
+                                                            {showSignUpConfirmPassword ? (
                                                                 <FaEye size={18} />
                                                             ) : (
                                                                 <FaEyeSlash size={18} />
@@ -811,7 +833,7 @@ const BecomeSeller = () => {
                                 >
                                     <FieldGroup>
                                         <Controller
-                                            name="code"
+                                            name="otp"
                                             control={resetPasswordForm.control}
                                             render={({ field, fieldState }) => (
                                                 <Field data-invalid={fieldState.invalid}>
@@ -861,17 +883,17 @@ const BecomeSeller = () => {
                                                             placeholder="New Password"
                                                             autoComplete="off"
                                                             type={
-                                                                showPassword
+                                                                showResetNewPassword
                                                                     ? "text"
                                                                     : "password"
                                                             }
                                                         />
                                                         <button
                                                             type="button"
-                                                            onClick={togglePasswordVisibility}
+                                                            onClick={toggleResetNewPasswordVisibility}
                                                             className="cursor-pointer absolute inset-y-0 end-2.5 text-gray-400 focus:outline-hidden focus:text-blue-600 dark:text-neutral-500 dark:focus:text-blue-500"
                                                         >
-                                                            {showPassword ? (
+                                                            {showResetNewPassword ? (
                                                                 <FaEye size={18} />
                                                             ) : (
                                                                 <FaEyeSlash size={18} />
@@ -901,17 +923,17 @@ const BecomeSeller = () => {
                                                             placeholder="Confirm Password"
                                                             autoComplete="off"
                                                             type={
-                                                                showConfirmPassword
+                                                                showResetConfirmPassword
                                                                     ? "text"
                                                                     : "password"
                                                             }
                                                         />
                                                         <button
                                                             type="button"
-                                                            onClick={toggleConfirmPasswordVisibility}
+                                                            onClick={toggleResetConfirmPasswordVisibility}
                                                             className="cursor-pointer absolute inset-y-0 end-2.5 text-gray-400 focus:outline-hidden focus:text-blue-600 dark:text-neutral-500 dark:focus:text-blue-500"
                                                         >
-                                                            {showConfirmPassword ? (
+                                                            {showResetConfirmPassword ? (
                                                                 <FaEye size={18} />
                                                             ) : (
                                                                 <FaEyeSlash size={18} />
@@ -942,7 +964,6 @@ const BecomeSeller = () => {
                                     </Button>
                                     <button
                                         onClick={() => {
-                                            setOtpSent(false);
                                             setTab("login");
                                         }}
                                         type="button"
@@ -964,7 +985,7 @@ const BecomeSeller = () => {
                 </Card>
             </div>
 
-            {/* ───--------------------- VERIFY DIALOG ----------------------------- */}
+            {/* ---------------------------- Verify Dialog ------------------------------- */}
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -974,9 +995,9 @@ const BecomeSeller = () => {
                         <div>
                             <Label className="mb-2">Email</Label>
                             <Input
-                                value={emailToVerify}
+                                value={email}
                                 onChange={(e) =>
-                                    setEmailToVerify(e.target.value)
+                                    setEmail(e.target.value)
                                 }
                             />
                         </div>

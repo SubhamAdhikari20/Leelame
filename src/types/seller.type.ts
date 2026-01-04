@@ -7,7 +7,7 @@ import { ISeller } from "@/models/seller.model.ts";
 export const sellerSchema = z.object({
     fullName: fullNameValidation,
     contact: contactValidation,
-    password: passwordValidation,
+    password: passwordValidation.nullish(),
     userId: z.string(),
 
     sellerNotes: z.string().nullish(),
