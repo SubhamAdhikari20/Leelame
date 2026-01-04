@@ -9,7 +9,6 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
     Field,
-    FieldDescription,
     FieldError,
     FieldGroup,
     FieldLabel
@@ -34,7 +33,7 @@ const VerifyAccountRegistration = () => {
     const verifyAccountRegistrationForm = useForm<z.infer<typeof verifyAccountRegistrationSchema>>({
         resolver: zodResolver(verifyAccountRegistrationSchema),
         defaultValues: {
-            code: "",
+            otp: "",
         },
     });
 
@@ -43,15 +42,19 @@ const VerifyAccountRegistration = () => {
         try {
             const response = await axios.put<BuyerResponseDtoType>("/api/users/buyer/verify-account/registration", {
                 username: username,
-                otp: data.code
+                otp: data.otp
             });
 
-            if (response.data.success) {
-                toast.success("Success", {
+            if (!response.data.success) {
+                toast.error("Failed", {
                     description: response.data.message,
                 });
-                router.replace("/login");
             }
+
+            toast.success("Success", {
+                description: response.data.message,
+            });
+            router.replace("/login");
         }
         catch (error) {
             const axiosError = error as AxiosError<BuyerResponseDtoType>;
@@ -83,7 +86,7 @@ const VerifyAccountRegistration = () => {
                     >
                         <FieldGroup>
                             <Controller
-                                name="code"
+                                name="otp"
                                 control={verifyAccountRegistrationForm.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>

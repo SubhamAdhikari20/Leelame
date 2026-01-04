@@ -194,20 +194,20 @@ export class BuyerService {
 
     checkUsernameUnique = async (checkUsernameUniqueDto: CheckUsernameUniqueDtoType): Promise<BuyerResponseDtoType | null> => {
         const { username } = checkUsernameUniqueDto;
-        const decodedUsername = decodeURIComponent(username);
 
+        const decodedUsername = decodeURIComponent(username);
         const existingBuyer = await this.buyerRepo.findBuyerByUsername(decodedUsername);
+
         if (!existingBuyer) {
             const response: BuyerResponseDtoType = {
                 success: true,
                 message: "Username is available",
-                status: 200
+                status: 200,
             };
             return response;
         }
 
         const linkedUser = await this.userRepo.findUserById(existingBuyer.userId.toString());
-
         if (linkedUser && linkedUser.isVerified === true) {
             throw new HttpError(400, "Username is already taken!");
         }
@@ -232,8 +232,8 @@ export class BuyerService {
         }
 
         const decodedUsername = decodeURIComponent(username);
-
         const existingBuyerByUsername = await this.buyerRepo.findBuyerByUsername(decodedUsername);
+
         if (!existingBuyerByUsername) {
             throw new HttpError(404, "Buyer with this username does not exist.");
         }
@@ -273,18 +273,6 @@ export class BuyerService {
             success: true,
             message: "Account verified successfully. You can now login.",
             status: 200,
-            user: {
-                _id: existingBuyerByUsername._id.toString(),
-                userId: existingBuyerByUsername.userId.toString(),
-                email: updatedUser.email,
-                isVerified: updatedUser.isVerified,
-                fullName: existingBuyerByUsername.fullName,
-                username: existingBuyerByUsername.username,
-                role: updatedUser.role,
-                isPermanentlyBanned: updatedUser.isPermanentlyBanned,
-                createdAt: existingBuyerByUsername.createdAt,
-                updatedAt: existingBuyerByUsername.updatedAt,
-            }
         };
         return response;
     };
@@ -297,21 +285,21 @@ export class BuyerService {
         }
 
         const decodedEmail = decodeURIComponent(email);
-        const user = await this.userRepo.findUserByEmail(decodedEmail);
+        const existingUserByEmail = await this.userRepo.findUserByEmail(decodedEmail);
 
-        if (!user) {
+        if (!existingUserByEmail) {
             throw new HttpError(404, "Invalid email address. User not availabale!");
         }
 
-        if (!user.isVerified) {
+        if (!existingUserByEmail.isVerified) {
             throw new HttpError(400, "This account is not verified. Please verify your email first.");
         }
 
-        if (!user.buyerProfile) {
+        if (!existingUserByEmail.buyerProfile) {
             throw new HttpError(400, "Buyer profile and id not found");
         }
 
-        const buyerProfile = await this.buyerRepo.findBuyerById(user.buyerProfile.toString());
+        const buyerProfile = await this.buyerRepo.findBuyerById(existingUserByEmail.buyerProfile.toString());
         if (!buyerProfile) {
             throw new HttpError(404, "Buyer user not found.");
         }
@@ -321,7 +309,7 @@ export class BuyerService {
         const expiryDate = new Date();
         expiryDate.setMinutes(expiryDate.getMinutes() + 10);    // Add 10 mins from 'now'
 
-        const updatedUser = await this.userRepo.updateUser(user._id.toString(), {
+        const updatedUser = await this.userRepo.updateUser(existingUserByEmail._id.toString(), {
             verifyEmailResetPassword: otp,
             verifyEmailResetPasswordExpiryDate: expiryDate
         });
@@ -344,18 +332,6 @@ export class BuyerService {
             success: true,
             message: "Reset Password instructions have been sent to your email",
             status: 200,
-            user: {
-                _id: buyerProfile._id.toString(),
-                userId: buyerProfile.userId.toString(),
-                email: updatedUser.email,
-                isVerified: updatedUser.isVerified,
-                fullName: buyerProfile.fullName,
-                username: buyerProfile.username,
-                role: updatedUser.role,
-                isPermanentlyBanned: updatedUser.isPermanentlyBanned,
-                createdAt: buyerProfile.createdAt,
-                updatedAt: buyerProfile.updatedAt,
-            }
         };
         return response;
     };
@@ -376,10 +352,6 @@ export class BuyerService {
         const existingUserByEmail = await this.userRepo.findUserByEmail(decodedEmail);
         if (!existingUserByEmail) {
             throw new HttpError(404, "User with this email does not exist.");
-        }
-
-        if (existingUserByEmail.isVerified) {
-            throw new HttpError(400, "This account is already verified. Please login.");
         }
 
         if (!existingUserByEmail.verifyEmailResetPassword || !existingUserByEmail.verifyEmailResetPasswordExpiryDate) {
@@ -405,20 +377,8 @@ export class BuyerService {
 
         const response: BuyerResponseDtoType = {
             success: true,
-            message: "Account verified successfully. You can now login.",
+            message: "Account verified successfully. You can now reset your password.",
             status: 200,
-            user: {
-                _id: buyerProfile._id.toString(),
-                userId: buyerProfile.userId.toString(),
-                email: existingUserByEmail.email,
-                isVerified: existingUserByEmail.isVerified,
-                fullName: buyerProfile.fullName,
-                username: buyerProfile.username,
-                role: existingUserByEmail.role,
-                isPermanentlyBanned: existingUserByEmail.isPermanentlyBanned,
-                createdAt: buyerProfile.createdAt,
-                updatedAt: buyerProfile.updatedAt,
-            }
         };
         return response;
     };
@@ -435,8 +395,8 @@ export class BuyerService {
         }
 
         const decodedEmail = decodeURIComponent(email);
-
         const existingUserByEmail = await this.userRepo.findUserByEmail(decodedEmail);
+
         if (!existingUserByEmail) {
             throw new HttpError(404, "User with this email does not exist.");
         }
@@ -480,20 +440,8 @@ export class BuyerService {
 
         const response: BuyerResponseDtoType = {
             success: true,
-            message: "Account verified successfully. You can now login.",
+            message: "Password reset successfully. You can now login with your new password.",
             status: 200,
-            user: {
-                _id: buyerProfile._id.toString(),
-                userId: buyerProfile.userId.toString(),
-                email: existingUserByEmail.email,
-                isVerified: existingUserByEmail.isVerified,
-                fullName: buyerProfile.fullName,
-                username: buyerProfile.username,
-                role: existingUserByEmail.role,
-                isPermanentlyBanned: existingUserByEmail.isPermanentlyBanned,
-                createdAt: buyerProfile.createdAt,
-                updatedAt: buyerProfile.updatedAt,
-            }
         };
         return response;
     };

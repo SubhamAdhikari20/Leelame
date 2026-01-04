@@ -7,5 +7,5 @@ const verifyCodeResetPasswordSchema = z
     .regex(/^[0-9]+$/, { message: "Verification code must contain only digits" })
 
 export const verifyAccountResetPasswordSchema = z.object({
-    code: verifyCodeResetPasswordSchema
+    otp: verifyCodeResetPasswordSchema
 });

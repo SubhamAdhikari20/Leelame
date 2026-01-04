@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import {
     Field,
-    FieldDescription,
     FieldError,
     FieldGroup,
     FieldLabel
@@ -40,16 +39,16 @@ const ForgotPassword = () => {
                 email: data.email,
             });
 
-            if (response.data.success) {
-                toast.success("Success", {
+            if (!response.data.success) {
+                toast.success("Failed", {
                     description: response.data.message,
                 });
-                router.replace(`/verify-account/reset-password?email=${data.email}`);
             }
 
-            toast.success("Failed", {
+            toast.success("Success", {
                 description: response.data.message,
             });
+            router.replace(`/verify-account/reset-password?email=${data.email}`);
         }
         catch (error) {
             const axiosError = error as AxiosError<BuyerResponseDtoType>;

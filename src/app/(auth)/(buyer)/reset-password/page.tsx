@@ -8,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import {
     Field,
-    FieldDescription,
     FieldError,
     FieldGroup,
     FieldLabel
@@ -47,10 +46,15 @@ const ResetPassword = () => {
                 newPassword: data.newPassword,
             });
 
+            if (!response.data.success) {
+                toast.success("Failed", {
+                    description: response.data.message,
+                });
+            }
+
             toast("Success", {
                 description: response.data.message,
             });
-
             router.replace(`/login`);
         }
         catch (error) {

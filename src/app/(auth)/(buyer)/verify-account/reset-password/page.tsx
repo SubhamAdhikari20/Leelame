@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import {
     Field,
-    FieldDescription,
     FieldError,
     FieldGroup,
     FieldLabel
@@ -35,7 +34,7 @@ const VerifyAccountResetPassword = () => {
     const verifyAccountResetPasswordForm = useForm<z.infer<typeof verifyAccountResetPasswordSchema>>({
         resolver: zodResolver(verifyAccountResetPasswordSchema),
         defaultValues: {
-            code: ""
+            otp: ""
         },
     });
 
@@ -44,15 +43,19 @@ const VerifyAccountResetPassword = () => {
         try {
             const response = await axios.put<BuyerResponseDtoType>("/api/users/buyer/verify-account/reset-password", {
                 email: email,
-                code: data.code,
+                otp: data.otp,
             });
 
-            if (response.data.success) {
-                toast.success("Success", {
+            if (!response.data.success) {
+                toast.success("Failed", {
                     description: response.data.message,
                 });
-                router.replace(`/reset-password?email=${email}`);
             }
+
+            toast.success("Success", {
+                description: response.data.message,
+            });
+            router.replace(`/reset-password?email=${email}`);
         }
         catch (error) {
             const axiosError = error as AxiosError<BuyerResponseDtoType>;
@@ -82,7 +85,7 @@ const VerifyAccountResetPassword = () => {
                 >
                     <FieldGroup>
                         <Controller
-                            name="code"
+                            name="otp"
                             control={verifyAccountResetPasswordForm.control}
                             render={({ field, fieldState }) => (
                                 <Field data-invalid={fieldState.invalid}>

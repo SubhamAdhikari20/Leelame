@@ -3,5 +3,5 @@ import { z } from "zod";
 import { otpValidation } from "../../user.schema.ts";
 
 export const verifyAccountRegistrationSchema = z.object({
-    code: otpValidation
+    otp: otpValidation
 });
