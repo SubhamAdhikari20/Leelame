@@ -43,7 +43,7 @@ const AdminLogin = () => {
     const loginForm = useForm<z.infer<typeof adminLoginSchema>>({
         resolver: zodResolver(adminLoginSchema),
         defaultValues: {
-            identifier: "",
+            email: "",
             password: "",
             role: "admin"
         },
@@ -54,7 +54,7 @@ const AdminLogin = () => {
         setIsSubmitting(true);
         try {
             const result = await signIn("credentials", {
-                identifier: data.identifier,
+                identifier: data.email,
                 password: data.password,
                 role: data.role,
                 redirect: false,
@@ -167,18 +167,18 @@ const AdminLogin = () => {
                         >
                             <FieldGroup>
                                 <Controller
-                                    name="identifier"
+                                    name="email"
                                     control={loginForm.control}
                                     render={({ field, fieldState }) => (
                                         <Field data-invalid={fieldState.invalid}>
                                             <FieldLabel htmlFor={field.name}>
-                                                Email/Contact
+                                                Email
                                             </FieldLabel>
                                             <Input
                                                 {...field}
                                                 id={field.name}
                                                 aria-invalid={fieldState.invalid}
-                                                placeholder="Email or Contact"
+                                                placeholder="Email"
                                                 autoComplete="off"
                                             />
                                             {fieldState.invalid && (

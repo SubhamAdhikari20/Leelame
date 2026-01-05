@@ -40,7 +40,7 @@ const buyerSchema: Schema<IBuyer> = new Schema({
         match: [/^[a-zA-Z0-9_]+$/, "IUsername can only contain letters, numbers, and underscores"],
         minLength: [3, "IUsername must be at least 3 characters"],
         maxLength: [30, "IUsername cannot exceed 30 characters"],
-        default: null
+        // default: null
     },
     contact: {
         type: String,
@@ -49,23 +49,23 @@ const buyerSchema: Schema<IBuyer> = new Schema({
         trim: true,
         minLength: [10, "Contact must be 10 digits"],
         maxLength: [10, "Contact must be 10 digits"],
-        default: null
+        // default: null
     },
     password: {
         type: String,
         minLength: [8, "Password must be at least 8 characters"],
-        default: null
+        // default: null
     },
     googleId: {
         type: String,
         unique: true,
         sparse: true,
-        default: null
+        // default: null
     },
     bio: {
         type: String,
         maxLength: [500, "Bio cannot exceed 500 characters"],
-        default: null
+        // default: null
     },
     terms: {
         type: Boolean,

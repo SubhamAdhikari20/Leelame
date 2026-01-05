@@ -1,9 +1,7 @@
 // src/schemas/auth/seller/login.schema.ts
 import { z } from "zod";
+import { emailValidation } from "@/schemas/user.schema.ts";
 
-const adminIdentifierValidation = z
-    .string()
-    .min(3, { message: "Email or Contact is required" });
 
 const passwordValidation = z
     .string()
@@ -15,8 +13,7 @@ const roleValidation = z
     }).optional();
 
 export const adminLoginSchema = z.object({
-    // Identifier = Email OR Contact
-    identifier: adminIdentifierValidation,
+    email: emailValidation,
     password: passwordValidation,
     role: roleValidation
 });
