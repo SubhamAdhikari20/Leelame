@@ -2,21 +2,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SellerResponseDto, CreatedSellerDto, VerifyOtpForRegistrationDto, ForgotPasswordDto, ResetPasswordDto, SendEmailForRegistrationDto } from "@/dtos/seller.dto.ts";
 import { SellerService } from "@/services/seller.service.ts";
-import { SellerRepositoryInterface } from "@/interfaces/seller.repository.interface.ts";
-import { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
 import { z } from "zod";
 import { HttpError } from "@/errors/http-error.ts";
 
 
 export class SellerController {
-    private sellerRepo: SellerRepositoryInterface;
-    private userRepo: UserRepositoryInterface;
     private sellerService: SellerService;
 
-    constructor(userRepo: UserRepositoryInterface, sellerRepo: SellerRepositoryInterface) {
-        this.sellerRepo = sellerRepo;
-        this.userRepo = userRepo;
-        this.sellerService = new SellerService(this.sellerRepo, this.userRepo);
+    constructor(sellerService: SellerService) {
+        this.sellerService = sellerService;
     }
 
     createSeller = async (req: NextRequest) => {

@@ -1,6 +1,6 @@
 // src/lib/actions/auth/buyer-auth.action.ts
 "use server";
-import { buyerCheckUsernameUnique, buyerForgotPassword, buyerLoginWithGoogle, buyerResetPassword, buyerSendAccountRegistrationEmail, buyerSignUp, buyerVerifyAccountRegistration, buyerVerifyAccountResetPassword } from "@/lib/api/auth/buyer.auth.ts";
+import { buyerCheckUsernameUnique, buyerForgotPassword, buyerLoginWithGoogle, buyerResetPassword, buyerSendAccountRegistrationEmail, buyerSignUp, buyerVerifyAccountRegistration, buyerVerifyAccountResetPassword } from "@/lib/api/auth/buyer-auth.api.ts";
 import { ForgotPasswordSchemaType } from "@/schemas/auth/buyer/forgot-password.schema.ts";
 import { BuyerSignUpSchemaType } from "@/schemas/auth/buyer/sign-up.schema.ts";
 import { VerifyAccountRegistrationSchemaType } from "@/schemas/auth/buyer/verify-account-registration.schema.ts";

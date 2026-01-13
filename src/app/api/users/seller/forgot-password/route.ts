@@ -1,8 +1,9 @@
 // src/app/api/users/seller/forgot-password/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import dbConnection from "@/lib/db-connect.ts";
-import { SellerRepository } from "@/repositories/seller.repository.ts";
+import dbConnection from "@/config/db.ts";
 import { UserRepository } from "@/repositories/user.repository.ts";
+import { SellerRepository } from "@/repositories/seller.repository.ts";
+import { SellerService } from "@/services/seller.service.ts";
 import { SellerController } from "@/controllers/seller.controller.ts";
 import { HttpError } from "@/errors/http-error.ts";
 
@@ -12,7 +13,9 @@ export const PUT = async (req: NextRequest) => {
 
         const userRepo = new UserRepository();
         const sellerRepo = new SellerRepository();
-        const sellerController = new SellerController(userRepo, sellerRepo);
+        const sellerService = new SellerService(userRepo, sellerRepo);
+        const sellerController = new SellerController(sellerService);
+
         return await sellerController.forgotPassword(req);
     }
     catch (error: any) {

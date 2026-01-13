@@ -1,9 +1,8 @@
 // src/app/(auth)/(seller)/become-seller/page.tsx
 "use client";
-import React, { useState } from "react";
+import React, { startTransition, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import {
@@ -36,15 +35,14 @@ import { Separator } from "@/components/ui/separator.tsx";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs.tsx";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import axios, { AxiosError } from "axios";
-import { SellerResponseDtoType } from "@/dtos/seller.dto.ts";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { sellerSignUpSchema } from "@/schemas/auth/seller/sign-up.schema.ts";
-import { sellerLoginSchema } from "@/schemas/auth/seller/login.schema.ts";
-import { sellerVerifyAccountRegistrationSchema } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
-import { sellerForgotPasswordSchema } from "@/schemas/auth/seller/forgot-password.schema.ts";
-import { sellerResetPasswordSchema } from "@/schemas/auth/seller/reset-password.schema.ts";
+import { SellerSignUpSchema, SellerSignUpSchemaType } from "@/schemas/auth/seller/sign-up.schema.ts";
+import { SellerLoginSchema, SellerLoginSchemaType } from "@/schemas/auth/seller/login.schema.ts";
+import { SellerVerifyAccountRegistrationSchema, SellerVerifyAccountRegistrationSchemaType } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
+import { SellerForgotPasswordSchema, SellerForgotPasswordSchemaType } from "@/schemas/auth/seller/forgot-password.schema.ts";
+import { SellerResetPasswordSchema, SellerResetPasswordSchemaType } from "@/schemas/auth/seller/reset-password.schema.ts";
 import { getSession, signIn } from "next-auth/react";
+import { handleSellerForgotPassword, handleSellerResetPassword, handleSellerSendAccountRegistrationEmail, handleSellerSignUp, handleSellerVerifyAccountRegistration } from "@/lib/actions/auth/seller-auth.action.ts";
 
 
 const BecomeSeller = () => {
@@ -63,8 +61,8 @@ const BecomeSeller = () => {
     const [email, setEmail] = useState("");
     const [iSendingCode, setIsSendingCode] = useState(false);
 
-    const signUpForm = useForm<z.infer<typeof sellerSignUpSchema>>({
-        resolver: zodResolver(sellerSignUpSchema),
+    const signUpForm = useForm<SellerSignUpSchemaType>({
+        resolver: zodResolver(SellerSignUpSchema),
         defaultValues: {
             fullName: "",
             contact: "",
@@ -73,8 +71,8 @@ const BecomeSeller = () => {
         },
     });
 
-    const verifyAccountRegistrationForm = useForm<z.infer<typeof sellerVerifyAccountRegistrationSchema>>({
-        resolver: zodResolver(sellerVerifyAccountRegistrationSchema),
+    const verifyAccountRegistrationForm = useForm<SellerVerifyAccountRegistrationSchemaType>({
+        resolver: zodResolver(SellerVerifyAccountRegistrationSchema),
         defaultValues: {
             otp: "",
             password: "",
@@ -82,8 +80,8 @@ const BecomeSeller = () => {
         },
     });
 
-    const loginForm = useForm<z.infer<typeof sellerLoginSchema>>({
-        resolver: zodResolver(sellerLoginSchema),
+    const loginForm = useForm<SellerLoginSchemaType>({
+        resolver: zodResolver(SellerLoginSchema),
         defaultValues: {
             identifier: "",
             password: "",
@@ -91,15 +89,15 @@ const BecomeSeller = () => {
         },
     });
 
-    const forgotPasswordForm = useForm({
-        resolver: zodResolver(sellerForgotPasswordSchema),
+    const forgotPasswordForm = useForm<SellerForgotPasswordSchemaType>({
+        resolver: zodResolver(SellerForgotPasswordSchema),
         defaultValues: {
             email: ""
         },
     });
 
-    const resetPasswordForm = useForm({
-        resolver: zodResolver(sellerResetPasswordSchema),
+    const resetPasswordForm = useForm<SellerResetPasswordSchemaType>({
+        resolver: zodResolver(SellerResetPasswordSchema),
         defaultValues: {
             otp: "",
             newPassword: "",
@@ -107,28 +105,27 @@ const BecomeSeller = () => {
         },
     });
 
-    const handleSignUp = async (data: z.infer<typeof sellerSignUpSchema>) => {
+    const handleSignUp = async (data: SellerSignUpSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.post<SellerResponseDtoType>("/api/users/seller/sign-up", data);
-
-            if (!response.data.success) {
+            const response = await handleSellerSignUp(data);
+            if (!response.success) {
                 toast.error("Sign Up Failed", {
-                    description: response.data.message,
+                    description: response.message,
                 });
+                return;
             }
 
             toast.success("Sign Up Successful", {
-                description: response.data.message,
+                description: response.message,
             });
             setEmail(data.email);
             setTab("verify-otp-register");
         }
-        catch (error) {
-            const axiosError = error as AxiosError<SellerResponseDtoType>;
-            console.error("Error in sign up of user: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error in sign up of user: ", error);
             toast.error("Error signing up the user", {
-                description: axiosError.response?.data.message,
+                description: error.message,
             });
         }
         finally {
@@ -136,32 +133,27 @@ const BecomeSeller = () => {
         }
     };
 
-    const handleVerifyAccountRegistration = async (data: z.infer<typeof sellerVerifyAccountRegistrationSchema>) => {
+    const handleVerifyAccountRegistration = async (data: SellerVerifyAccountRegistrationSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.put<SellerResponseDtoType>("/api/users/seller/verify-account-registration", {
-                email: email,
-                otp: data.otp,
-                password: data.password,
-            });
-
-            if (!response.data.success) {
+            const response = await handleSellerVerifyAccountRegistration(email, data);
+            if (!response.success) {
                 toast.error("Failed", {
-                    description: response.data.message,
+                    description: response.message,
                 });
+                return;
             }
 
             toast.success("Success", {
-                description: response.data.message,
+                description: response.message,
             });
             setEmail("");
             setTab("login");
         }
-        catch (error) {
-            const axiosError = error as AxiosError<SellerResponseDtoType>;
-            console.error("Error verifying OTP for user registration: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error verifying OTP for user registration: ", error);
             toast.error("Error verifying OTP for user registration", {
-                description: axiosError.response?.data.message,
+                description: error.message,
             });
         }
         finally {
@@ -169,7 +161,7 @@ const BecomeSeller = () => {
         }
     };
 
-    const handleLogin = async (data: z.infer<typeof sellerLoginSchema>) => {
+    const handleLogin = async (data: SellerLoginSchemaType) => {
         setIsSubmitting(true);
         try {
             const result = await signIn("credentials", {
@@ -198,8 +190,10 @@ const BecomeSeller = () => {
                     description: `Logged in as ${user.role}`
                 });
                 if (user.role === "seller") {
-                    router.replace("/seller/dashboard");
+                    startTransition(() => router.replace("/seller/dashboard"));
+                    return;
                 }
+                return;
             }
             else {
                 toast.warning('Account Not Verified', {
@@ -212,13 +206,13 @@ const BecomeSeller = () => {
                         }
                     }
                 });
+                return;
             }
         }
-        catch (error) {
-            const axiosError = error as AxiosError<SellerResponseDtoType>;
-            console.error("Error in seller user login: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error in seller user login: ", error);
             toast.error("Error in seller user login", {
-                description: axiosError.response?.data.message
+                description: error.message
             });
         }
         finally {
@@ -226,30 +220,27 @@ const BecomeSeller = () => {
         }
     };
 
-    const handleForgotPassword = async (data: z.infer<typeof sellerForgotPasswordSchema>) => {
+    const handleForgotPassword = async (data: SellerForgotPasswordSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.put<SellerResponseDtoType>("/api/users/seller/forgot-password", {
-                email: data.email,
-            });
-
-            if (!response.data.success) {
+            const response = await handleSellerForgotPassword(data);
+            if (!response.success) {
                 toast.error("Failed", {
-                    description: response.data.message,
+                    description: response.message,
                 });
+                return;
             }
 
             toast.success("Success", {
-                description: response.data.message
+                description: response.message
             });
             setEmail(data.email);
             setTab("reset-password");
         }
-        catch (error) {
-            const axiosError = error as AxiosError<SellerResponseDtoType>;
-            console.error("Error sending forgot password request", axiosError);
+        catch (error: Error | any) {
+            console.error("Error sending forgot password request", error);
             toast.error("Failed", {
-                description: axiosError.response?.data.message || "Failed to send reset instructions",
+                description: error.message || "Failed to send reset instructions",
             });
         }
         finally {
@@ -257,32 +248,27 @@ const BecomeSeller = () => {
         }
     };
 
-    const handleResetPassword = async (data: z.infer<typeof sellerResetPasswordSchema>) => {
+    const handleResetPassword = async (data: SellerResetPasswordSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.put<SellerResponseDtoType>("/api/users/seller/reset-password", {
-                email: email,
-                otp: data.otp,
-                newPassword: data.newPassword,
-            });
-
-            if (!response.data.success) {
+            const response = await handleSellerResetPassword(email, data);
+            if (!response.success) {
                 toast.error("Failed", {
-                    description: response.data.message,
+                    description: response.message,
                 });
+                return;
             }
 
             toast.success("Success", {
-                description: response.data.message,
+                description: response.message,
             });
             setEmail("");
             setTab("login");
         }
-        catch (error) {
-            const axiosError = error as AxiosError<SellerResponseDtoType>;
-            console.error("Error in verifying OTP for reseting password: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error in verifying OTP for reseting password: ", error);
             toast.error("Failed to verify OTP", {
-                description: axiosError.response?.data.message,
+                description: error.message,
             });
         }
         finally {
@@ -293,26 +279,23 @@ const BecomeSeller = () => {
     const sendAccountVerificationCode = async () => {
         setIsSendingCode(true);
         try {
-            const response = await axios.put<SellerResponseDtoType>("/api/users/seller/send-account-registration-email", {
-                email: email,
-            });
-
-            if (!response.data.success) {
+            const response = await handleSellerSendAccountRegistrationEmail(email);
+            if (!response.success) {
                 toast.error("Failed", {
-                    description: response.data.message,
+                    description: response.message,
                 });
+                return;
             }
 
             toast.success("Success", {
-                description: response.data.message
+                description: response.message
             });
             setTab("verify-otp-register");
         }
-        catch (error) {
-            const axiosError = error as AxiosError<SellerResponseDtoType>;
-            console.error("Error sending account verification email: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error sending account verification email: ", error);
             toast.error("Error sending account verification email", {
-                description: axiosError.response?.data.message
+                description: error.message
             });
         }
         finally {

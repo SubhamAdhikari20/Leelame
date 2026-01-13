@@ -2,7 +2,7 @@
 import { z } from "zod";
 import { otpValidation, passwordValidation, confirmPasswordValidation } from "../../user.schema.ts";
 
-export const sellerVerifyAccountRegistrationSchema = z.object({
+export const SellerVerifyAccountRegistrationSchema = z.object({
     otp: otpValidation,
     password: passwordValidation,
     confirmPassword: confirmPasswordValidation
@@ -15,7 +15,10 @@ export const sellerVerifyAccountRegistrationSchema = z.object({
         });
     }
 });
+export type SellerVerifyAccountRegistrationSchemaType = z.infer<typeof SellerVerifyAccountRegistrationSchema>;
 
-export const sellerVerifyAccountRegistrationFromVerifyDialogBoxFromLoginSchema = z.object({
+
+export const SellerVerifyAccountRegistrationFromVerifyDialogBoxFromLoginSchema = z.object({
     otp: otpValidation
 });
+export type SellerVerifyAccountRegistrationFromVerifyDialogBoxFromLoginSchemaType = z.infer<typeof SellerVerifyAccountRegistrationFromVerifyDialogBoxFromLoginSchema>;

@@ -2,7 +2,7 @@
 import { z } from "zod";
 import { otpValidation, passwordValidation, confirmPasswordValidation } from "../../user.schema.ts";
 
-export const sellerResetPasswordSchema = z.object({
+export const SellerResetPasswordSchema = z.object({
     otp: otpValidation,
     newPassword: passwordValidation,
     confirmPassword: confirmPasswordValidation
@@ -15,3 +15,4 @@ export const sellerResetPasswordSchema = z.object({
         });
     }
 });
+export type SellerResetPasswordSchemaType = z.infer<typeof SellerResetPasswordSchema>;

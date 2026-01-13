@@ -10,15 +10,15 @@ import { HttpError } from "@/errors/http-error.ts";
 
 
 export class SellerService {
-    private sellerRepo: SellerRepositoryInterface;
     private userRepo: UserRepositoryInterface;
+    private sellerRepo: SellerRepositoryInterface;
 
     constructor(
-        sellerRepo: SellerRepositoryInterface,
-        userRepo: UserRepositoryInterface
+        userRepo: UserRepositoryInterface,
+        sellerRepo: SellerRepositoryInterface
     ) {
-        this.sellerRepo = sellerRepo;
         this.userRepo = userRepo;
+        this.sellerRepo = sellerRepo;
     }
 
     createSeller = async (sellerData: CreatedSellerDtoType): Promise<SellerResponseDtoType | null> => {

@@ -1,4 +1,4 @@
-// src/lib/api/auth/buyer.auth.ts
+// src/lib/api/auth/buyer-auth.api.ts
 import axios, { AxiosErrorType } from "@/lib/api/axios.ts";
 import { API } from "@/lib/api/endpoints.ts";
 import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";

@@ -14,9 +14,10 @@ const roleValidation = z
         error: "Role is required"
     }).optional();
 
-export const sellerLoginSchema = z.object({
+export const SellerLoginSchema = z.object({
     // Identifier = Email OR Contact
     identifier: sellerIdentifierValidation,
     password: passwordValidation,
     role: roleValidation
 });
+export type SellerLoginSchemaType = z.infer<typeof SellerLoginSchema>;
