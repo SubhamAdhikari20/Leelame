@@ -1,9 +1,8 @@
 // src/app/(auth)/(buyer)/reset-password/[email]/page.tsx
 "use client";
-import React, { useState } from "react";
+import React, { startTransition, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
-import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import {
@@ -16,9 +15,8 @@ import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Loader2 } from "lucide-react";
-import axios, { AxiosError } from "axios";
-import { resetPasswordSchema } from "@/schemas/auth/buyer/reset-password.schema.ts";
-import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
+import { ResetPasswordSchema, ResetPasswordSchemaType } from "@/schemas/auth/buyer/reset-password.schema.ts";
+import { handleBuyerResetPassword } from "@/lib/actions/auth/buyer-auth.action.ts";
 
 
 const ResetPassword = () => {
@@ -30,38 +28,34 @@ const ResetPassword = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const resetPasswordForm = useForm<z.infer<typeof resetPasswordSchema>>({
-        resolver: zodResolver(resetPasswordSchema),
+    const resetPasswordForm = useForm<ResetPasswordSchemaType>({
+        resolver: zodResolver(ResetPasswordSchema),
         defaultValues: {
             newPassword: "",
             confirmPassword: ""
         },
     });
 
-    const onSubmit = async (data: z.infer<typeof resetPasswordSchema>) => {
+    const onSubmit = async (data: ResetPasswordSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.put<BuyerResponseDtoType>("/api/users/buyer/reset-password", {
-                email: email,
-                newPassword: data.newPassword,
-            });
-
-            if (!response.data.success) {
+            const response = await handleBuyerResetPassword(email ?? "", data);
+            if (!response.success) {
                 toast.error("Failed", {
-                    description: response.data.message,
+                    description: response.message,
                 });
+                return;
             }
 
             toast.success("Success", {
-                description: response.data.message,
+                description: response.message,
             });
-            router.replace(`/login`);
+            startTransition(() => router.replace(`/login`));
         }
-        catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
-            console.error("Error in reseting password of the user", axiosError);
+        catch (error: Error | any) {
+            console.error("Error in reseting password of the user", error);
             toast("Reset Password failed", {
-                description: axiosError.response?.data.message,
+                description: error.message,
             });
         }
         finally {

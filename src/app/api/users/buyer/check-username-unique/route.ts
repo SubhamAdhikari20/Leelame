@@ -1,18 +1,21 @@
 // src/api/users/buyer/check-username-unique/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/db-connect.ts";
+import dbConnection from "@/config/db.ts";
 import { UserRepository } from "@/repositories/user.repository.ts";
 import { BuyerRepository } from "@/repositories/buyer.repository.ts";
+import { BuyerService } from "@/services/buyer.service.ts";
 import { BuyerController } from "@/controllers/buyer.controller.ts";
 import { HttpError } from "@/errors/http-error.ts";
 
 export const GET = async (req: NextRequest) => {
     try {
-        await dbConnect();
+        await dbConnection();
 
         const userRepo = new UserRepository();
         const buyerRepo = new BuyerRepository();
-        const buyerController = new BuyerController(userRepo, buyerRepo);
+        const buyerService = new BuyerService(userRepo, buyerRepo);
+        const buyerController = new BuyerController(buyerService);
+
         return await buyerController.checkUsernameUnique(req);
     }
     catch (error: any) {

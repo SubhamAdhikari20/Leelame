@@ -1,8 +1,7 @@
 // src/app/(auth)/(buyer)/sign-up/page.tsx
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, startTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Controller, useForm } from "react-hook-form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,9 +20,8 @@ import { Button } from "@/components/ui/button.tsx";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import axios, { AxiosError } from "axios";
-import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
-import { buyerSignUpSchema } from "@/schemas/auth/buyer/sign-up.schema.ts";
+import { BuyerSignUpSchema, BuyerSignUpSchemaType } from "@/schemas/auth/buyer/sign-up.schema.ts";
+import { handleBuyerSignUp, handleBuyerCheckUsernameUnique, handleBuyerLoginWithGoogle } from "@/lib/actions/auth/buyer-auth.action.ts";
 
 
 const SignUp = () => {
@@ -43,20 +41,20 @@ const SignUp = () => {
                 setIsCheckingUsername(true);
                 setUsernameMessage("");
                 try {
-                    const response = await axios.get<BuyerResponseDtoType>(`/api/users/buyer/check-username-unique?username=${username}`);
-                    if (response.data.success) {
-                        setUsernameMessage(response.data.message);
+                    const response = await handleBuyerCheckUsernameUnique(username);
+                    if (!response.success) {
+                        toast.error("Error checking username uniqueness: ", {
+                            description: response.message
+                        });
+                        return;
                     }
-                }
-                catch (error) {
-                    const axiosError = error as AxiosError<BuyerResponseDtoType>;
-                    setUsernameMessage(
-                        axiosError.response?.data.message ?? "Error checking username uniqueness!"
-                    );
 
-                    // toast.error("Error checking username uniqueness.", {
-                    //     description: error.response?.data.message
-                    // });
+                    setUsername(response.message || "");
+                }
+                catch (error: Error | any) {
+                    setUsernameMessage(
+                        error.message ?? "Error checking username uniqueness!"
+                    );
                 }
                 finally {
                     setIsCheckingUsername(false);
@@ -67,8 +65,8 @@ const SignUp = () => {
     }, [username]);
 
     // zod implementation using react hook form
-    const signUpForm = useForm<z.infer<typeof buyerSignUpSchema>>({
-        resolver: zodResolver(buyerSignUpSchema),
+    const signUpForm = useForm<BuyerSignUpSchemaType>({
+        resolver: zodResolver(BuyerSignUpSchema),
         defaultValues: {
             fullName: "",
             username: "",
@@ -81,27 +79,26 @@ const SignUp = () => {
         },
     });
 
-    const onSubmit = async (data: z.infer<typeof buyerSignUpSchema>) => {
+    const onSubmit = async (data: BuyerSignUpSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.post<BuyerResponseDtoType>("/api/users/buyer/sign-up", data);
-
-            if (!response.data.success) {
+            const response = await handleBuyerSignUp(data);
+            if (!response.success) {
                 toast.error("Sign Up Failed", {
-                    description: response.data.message,
+                    description: response.message,
                 });
+                return;
             }
 
             toast.success("Sign Up Successful", {
-                description: response.data.message,
+                description: response.message,
             });
-            router.replace(`/verify-account/registration?username=${data.username}`);
+            startTransition(() => router.replace(`/verify-account/registration?username=${data.username}`));
         }
-        catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
-            console.error("Error in sign up of user: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error in sign up of user: ", error);
             toast.error("Error signing up the user", {
-                description: axiosError.response?.data.message,
+                description: error.message,
             });
         }
         finally {
@@ -112,25 +109,28 @@ const SignUp = () => {
     const loginWithGoogle = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
-                // const response = await loginUserWithGoogle(tokenResponse.access_token);
-                const response = await axios.post<BuyerResponseDtoType>("/api/auth/google-login", { tokenResponse });
-                if (response.data.success) {
-                    toast.success("Google Login Successful", {
-                        description: response.data.message,
+                const response = await handleBuyerLoginWithGoogle(tokenResponse.access_token);
+                if (!response.success) {
+                    toast.error("Google Login Failed", {
+                        description: response.message,
                     });
-                    router.replace("/");
+                    return;
                 }
+
+                toast.success("Google Login Successful", {
+                    description: response.message,
+                });
+                startTransition(() => router.replace("/"));
             }
-            catch (error) {
-                const axiosError = error as AxiosError<BuyerResponseDtoType>;
-                console.error("Error in google login: ", axiosError);
+            catch (error: Error | any) {
+                console.error("Error in google login: ", error);
                 toast.error("Error in google login", {
-                    description: axiosError.response?.data.message
+                    description: error.message
                 });
             }
         },
         onError: () => {
-            toast.error("Google login failed");
+            toast.error("Google Login Failed");
         },
     });
 

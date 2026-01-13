@@ -1,10 +1,9 @@
 // src/app/(auth)/(buyer)/forgot-password/page.tsx
 "use client";
-import React, { useState } from "react";
+import React, { startTransition, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
-import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -16,47 +15,42 @@ import {
 } from "@/components/ui/field.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
-import axios, { AxiosError } from "axios";
-import { forgotPasswordSchema } from "@/schemas/auth/buyer/forgot-password.schema.ts";
-import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
+import { ForgotPasswordSchema, ForgotPasswordSchemaType } from "@/schemas/auth/buyer/forgot-password.schema.ts";
+import { handleBuyerForgotPassword } from "@/lib/actions/auth/buyer-auth.action.ts";
 
 
 const ForgotPassword = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const router = useRouter();
-    const forgotPasswordForm = useForm<z.infer<typeof forgotPasswordSchema>>({
-        resolver: zodResolver(forgotPasswordSchema),
+    const forgotPasswordForm = useForm<ForgotPasswordSchemaType>({
+        resolver: zodResolver(ForgotPasswordSchema),
         defaultValues: {
             email: ""
         },
     });
 
-    const onSubmit = async (data: z.infer<typeof forgotPasswordSchema>) => {
+    const onSubmit = async (data: ForgotPasswordSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.put<BuyerResponseDtoType>("/api/users/buyer/forgot-password", {
-                email: data.email,
-            });
-
-            if (!response.data.success) {
+            const response = await handleBuyerForgotPassword(data);
+            if (!response.success) {
                 toast.error("Failed", {
-                    description: response.data.message,
+                    description: response.message,
                 });
+                return;
             }
 
             toast.success("Success", {
-                description: response.data.message,
+                description: response.message,
             });
-            router.replace(`/verify-account/reset-password?email=${data.email}`);
+            startTransition(() => router.replace(`/verify-account/reset-password?email=${data.email}`));
         }
-        catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
-            console.error("Error sending forgot password request", axiosError);
+        catch (error: Error | any) {
+            console.error("Error sending forgot password request", error);
             toast("Failed", {
                 description:
-                    axiosError.response?.data.message ||
-                    "Failed to send reset instructions",
+                    error.message
             });
         }
         finally {

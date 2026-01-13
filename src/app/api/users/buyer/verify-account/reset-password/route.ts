@@ -1,8 +1,9 @@
 // src/app/api/users/buyer/verify-account/reset-password/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import dbConnection from "@/lib/db-connect.ts";
+import dbConnection from "@/config/db.ts";
 import { UserRepository } from "@/repositories/user.repository.ts";
 import { BuyerRepository } from "@/repositories/buyer.repository.ts";
+import { BuyerService } from "@/services/buyer.service.ts";
 import { BuyerController } from "@/controllers/buyer.controller.ts";
 import { HttpError } from "@/errors/http-error.ts";
 
@@ -12,7 +13,9 @@ export const PUT = async (req: NextRequest) => {
 
         const userRepo = new UserRepository();
         const buyerRepo = new BuyerRepository();
-        const buyerController = new BuyerController(userRepo, buyerRepo);
+        const buyerService = new BuyerService(userRepo, buyerRepo);
+        const buyerController = new BuyerController(buyerService);
+
         return await buyerController.verifyOtpForResetPassword(req);
     }
     catch (error: any) {

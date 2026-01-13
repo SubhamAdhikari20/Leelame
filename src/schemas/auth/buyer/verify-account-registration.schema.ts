@@ -2,6 +2,8 @@
 import { z } from "zod";
 import { otpValidation } from "../../user.schema.ts";
 
-export const verifyAccountRegistrationSchema = z.object({
+export const VerifyAccountRegistrationSchema = z.object({
     otp: otpValidation
 });
+
+export type VerifyAccountRegistrationSchemaType = z.infer<typeof VerifyAccountRegistrationSchema>;

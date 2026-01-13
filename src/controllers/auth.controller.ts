@@ -11,18 +11,10 @@ import { HttpError } from "@/errors/http-error.ts";
 
 
 export class AuthController {
-    private userRepo: UserRepositoryInterface;
-    private buyerRepo: BuyerRepositoryInterface;
-    private sellerRepo: SellerRepositoryInterface;
-    private adminRepo: AdminRepositoryInterface;
     private authService: AuthService;
 
-    constructor(userRepo: UserRepositoryInterface, buyerRepo: BuyerRepositoryInterface, sellerRepo: SellerRepositoryInterface, adminRepo: AdminRepositoryInterface) {
-        this.userRepo = userRepo;
-        this.buyerRepo = buyerRepo;
-        this.sellerRepo = sellerRepo;
-        this.adminRepo = adminRepo;
-        this.authService = new AuthService(this.userRepo, this.buyerRepo, this.sellerRepo, this.adminRepo);
+    constructor(authService: AuthService) {
+        this.authService = authService;
     }
 
     authenticate = async (req: NextRequest) => {

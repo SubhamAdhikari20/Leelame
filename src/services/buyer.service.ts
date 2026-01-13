@@ -14,8 +14,8 @@ export class BuyerService {
     private userRepo: UserRepositoryInterface;
 
     constructor(
-        buyerRepo: BuyerRepositoryInterface,
-        userRepo: UserRepositoryInterface
+        userRepo: UserRepositoryInterface,
+        buyerRepo: BuyerRepositoryInterface
     ) {
         this.buyerRepo = buyerRepo;
         this.userRepo = userRepo;

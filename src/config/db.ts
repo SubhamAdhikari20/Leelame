@@ -1,4 +1,4 @@
-// src/lib/db-connect.ts
+// src/config/db.ts
 import mongoose from "mongoose";
 
 type ConnectionObject = {

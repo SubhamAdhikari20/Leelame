@@ -8,7 +8,7 @@ const termsAndConditionsValidation = z
         message: "You must accept the terms and conditions"
     });
 
-export const buyerSignUpSchema = z.object({
+export const BuyerSignUpSchema = z.object({
     fullName: fullNameValidation,
     username: usernameValidation,
     contact: contactValidation,
@@ -26,3 +26,5 @@ export const buyerSignUpSchema = z.object({
         });
     }
 });
+
+export type BuyerSignUpSchemaType = z.infer<typeof BuyerSignUpSchema>;

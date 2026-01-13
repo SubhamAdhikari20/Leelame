@@ -2,21 +2,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { BuyerResponseDto, CheckUsernameUniqueDto, CreatedBuyerDto, ForgotPasswordDto, ResetPasswordDto, SendEmailForRegistrationDto, VerifyOtpForRegistrationDto, VerifyOtpForResetPasswordDto } from "@/dtos/buyer.dto.ts";
 import { BuyerService } from "@/services/buyer.service.ts";
-import { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interface.ts";
-import { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
 import { z } from "zod";
 import { HttpError } from "@/errors/http-error.ts";
 
 
 export class BuyerController {
-    private buyerRepo: BuyerRepositoryInterface;
-    private userRepo: UserRepositoryInterface;
     private buyerService: BuyerService;
 
-    constructor(userRepo: UserRepositoryInterface, buyerRepo: BuyerRepositoryInterface) {
-        this.buyerRepo = buyerRepo;
-        this.userRepo = userRepo;
-        this.buyerService = new BuyerService(this.buyerRepo, this.userRepo);
+    constructor(buyerService: BuyerService) {
+        this.buyerService = buyerService;
     }
 
     createBuyer = async (req: NextRequest) => {
@@ -199,7 +193,7 @@ export class BuyerController {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: validatedData.error
+                        message: z.prettifyError(validatedData.error)
                     },
                     { status: 400 }
                 );
@@ -247,7 +241,7 @@ export class BuyerController {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: validatedData.error
+                        message: z.prettifyError(validatedData.error)
                     },
                     { status: 400 }
                 );
@@ -295,7 +289,7 @@ export class BuyerController {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: validatedData.error
+                        message: z.prettifyError(validatedData.error)
                     },
                     { status: 400 }
                 );
@@ -343,7 +337,7 @@ export class BuyerController {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: validatedData.error
+                        message: z.prettifyError(validatedData.error)
                     },
                     { status: 400 }
                 );

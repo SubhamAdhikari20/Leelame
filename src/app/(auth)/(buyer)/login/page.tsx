@@ -1,9 +1,8 @@
 // src/app/(auth)/(buyer)/login/page.tsx
 "use client";
-import React, { useState } from "react";
+import React, { startTransition, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -28,8 +27,9 @@ import { FcGoogle } from "react-icons/fc"
 import { useGoogleLogin } from "@react-oauth/google";
 import { getSession, signIn } from "next-auth/react";
 import axios, { AxiosError } from "axios";
-import { buyerLoginSchema } from "@/schemas/auth/buyer/login.schema.ts";
+import { BuyerLoginSchema, BuyerLoginSchemaType } from "@/schemas/auth/buyer/login.schema.ts";
 import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
+import { handleBuyerLoginWithGoogle, handleBuyerSendAccountRegistrationEmail } from "@/lib/actions/auth/buyer-auth.action.ts";
 
 
 const Login = () => {
@@ -42,8 +42,8 @@ const Login = () => {
 
     const router = useRouter();
 
-    const loginForm = useForm<z.infer<typeof buyerLoginSchema>>({
-        resolver: zodResolver(buyerLoginSchema),
+    const loginForm = useForm<BuyerLoginSchemaType>({
+        resolver: zodResolver(BuyerLoginSchema),
         defaultValues: {
             identifier: "",
             password: "",
@@ -52,7 +52,7 @@ const Login = () => {
     });
 
     // Login
-    const onSubmit = async (data: z.infer<typeof buyerLoginSchema>) => {
+    const onSubmit = async (data: BuyerLoginSchemaType) => {
         setIsSubmitting(true);
         try {
             const result = await signIn("credentials", {
@@ -109,8 +109,10 @@ const Login = () => {
                     description: `Logged in as ${user.role}`
                 });
                 if (user.role === "buyer") {
-                    router.replace(`/${user.username}`);
+                    startTransition(() => router.replace(`/${user.username}`));
+                    return;
                 }
+                return;
             }
             else {
                 toast.warning("Account Not Verified", {
@@ -123,13 +125,13 @@ const Login = () => {
                         }
                     }
                 });
+                return;
             }
         }
-        catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
-            console.error("Error in user login: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error in user login: ", error);
             toast.error("Error in user login", {
-                description: axiosError.response?.data.message
+                description: error.message
             });
         }
         finally {
@@ -140,14 +142,19 @@ const Login = () => {
     const loginWithGoogle = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
-                const response = await axios.post<BuyerResponseDtoType>("/api/auth/google-login", { tokenResponse });
+                const response = await handleBuyerLoginWithGoogle(tokenResponse.access_token);
 
-                if (response.data.success) {
-                    toast.success("Google Login Successful", {
-                        description: response.data.message,
+                if (response.success) {
+                    toast.error("Google Login Failed", {
+                        description: response.message,
                     });
-                    router.replace(`/`);
+                    return;
                 }
+
+                toast.success("Google Login Successful", {
+                    description: response.message,
+                });
+                startTransition(() => router.replace("/"));
             }
             catch (error) {
                 const axiosError = error as AxiosError<BuyerResponseDtoType>;
@@ -165,27 +172,24 @@ const Login = () => {
     const sendAccountVerificationCode = async () => {
         setIsSendingCode(true);
         try {
-            const response = await axios.put<BuyerResponseDtoType>("/api/users/buyer/send-account-registration-email", {
-                email: emailToVerify,
-            });
-
-            if (!response.data.success || response.data.user == null) {
+            const response = await handleBuyerSendAccountRegistrationEmail(emailToVerify);
+            if (!response.success || response.data == null) {
                 toast.error("Failed", {
-                    description: response.data.message
+                    description: response.message
                 });
+                return;
             }
 
             toast.success("Success", {
-                description: response.data.message
+                description: response.message
             });
-            const buyer = response.data.user;
-            router.replace(`/verify-account/registration?username=${buyer?.username}`);
+            const buyer = response.data;
+            startTransition(() => router.replace(`/verify-account/registration?username=${buyer?.username}`));
         }
-        catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
-            console.error("Error sending account verification email: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error sending account verification email: ", error);
             toast.error("Error sending account verification email", {
-                description: axiosError.response?.data.message
+                description: error.message
             });
         }
         finally {

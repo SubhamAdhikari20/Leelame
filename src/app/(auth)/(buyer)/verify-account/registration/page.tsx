@@ -1,11 +1,10 @@
 // src/app/(auth)/(buyer)/verify-account/registration/page.tsx
 "use client";
-import React, { useState } from "react";
+import React, { startTransition, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
-import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
     Field,
@@ -19,9 +18,9 @@ import {
     InputOTPSlot,
 } from "@/components/ui/input-otp.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import axios, { AxiosError } from "axios";
-import { verifyAccountRegistrationSchema } from "@/schemas/auth/buyer/verify-account-registration.schema.ts";
-import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
+import { VerifyAccountRegistrationSchema, VerifyAccountRegistrationSchemaType } from "@/schemas/auth/buyer/verify-account-registration.schema.ts";
+import { handleBuyerVerifyAccountRegistration } from "@/lib/actions/auth/buyer-auth.action.ts";
+
 
 const VerifyAccountRegistration = () => {
     const [isVerifying, setIsVerifying] = useState(false);
@@ -30,37 +29,37 @@ const VerifyAccountRegistration = () => {
     const searchParams = useSearchParams();
     const username = searchParams.get("username");
 
-    const verifyAccountRegistrationForm = useForm<z.infer<typeof verifyAccountRegistrationSchema>>({
-        resolver: zodResolver(verifyAccountRegistrationSchema),
+    const verifyAccountRegistrationForm = useForm<VerifyAccountRegistrationSchemaType>({
+        resolver: zodResolver(VerifyAccountRegistrationSchema),
         defaultValues: {
             otp: "",
         },
     });
 
-    const onSubmit = async (data: z.infer<typeof verifyAccountRegistrationSchema>) => {
+    const onSubmit = async (data: VerifyAccountRegistrationSchemaType) => {
         setIsVerifying(true);
         try {
-            const response = await axios.put<BuyerResponseDtoType>("/api/users/buyer/verify-account/registration", {
-                username: username,
-                otp: data.otp
-            });
+            const response = await handleBuyerVerifyAccountRegistration(
+                username ?? "",
+                data
+            );
 
-            if (!response.data.success) {
+            if (!response.success) {
                 toast.error("Failed", {
-                    description: response.data.message,
+                    description: response.message,
                 });
+                return;
             }
 
             toast.success("Success", {
-                description: response.data.message,
+                description: response.message,
             });
-            router.replace("/login");
+            startTransition(() => router.replace("/login"));
         }
-        catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
-            console.error("Error verifying OTP for user registration: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error verifying OTP for user registration: ", error);
             toast.error("Error verifying OTP for user registration", {
-                description: axiosError.response?.data.message,
+                description: error.message,
             });
         }
         finally {

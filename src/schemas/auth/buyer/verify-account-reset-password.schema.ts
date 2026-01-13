@@ -6,6 +6,8 @@ const verifyCodeResetPasswordSchema = z
     .length(6, { message: "Verification code must be 6 characters long" })
     .regex(/^[0-9]+$/, { message: "Verification code must contain only digits" })
 
-export const verifyAccountResetPasswordSchema = z.object({
+export const VerifyAccountResetPasswordSchema = z.object({
     otp: verifyCodeResetPasswordSchema
 });
+
+export type VerifyAccountResetPasswordSchemaType = z.infer<typeof VerifyAccountResetPasswordSchema>;

@@ -6,6 +6,8 @@ const forgotPasswordValidation = z
     .min(5, { message: "Email must be at least 5 characters long" })
     .max(50, { message: "Email must not exceed 50 characters" });
 
-export const forgotPasswordSchema = z.object({
+export const ForgotPasswordSchema = z.object({
     email: forgotPasswordValidation
 });
+
+export type ForgotPasswordSchemaType = z.infer<typeof ForgotPasswordSchema>;
