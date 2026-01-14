@@ -2,21 +2,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AdminResponseDto, CreatedAdminDto, ForgotPasswordDto, ResetPasswordDto, SendEmailForRegistrationDto, VerifyOtpForRegistrationDto, VerifyOtpForResetPasswordDto } from "@/dtos/admin.dto.ts";
 import { AdminService } from "@/services/admin.service.ts";
-import { AdminRepositoryInterface } from "@/interfaces/admin.repository.interface.ts";
-import { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
 import { z } from "zod";
 import { HttpError } from "@/errors/http-error.ts";
 
 
 export class AdminController {
-    private adminRepo: AdminRepositoryInterface;
-    private userRepo: UserRepositoryInterface;
     private adminService: AdminService;
 
-    constructor(userRepo: UserRepositoryInterface, adminRepo: AdminRepositoryInterface) {
-        this.adminRepo = adminRepo;
-        this.userRepo = userRepo;
-        this.adminService = new AdminService(this.adminRepo, this.userRepo);
+    constructor(adminService: AdminService) {
+        this.adminService = adminService;
     }
 
     createAdmin = async (req: NextRequest) => {
@@ -57,7 +51,7 @@ export class AdminController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error in admin signup controller:", error);
 
             if (error instanceof HttpError) {
@@ -105,7 +99,7 @@ export class AdminController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error in admin verify otp for registration controller:", error);
 
             if (error instanceof HttpError) {
@@ -153,7 +147,7 @@ export class AdminController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error in admin forgot password controller:", error);
 
             if (error instanceof HttpError) {
@@ -201,7 +195,7 @@ export class AdminController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error in admin verify otp for reset password controller:", error);
 
             if (error instanceof HttpError) {
@@ -249,7 +243,7 @@ export class AdminController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error in admin reset password controller:", error);
 
             if (error instanceof HttpError) {
@@ -309,7 +303,7 @@ export class AdminController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error in admin send verication email controller:", error);
 
             if (error instanceof HttpError) {

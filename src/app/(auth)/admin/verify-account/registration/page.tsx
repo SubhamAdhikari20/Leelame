@@ -1,11 +1,10 @@
 // src/app/(auth)/admin/verify-account/registration/page.tsx
 "use client";
-import React, { useState } from "react";
+import React, { startTransition, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
-import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
     Field,
@@ -19,9 +18,9 @@ import {
     InputOTPSlot,
 } from "@/components/ui/input-otp.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import axios, { AxiosError } from "axios";
-import { verifyAccountRegistrationSchema } from "@/schemas/auth/admin/verify-account-registration.schema.ts";
-import { AdminResponseDtoType } from "@/dtos/admin.dto.ts";
+import { AdminVerifyAccountRegistrationSchema, AdminVerifyAccountRegistrationSchemaType } from "@/schemas/auth/admin/verify-account-registration.schema.ts";
+import { handleAdminVerifyAccountRegistration } from "@/lib/actions/auth/admin-auth.action.ts";
+
 
 const VerifyAccountRegistration = () => {
     const [isVerifying, setIsVerifying] = useState(false);
@@ -30,37 +29,33 @@ const VerifyAccountRegistration = () => {
     const searchParams = useSearchParams();
     const email = searchParams.get("email");
 
-    const verifyAccountRegistrationForm = useForm<z.infer<typeof verifyAccountRegistrationSchema>>({
-        resolver: zodResolver(verifyAccountRegistrationSchema),
+    const verifyAccountRegistrationForm = useForm<AdminVerifyAccountRegistrationSchemaType>({
+        resolver: zodResolver(AdminVerifyAccountRegistrationSchema),
         defaultValues: {
             otp: "",
         },
     });
 
-    const onSubmit = async (data: z.infer<typeof verifyAccountRegistrationSchema>) => {
+    const onSubmit = async (data: AdminVerifyAccountRegistrationSchemaType) => {
         setIsVerifying(true);
         try {
-            const response = await axios.put<AdminResponseDtoType>("/api/users/admin/verify-account/registration", {
-                email: email,
-                otp: data.otp
-            });
-
-            if (!response.data.success) {
+            const response = await handleAdminVerifyAccountRegistration(email ?? "", data);
+            if (!response.success) {
                 toast.error("Failed", {
-                    description: response.data.message,
+                    description: response.message,
                 });
+                return;
             }
 
             toast.success("Success", {
-                description: response.data.message,
+                description: response.message,
             });
-            router.replace("/admin/login");
+            startTransition(() => router.replace("/admin/login"));
         }
-        catch (error) {
-            const axiosError = error as AxiosError<AdminResponseDtoType>;
-            console.error("Error verifying OTP for user registration: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error verifying OTP for user registration: ", error);
             toast.error("Error verifying OTP for user registration", {
-                description: axiosError.response?.data.message,
+                description: error.message,
             });
         }
         finally {

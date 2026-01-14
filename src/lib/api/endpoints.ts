@@ -21,5 +21,14 @@ export const API = {
             FORGOT_PASSWORD: "/api/users/seller/forgot-password",
             RESET_PASSWORD: "/api/users/seller/reset-password"
         },
+        ADMIN: {
+            SIGN_UP: "/api/users/admin/sign-up",
+            // LOGIN: "/api/users/admin/login",
+            SEND_ACCOUNT_REGISTRATION_EMAIL: "/api/users/admin/send-account-registration-email",
+            VERIFY_ACCOUNT_REGISTRATION: "/api/users/admin/verify-account-registration",
+            FORGOT_PASSWORD: "/api/users/admin/forgot-password",
+            VERIFY_ACCOUNT_RESET_PASSWORD: "/api/users/admin/verify-account/reset-password",
+            RESET_PASSWORD: "/api/users/admin/reset-password"
+        }
     }
 };

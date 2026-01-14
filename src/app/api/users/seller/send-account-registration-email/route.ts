@@ -18,7 +18,7 @@ export const PUT = async (req: NextRequest) => {
 
         return await sellerController.handleSendEmailForRegistration(req);
     }
-    catch (error: any) {
+    catch (error: Error | any) {
         console.error("Error sending account verification email for seller route:", error);
 
         if (error instanceof HttpError) {

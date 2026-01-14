@@ -18,7 +18,7 @@ export const POST = async (req: NextRequest) => {
 
         return await buyerController.createBuyer(req);
     }
-    catch (error: any) {
+    catch (error: Error | any) {
         console.error("Error in buyer signup route:", error);
 
         if (error instanceof HttpError) {

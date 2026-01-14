@@ -2,10 +2,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LoginUserDto, AuthResponseDto } from "@/dtos/auth.dto.ts";
 import { AuthService } from "@/services/auth.service.ts";
-import { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
-import { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interface.ts";
-import { SellerRepositoryInterface } from "@/interfaces/seller.repository.interface.ts";
-import { AdminRepositoryInterface } from "@/interfaces/admin.repository.interface.ts";
 import { z } from "zod";
 import { HttpError } from "@/errors/http-error.ts";
 
@@ -55,7 +51,7 @@ export class AuthController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error) {
+        catch (error: Error | any) {
             console.error("Error in login auth controller:", error);
 
             if (error instanceof HttpError) {

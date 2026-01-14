@@ -1,8 +1,7 @@
 // src/app/(auth)/admin/verify-account/reset-password/[email]/page.tsx
 "use client";
-import React, { useState } from "react";
+import React, { startTransition, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "sonner";
@@ -19,9 +18,8 @@ import {
     InputOTPSlot,
 } from "@/components/ui/input-otp.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import axios, { AxiosError } from "axios";
-import { verifyAccountResetPasswordSchema } from "@/schemas/auth/admin/verify-account-reset-password.schema.ts";
-import { AdminResponseDtoType } from "@/dtos/admin.dto.ts";
+import { AdminVerifyAccountResetPasswordSchema, AdminVerifyAccountResetPasswordSchemaType } from "@/schemas/auth/admin/verify-account-reset-password.schema.ts";
+import { handleAdminVerifyAccountResetPassword } from "@/lib/actions/auth/admin-auth.action.ts";
 
 
 const VerifyAccountResetPassword = () => {
@@ -31,37 +29,33 @@ const VerifyAccountResetPassword = () => {
     const searchParams = useSearchParams();
     const email = searchParams.get("email");
 
-    const verifyAccountResetPasswordForm = useForm<z.infer<typeof verifyAccountResetPasswordSchema>>({
-        resolver: zodResolver(verifyAccountResetPasswordSchema),
+    const verifyAccountResetPasswordForm = useForm<AdminVerifyAccountResetPasswordSchemaType>({
+        resolver: zodResolver(AdminVerifyAccountResetPasswordSchema),
         defaultValues: {
             otp: ""
         },
     });
 
-    const onSubmit = async (data: z.infer<typeof verifyAccountResetPasswordSchema>) => {
+    const onSubmit = async (data: AdminVerifyAccountResetPasswordSchemaType) => {
         setIsVerifying(true);
         try {
-            const response = await axios.put<AdminResponseDtoType>("/api/users/admin/verify-account/reset-password", {
-                email: email,
-                otp: data.otp,
-            });
-
-            if (!response.data.success) {
+            const response = await handleAdminVerifyAccountResetPassword(email ?? "", data);
+            if (!response.success) {
                 toast.error("Failed", {
-                    description: response.data.message,
+                    description: response.message,
                 });
+                return;
             }
 
             toast.success("Success", {
-                description: response.data.message,
+                description: response.message,
             });
-            router.replace(`/admin/reset-password?email=${email}`);
+            startTransition(() => router.replace(`/admin/reset-password?email=${email}`));
         }
-        catch (error) {
-            const axiosError = error as AxiosError<AdminResponseDtoType>;
-            console.error("Error in verifying OTP for reseting password: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error in verifying OTP for reseting password: ", error);
             toast.error("Failed to verify OTP", {
-                description: axiosError.response?.data.message,
+                description: error.message,
             });
         }
         finally {

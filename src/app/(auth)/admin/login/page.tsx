@@ -1,9 +1,8 @@
 // src/app/(auth)/admin/login/page.tsx
 "use client";
-import React, { useState } from "react";
+import React, { startTransition, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -25,9 +24,8 @@ import { Label } from "@/components/ui/label.tsx";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { getSession, signIn } from "next-auth/react";
-import axios, { AxiosError } from "axios";
-import { adminLoginSchema } from "@/schemas/auth/admin/login.schema.ts";
-import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
+import { AdminLoginSchema, AdminLoginSchemaType } from "@/schemas/auth/admin/login.schema.ts";
+import { handleAdminSendAccountRegistrationEmail } from "@/lib/actions/auth/admin-auth.action.ts";
 
 
 const AdminLogin = () => {
@@ -40,8 +38,8 @@ const AdminLogin = () => {
 
     const router = useRouter();
 
-    const loginForm = useForm<z.infer<typeof adminLoginSchema>>({
-        resolver: zodResolver(adminLoginSchema),
+    const loginForm = useForm<AdminLoginSchemaType>({
+        resolver: zodResolver(AdminLoginSchema),
         defaultValues: {
             email: "",
             password: "",
@@ -50,7 +48,7 @@ const AdminLogin = () => {
     });
 
     // Login
-    const onSubmit = async (data: z.infer<typeof adminLoginSchema>) => {
+    const onSubmit = async (data: AdminLoginSchemaType) => {
         setIsSubmitting(true);
         try {
             const result = await signIn("credentials", {
@@ -79,8 +77,10 @@ const AdminLogin = () => {
                     description: `Logged in as ${user.role}`
                 });
                 if (user.role === "admin") {
-                    router.replace("/admin/dashboard");
+                    startTransition(() => router.replace("/admin/dashboard"));
+                    return;
                 }
+                return;
             }
             else {
                 toast.warning('Account Not Verified', {
@@ -93,13 +93,13 @@ const AdminLogin = () => {
                         }
                     }
                 });
+                return;
             }
         }
-        catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
-            console.error("Error in user login: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error in user login: ", error);
             toast.error("Error in user login", {
-                description: axiosError.response?.data.message
+                description: error.message
             });
         }
         finally {
@@ -110,23 +110,23 @@ const AdminLogin = () => {
     const sendAccountVerificationCode = async () => {
         setIsSendingCode(true);
         try {
-            const response = await axios.put<BuyerResponseDtoType>("/api/users/buyer/send-account-registration-email", {
-                email: emailToVerify,
-            });
-
-            if (response.data.success) {
-                toast.success("Success", {
-                    description: response.data.message
+            const response = await handleAdminSendAccountRegistrationEmail(emailToVerify);
+            if (!response.success) {
+                toast.error("Failed", {
+                    description: response.message
                 });
-                const buyer = response.data.user;
-                router.replace(`/verify-account/registration?username=${buyer?.username}`);
+                return;
             }
+            toast.success("Success", {
+                description: response.message
+            });
+            const admin = response.data;
+            startTransition(() => router.replace(`/verify-account/registration?email=${admin?.email}`));
         }
-        catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
-            console.error("Error sending account verification email: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error sending account verification email: ", error);
             toast.error("Error sending account verification email", {
-                description: axiosError.response?.data.message
+                description: error.message
             });
         }
         finally {

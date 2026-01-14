@@ -1,8 +1,7 @@
 // src/app/(auth)/admin/sign-up/page.tsx
 "use client";
-import React, { useState } from "react";
+import React, { startTransition, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Controller, useForm } from "react-hook-form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,9 +16,8 @@ import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import axios, { AxiosError } from "axios";
-import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
-import { adminSignUpSchema } from "@/schemas/auth/admin/sign-up.schema.ts";
+import { AdminSignUpSchema, AdminSignUpSchemaType } from "@/schemas/auth/admin/sign-up.schema.ts";
+import { handleAdminSignUp } from "@/lib/actions/auth/admin-auth.action.ts";
 
 
 const AdminSignUp = () => {
@@ -29,8 +27,8 @@ const AdminSignUp = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const signUpForm = useForm<z.infer<typeof adminSignUpSchema>>({
-        resolver: zodResolver(adminSignUpSchema),
+    const signUpForm = useForm<AdminSignUpSchemaType>({
+        resolver: zodResolver(AdminSignUpSchema),
         defaultValues: {
             fullName: "",
             email: "",
@@ -41,27 +39,26 @@ const AdminSignUp = () => {
         },
     });
 
-    const onSubmit = async (data: z.infer<typeof adminSignUpSchema>) => {
+    const onSubmit = async (data: AdminSignUpSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.post<BuyerResponseDtoType>("/api/users/admin/sign-up", data);
-
-            if (!response.data.success) {
+            const response = await handleAdminSignUp(data)
+            if (!response.success) {
                 toast.error("Sign Up Failed", {
-                    description: response.data.message,
+                    description: response.message,
                 });
+                return;
             }
 
             toast.success("Sign Up Successful", {
-                description: response.data.message,
+                description: response.message,
             });
-            router.replace(`/admin/verify-account/registration?email=${data.email}`);
+            startTransition(() => router.replace(`/admin/verify-account/registration?email=${data.email}`));
         }
-        catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
-            console.error("Error in sign up of user: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error in sign up of user: ", error);
             toast.error("Error signing up the user", {
-                description: axiosError.response?.data.message,
+                description: error.message,
             });
         }
         finally {

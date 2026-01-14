@@ -18,7 +18,7 @@ export const PUT = async (req: NextRequest) => {
 
         return await sellerController.forgotPassword(req);
     }
-    catch (error: any) {
+    catch (error: Error | any) {
         console.error("Error in seller forgot password route:", error);
 
         if (error instanceof HttpError) {

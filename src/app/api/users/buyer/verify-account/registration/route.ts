@@ -18,7 +18,7 @@ export const PUT = async (req: NextRequest) => {
 
         return await buyerController.verifyOtpForRegistration(req);
     }
-    catch (error: any) {
+    catch (error: Error | any) {
         console.error("Error verifying OTP for user registration buyer route: ", error);
 
         if (error instanceof HttpError) {

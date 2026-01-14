@@ -12,8 +12,9 @@ const roleValidation = z
         error: "Role is required"
     }).optional();
 
-export const adminLoginSchema = z.object({
+export const AdminLoginSchema = z.object({
     email: emailValidation,
     password: passwordValidation,
     role: roleValidation
 });
+export type AdminLoginSchemaType = z.infer<typeof AdminLoginSchema>;

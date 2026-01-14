@@ -51,7 +51,7 @@ export class SellerController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error in seller signup controller: ", error);
 
             if (error instanceof HttpError) {
@@ -99,7 +99,7 @@ export class SellerController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error verifying otp for registration for seller controller: ", error);
 
             if (error instanceof HttpError) {
@@ -147,7 +147,7 @@ export class SellerController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error in seller forgot password controller: ", error);
 
             if (error instanceof HttpError) {
@@ -195,7 +195,7 @@ export class SellerController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error reseting password for seller controller: ", error);
 
             if (error instanceof HttpError) {
@@ -243,7 +243,7 @@ export class SellerController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error sending verication email for seller controller: ", error);
 
             if (error instanceof HttpError) {

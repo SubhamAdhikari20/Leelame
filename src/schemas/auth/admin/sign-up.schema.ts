@@ -3,7 +3,7 @@ import { z } from "zod";
 import { fullNameValidation, contactValidation, emailValidation, passwordValidation, confirmPasswordValidation, roleValidation } from "../../user.schema.ts";
 
 
-export const adminSignUpSchema = z.object({
+export const AdminSignUpSchema = z.object({
     fullName: fullNameValidation,
     contact: contactValidation,
     email: emailValidation,
@@ -19,3 +19,4 @@ export const adminSignUpSchema = z.object({
         });
     }
 });
+export type AdminSignUpSchemaType = z.infer<typeof AdminSignUpSchema>;

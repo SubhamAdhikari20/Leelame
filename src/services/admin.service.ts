@@ -2,23 +2,23 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { AdminResponseDtoType, CreatedAdminDtoType, VerifyOtpForRegistrationDtoType, ForgotPasswordDtoType, VerifyOtpForResetPasswordDtoType, ResetPasswordDtoType, SendEmailForRegistrationDtoType } from "@/dtos/admin.dto.ts";
-import { AdminRepositoryInterface } from "@/interfaces/admin.repository.interface.ts";
 import { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
+import { AdminRepositoryInterface } from "@/interfaces/admin.repository.interface.ts";
 import { sendVerificationEmail } from "@/helpers/send-registration-verification-email.tsx";
 import { sendResetPasswordVerificationEmail } from "@/helpers/send-reset-password-verification-email.tsx";
 import { HttpError } from "@/errors/http-error.ts";
 
 
 export class AdminService {
-    private adminRepo: AdminRepositoryInterface;
     private userRepo: UserRepositoryInterface;
+    private adminRepo: AdminRepositoryInterface;
 
     constructor(
-        adminRepo: AdminRepositoryInterface,
-        userRepo: UserRepositoryInterface
+        userRepo: UserRepositoryInterface,
+        adminRepo: AdminRepositoryInterface
     ) {
-        this.adminRepo = adminRepo;
         this.userRepo = userRepo;
+        this.adminRepo = adminRepo;
     }
 
     createAdmin = async (adminData: CreatedAdminDtoType): Promise<AdminResponseDtoType | null> => {

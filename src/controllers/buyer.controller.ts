@@ -51,7 +51,7 @@ export class BuyerController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error in buyer signup controller:", error);
 
             if (error instanceof HttpError) {
@@ -113,7 +113,7 @@ export class BuyerController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error checking username uniqueness controller: ", error);
 
             if (error instanceof HttpError) {
@@ -161,7 +161,7 @@ export class BuyerController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error in buyer verify otp for registration controller:", error);
 
             if (error instanceof HttpError) {
@@ -209,7 +209,7 @@ export class BuyerController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error in buyer forgot password controller:", error);
 
             if (error instanceof HttpError) {
@@ -257,7 +257,7 @@ export class BuyerController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error in buyer verify otp for reset password controller:", error);
 
             if (error instanceof HttpError) {
@@ -305,7 +305,7 @@ export class BuyerController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error in buyer reset password controller:", error);
 
             if (error instanceof HttpError) {
@@ -365,7 +365,7 @@ export class BuyerController {
                 { status: result?.status ?? 200 }
             );
         }
-        catch (error: any) {
+        catch (error: Error | any) {
             console.error("Error in buyer send verication email controller:", error);
 
             if (error instanceof HttpError) {
