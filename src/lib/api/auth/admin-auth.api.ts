@@ -36,7 +36,7 @@ export const adminSendAccountRegistrationEmail = async (email: string) => {
 // Verify Account Registration Axios
 export const adminVerifyAccountRegistration = async (username: string, verifyAccountRegistrationData: AdminVerifyAccountRegistrationSchemaType) => {
     try {
-        const response = await axios.put<AdminResponseDtoType>(API.AUTH.ADMIN.VERIFY_ACCOUNT_REGISTRATION, { username, verifyAccountRegistrationData });
+        const response = await axios.put<AdminResponseDtoType>(API.AUTH.ADMIN.VERIFY_ACCOUNT_REGISTRATION, { username, ...verifyAccountRegistrationData });
         return response.data;
     }
     catch (error: Error | any) {
@@ -60,7 +60,7 @@ export const adminForgotPassword = async (forgotPasswordData: AdminForgotPasswor
 // Verify Account Reset Password Axios
 export const adminVerifyAccountResetPassword = async (username: string, verifyAccountResetPasswordData: AdminVerifyAccountResetPasswordSchemaType) => {
     try {
-        const response = await axios.put<AdminResponseDtoType>(API.AUTH.ADMIN.VERIFY_ACCOUNT_RESET_PASSWORD, { username, verifyAccountResetPasswordData });
+        const response = await axios.put<AdminResponseDtoType>(API.AUTH.ADMIN.VERIFY_ACCOUNT_RESET_PASSWORD, { username, ...verifyAccountResetPasswordData });
         return response.data;
     }
     catch (error: Error | any) {
@@ -72,7 +72,7 @@ export const adminVerifyAccountResetPassword = async (username: string, verifyAc
 // Reset Password Axios
 export const adminResetPassword = async (email: string, resetPasswordData: AdminResetPasswordSchemaType) => {
     try {
-        const response = await axios.put<AdminResponseDtoType>(API.AUTH.ADMIN.RESET_PASSWORD, { email, resetPasswordData });
+        const response = await axios.put<AdminResponseDtoType>(API.AUTH.ADMIN.RESET_PASSWORD, { email, ...resetPasswordData });
         return response.data;
     }
     catch (error: Error | any) {

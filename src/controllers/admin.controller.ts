@@ -131,7 +131,7 @@ export class AdminController {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: validatedData.error
+                        message: z.prettifyError(validatedData.error)
                     },
                     { status: 400 }
                 );
@@ -179,7 +179,7 @@ export class AdminController {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: validatedData.error
+                        message: z.prettifyError(validatedData.error)
                     },
                     { status: 400 }
                 );
@@ -227,7 +227,7 @@ export class AdminController {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: validatedData.error
+                        message: z.prettifyError(validatedData.error)
                     },
                     { status: 400 }
                 );
@@ -275,7 +275,7 @@ export class AdminController {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: validatedData.error
+                        message: z.prettifyError(validatedData.error)
                     },
                     { status: 400 }
                 );
