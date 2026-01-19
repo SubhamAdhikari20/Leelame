@@ -35,7 +35,7 @@ export const sellerSendAccountRegistrationEmail = async (email: string) => {
 // Verify Account Registration Axios
 export const sellerVerifyAccountRegistration = async (email: string, verifyAccountRegistrationData: SellerVerifyAccountRegistrationSchemaType) => {
     try {
-        const response = await axios.put<SellerResponseDtoType>(API.AUTH.SELLER.VERIFY_ACCOUNT_REGISTRATION, { email, verifyAccountRegistrationData });
+        const response = await axios.put<SellerResponseDtoType>(API.AUTH.SELLER.VERIFY_ACCOUNT_REGISTRATION, { email, ...verifyAccountRegistrationData });
         return response.data;
     }
     catch (error: Error | any) {
@@ -59,7 +59,7 @@ export const sellerForgotPassword = async (forgotPasswordData: SellerForgotPassw
 // Reset Password Axios
 export const sellerResetPassword = async (email: string, resetPasswordData: SellerResetPasswordSchemaType) => {
     try {
-        const response = await axios.put<SellerResponseDtoType>(API.AUTH.SELLER.RESET_PASSWORD, { email, resetPasswordData });
+        const response = await axios.put<SellerResponseDtoType>(API.AUTH.SELLER.RESET_PASSWORD, { email, ...resetPasswordData });
         return response.data;
     }
     catch (error: Error | any) {

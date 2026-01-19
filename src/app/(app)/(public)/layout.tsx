@@ -1,4 +1,4 @@
-// src/app/(app)/layout.tsx
+// src/app/(app)/(public)/layout.tsx
 "use client";
 import React from "react";
 import Navbar from "@/components/navbar.tsx";

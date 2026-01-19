@@ -1,6 +1,6 @@
 // src/app/(auth)/(seller)/become-seller/page.tsx
 "use client";
-import React, { startTransition, useState } from "react";
+import React, { startTransition, useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button.tsx";
@@ -45,10 +45,42 @@ import { getSession, signIn } from "next-auth/react";
 import { handleSellerForgotPassword, handleSellerResetPassword, handleSellerSendAccountRegistrationEmail, handleSellerSignUp, handleSellerVerifyAccountRegistration } from "@/lib/actions/auth/seller-auth.action.ts";
 
 
+const VALID_TABS = new Set([
+    "sign-up", "login", "verify-otp-register", "forgot-password", "reset-password"
+]);
+
+// Keys used for sessionStorage persistence
+const TAB_KEY = "become-seller:tab";
+const EMAIL_KEY = "become-seller:email";
+
+// const getInitialTab = (): string => {
+//     if (typeof window === "undefined") return "sign-up";
+//     const stored = sessionStorage.getItem(TAB_KEY);
+//     return (stored && VALID_TABS.has(stored)) ? stored : "sign-up";
+// };
+
+// const getInitialEmail = (): string => {
+//     if (typeof window === "undefined") return "";
+//     return sessionStorage.getItem(EMAIL_KEY) ?? "";
+// };
+
+const clearPersisted = () => {
+    if (typeof window === "undefined") return;
+    try {
+        sessionStorage.removeItem(TAB_KEY);
+        sessionStorage.removeItem(EMAIL_KEY);
+    } catch (e) {
+        // ignore storage errors
+    }
+};
+
 const BecomeSeller = () => {
     const router = useRouter();
 
-    const [tab, setTab] = useState("sign-up");
+    const [tab, setTab] = useState<string>("sign-up");
+    const [email, setEmail] = useState<string>("");
+    const [isMounted, setIsMounted] = useState(false);
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSignUpPassword, setShowSignUpPassword] = useState(false);
     const [showLoginPassword, setShowLoginPassword] = useState(false);
@@ -58,8 +90,55 @@ const BecomeSeller = () => {
     const [showResetConfirmPassword, setShowResetConfirmPassword] = useState(false);
 
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [email, setEmail] = useState("");
     const [iSendingCode, setIsSendingCode] = useState(false);
+
+    // safe setter that validates tab values
+    const setTabSafe = (value: string) => {
+        if (VALID_TABS.has(value)) setTab(value);
+        else setTab("sign-up");
+    };
+
+    useEffect(() => {
+        setIsMounted(true);
+        try {
+            const storedTab = sessionStorage.getItem(TAB_KEY);
+            if (storedTab && VALID_TABS.has(storedTab)) {
+                setTab(storedTab);
+            }
+
+            const storedEmail = sessionStorage.getItem(EMAIL_KEY);
+            if (storedEmail) {
+                setEmail(storedEmail);
+            }
+        } catch (e) {
+            // ignore storage errors
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Persist changes after mount
+    useEffect(() => {
+        if (!isMounted) return;
+        try {
+            sessionStorage.setItem(TAB_KEY, tab);
+        } catch (e) {
+            // ignore
+        }
+    }, [tab, isMounted]);
+
+    useEffect(() => {
+        if (!isMounted) return;
+        try {
+            if (email) {
+                sessionStorage.setItem(EMAIL_KEY, email);
+            }
+            else {
+                sessionStorage.removeItem(EMAIL_KEY);
+            }
+        } catch (e) {
+            // ignore
+        }
+    }, [email, isMounted]);
 
     const signUpForm = useForm<SellerSignUpSchemaType>({
         resolver: zodResolver(SellerSignUpSchema),
@@ -105,6 +184,22 @@ const BecomeSeller = () => {
         },
     });
 
+    useEffect(() => {
+        signUpForm.reset();
+    }, [tab, signUpForm]);
+    useEffect(() => {
+        verifyAccountRegistrationForm.reset();
+    }, [tab, verifyAccountRegistrationForm]);
+    useEffect(() => {
+        loginForm.reset();
+    }, [tab, loginForm]);
+    useEffect(() => {
+        forgotPasswordForm.reset();
+    }, [tab, forgotPasswordForm]);
+    useEffect(() => {
+        resetPasswordForm.reset();
+    }, [tab, resetPasswordForm]);
+
     const handleSignUp = async (data: SellerSignUpSchemaType) => {
         setIsSubmitting(true);
         try {
@@ -120,7 +215,7 @@ const BecomeSeller = () => {
                 description: response.message,
             });
             setEmail(data.email);
-            setTab("verify-otp-register");
+            setTabSafe("verify-otp-register");
         }
         catch (error: Error | any) {
             console.error("Error in sign up of user: ", error);
@@ -148,7 +243,7 @@ const BecomeSeller = () => {
                 description: response.message,
             });
             setEmail("");
-            setTab("login");
+            setTabSafe("login");
         }
         catch (error: Error | any) {
             console.error("Error verifying OTP for user registration: ", error);
@@ -187,7 +282,7 @@ const BecomeSeller = () => {
 
             if (user.isVerified) {
                 toast.success("Login Successful", {
-                    description: `Logged in as ${user.role}`
+                    description: `Logged in as a ${user.role}`
                 });
                 if (user.role === "seller") {
                     startTransition(() => router.replace("/seller/dashboard"));
@@ -225,6 +320,7 @@ const BecomeSeller = () => {
         try {
             const response = await handleSellerForgotPassword(data);
             if (!response.success) {
+                console.error("Failed to send forgot password request: ", response.message);
                 toast.error("Failed", {
                     description: response.message,
                 });
@@ -235,7 +331,7 @@ const BecomeSeller = () => {
                 description: response.message
             });
             setEmail(data.email);
-            setTab("reset-password");
+            setTabSafe("reset-password");
         }
         catch (error: Error | any) {
             console.error("Error sending forgot password request", error);
@@ -254,7 +350,7 @@ const BecomeSeller = () => {
             const response = await handleSellerResetPassword(email, data);
             if (!response.success) {
                 toast.error("Failed", {
-                    description: response.message,
+                    description: response.message.toString(),
                 });
                 return;
             }
@@ -263,7 +359,7 @@ const BecomeSeller = () => {
                 description: response.message,
             });
             setEmail("");
-            setTab("login");
+            setTabSafe("login");
         }
         catch (error: Error | any) {
             console.error("Error in verifying OTP for reseting password: ", error);
@@ -290,7 +386,7 @@ const BecomeSeller = () => {
             toast.success("Success", {
                 description: response.message
             });
-            setTab("verify-otp-register");
+            setTabSafe("verify-otp-register");
         }
         catch (error: Error | any) {
             console.error("Error sending account verification email: ", error);
@@ -317,7 +413,10 @@ const BecomeSeller = () => {
                     <Button
                         variant="ghost"
                         className="relative top-2 left-2 text-gray-600 dark:text-gray-400 hover:text-blue-950 dark:hover:text-gray-200 dark:hover:bg-gray-700"
-                        onClick={() => router.push("/")}
+                        onClick={() => {
+                            clearPersisted();
+                            router.push("/");
+                        }}
                         aria-label="Back to home"
                     >
                         <ArrowLeft size={24} />
@@ -348,7 +447,7 @@ const BecomeSeller = () => {
                     <CardContent className="flex flex-col justify-center p-8">
                         {/* Sign Up and Login */}
                         {(tab === "sign-up" || tab === "login") && (
-                            <Tabs value={tab} onValueChange={setTab}>
+                            <Tabs value={tab} onValueChange={setTabSafe}>
                                 <TabsList className="grid grid-cols-2 mb-6 w-full">
                                     <TabsTrigger value="sign-up">Sign up</TabsTrigger>
                                     <TabsTrigger value="login">Login</TabsTrigger>
@@ -361,7 +460,7 @@ const BecomeSeller = () => {
                                         <CardDescription>
                                             Already have an account?{" "}
                                             <button
-                                                onClick={() => setTab("login")}
+                                                onClick={() => setTabSafe("login")}
                                                 className="text-green-500 hover:underline cursor-pointer"
                                             >
                                                 Log in
@@ -467,7 +566,7 @@ const BecomeSeller = () => {
                                         <CardDescription>
                                             Don’t have an account?{" "}
                                             <button
-                                                onClick={() => setTab("sign-up")}
+                                                onClick={() => setTabSafe("sign-up")}
                                                 className="text-green-500 hover:underline cursor-pointer"
                                             >
                                                 Create
@@ -546,7 +645,7 @@ const BecomeSeller = () => {
                                         <div className="text-sm text-right">
                                             <button
                                                 type="button"
-                                                onClick={() => setTab("forgot-password")}
+                                                onClick={() => setTabSafe("forgot-password")}
                                                 className="text-green-500 hover:underline cursor-pointer"
                                             >
                                                 Forgot Password?
@@ -724,7 +823,7 @@ const BecomeSeller = () => {
                                             type="button"
                                             className="flex-1 font-semibold"
                                             variant="outline"
-                                            onClick={() => setTab("sign-up")}
+                                            onClick={() => setTabSafe("sign-up")}
                                         >
                                             Back
                                         </Button>
@@ -789,7 +888,7 @@ const BecomeSeller = () => {
                                     </div>
 
                                     <button
-                                        onClick={() => setTab("login")}
+                                        onClick={() => setTabSafe("login")}
                                         type="button"
                                         className="text-sm text-green-500 hover:underline block text-center w-full cursor-pointer"
                                     >
@@ -892,7 +991,7 @@ const BecomeSeller = () => {
 
                                         <Controller
                                             name="confirmPassword"
-                                            control={verifyAccountRegistrationForm.control}
+                                            control={resetPasswordForm.control}
                                             render={({ field, fieldState }) => (
                                                 <Field data-invalid={fieldState.invalid}>
                                                     <FieldLabel htmlFor={field.name}>
@@ -947,7 +1046,7 @@ const BecomeSeller = () => {
                                     </Button>
                                     <button
                                         onClick={() => {
-                                            setTab("login");
+                                            setTabSafe("login");
                                         }}
                                         type="button"
                                         className="text-sm text-green-500 hover:underline block text-center w-full cursor-pointer"

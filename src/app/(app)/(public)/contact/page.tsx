@@ -1,4 +1,4 @@
-// src/app/(app/contact/page.tsx
+// src/app/(app)/(public)/contact/page.tsx
 "use client";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";

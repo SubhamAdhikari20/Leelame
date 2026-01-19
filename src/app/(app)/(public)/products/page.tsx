@@ -1,4 +1,4 @@
-// src/app/(app)/products/page.tsx
+// src/app/(app)/(public)/products/page.tsx
 "use client";
 import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button.tsx";

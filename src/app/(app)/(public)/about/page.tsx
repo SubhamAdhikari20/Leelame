@@ -1,4 +1,4 @@
-// frontend/src/pages/AboutPage.tsx
+// src/app/(app)/(public)/about/page.tsx
 "use client";
 import React from "react";
 import Link from "next/link";
