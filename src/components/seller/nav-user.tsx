@@ -1,5 +1,6 @@
 // src/components/seller/nav-user.tsx
-"use client"
+"use client";
+import React from "react";
 import { Bell } from "lucide-react";
 import {
     IconCreditCard,
@@ -39,7 +40,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog.tsx";
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 
@@ -54,6 +55,12 @@ const NavUser = ({
 }) => {
     const router = useRouter();
     const { isMobile } = useSidebar();
+    const { data: session } = useSession();
+    const currentUser = session?.user;
+
+    // if (!currentUser) {
+    //     return null;
+    // }
 
     const handleLogout = async () => {
         await signOut({ redirect: false });
@@ -71,12 +78,28 @@ const NavUser = ({
                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer mt-auto px-3 py-2"
                         >
                             <Avatar className="h-8 w-8 rounded-lg">
-                                <AvatarImage src={user.avatar} alt={user.name} />
-                                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                                {currentUser && currentUser.profilePictureUrl ? (
+                                    <AvatarImage
+                                        src={currentUser.profilePictureUrl}
+                                        alt={currentUser.fullName}
+                                    />
+                                ) : (
+                                    <AvatarFallback>
+                                        {(
+                                            (currentUser && currentUser.fullName) ??
+                                            (currentUser && currentUser.username) ??
+                                            "U"
+                                        )
+                                            .split(" ")
+                                            .map((n) => n[0])
+                                            .join("")
+                                            .toUpperCase()}
+                                    </AvatarFallback>
+                                )}
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-medium">{user.name}</span>
-                                <span className="truncate text-xs">{user.email}</span>
+                                <span className="truncate font-medium">{currentUser?.fullName}</span>
+                                <span className="truncate text-xs">{currentUser?.email}</span>
                             </div>
                             <IconDotsVertical className="ml-auto size-4" />
                         </SidebarMenuButton>
@@ -90,18 +113,34 @@ const NavUser = ({
                         <DropdownMenuLabel className="p-0 font-normal">
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <Avatar className="h-8 w-8 rounded-lg">
-                                    <AvatarImage src={user.avatar} alt={user.name} />
-                                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                                    {currentUser && currentUser.profilePictureUrl ? (
+                                        <AvatarImage
+                                            src={currentUser.profilePictureUrl}
+                                            alt={currentUser.fullName}
+                                        />
+                                    ) : (
+                                        <AvatarFallback>
+                                            {(
+                                                (currentUser && currentUser.fullName) ??
+                                                (currentUser && currentUser.username) ??
+                                                "U"
+                                            )
+                                                .split(" ")
+                                                .map((n) => n[0])
+                                                .join("")
+                                                .toUpperCase()}
+                                        </AvatarFallback>
+                                    )}
                                 </Avatar>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
-                                    <span className="truncate font-medium">{user.name}</span>
-                                    <span className="truncate text-xs">{user.email}</span>
+                                    <span className="truncate font-medium">{currentUser?.fullName}</span>
+                                    <span className="truncate text-xs">{currentUser?.email}</span>
                                 </div>
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => router.push("/seller/settings/account")}>
                                 <IconUserCircle />
                                 Account
                             </DropdownMenuItem>

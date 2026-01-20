@@ -18,6 +18,7 @@ import NavUser from "@/components/seller/nav-user.tsx";
 import Link from "next/link";
 import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
 import { IconInnerShadowTop } from "@tabler/icons-react";
+import { useSession } from "next-auth/react";
 
 
 const user = {
@@ -29,7 +30,7 @@ const user = {
 // Menu items
 const items = [
     {
-        title: "Home",
+        title: "Dashboard",
         url: "/",
         icon: Home,
     },
@@ -56,6 +57,8 @@ const items = [
 ];
 
 const SellerSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
+    const { data: session } = useSession();
+
     return (
         <div>
             <Sidebar collapsible="icon" {...props}>
