@@ -6,13 +6,12 @@ import {
     IconDotsVertical,
     IconLogout,
     IconUserCircle,
-} from "@tabler/icons-react"
-
+} from "@tabler/icons-react";
 import {
     Avatar,
     AvatarFallback,
     AvatarImage,
-} from "@/components/ui/avatar.tsx"
+} from "@/components/ui/avatar.tsx";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,13 +20,13 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu.tsx"
+} from "@/components/ui/dropdown-menu.tsx";
 import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
     useSidebar,
-} from "@/components/ui/sidebar.tsx"
+} from "@/components/ui/sidebar.tsx";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -42,7 +41,6 @@ import {
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { toast } from "sonner";
-import { Button } from "../ui/button";
 
 
 const NavUser = ({
@@ -58,7 +56,6 @@ const NavUser = ({
     const { isMobile } = useSidebar();
 
     const handleLogout = async () => {
-        // await signOut({ callbackUrl: "/login" });
         await signOut({ redirect: false });
         router.replace("/become-seller");
         toast.success("Logout Successful.");

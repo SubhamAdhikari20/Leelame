@@ -7,18 +7,17 @@ import {
     SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
-    SidebarGroupLabel,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarRail,
 } from "@/components/ui/sidebar.tsx";
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
-import NavUser from "@/components/seller/nav-user.tsx";
-import { IconInnerShadowTop } from "@tabler/icons-react";
-import Link from "next/link";
 import { Separator } from "@/components/ui/separator.tsx";
+import NavUser from "@/components/seller/nav-user.tsx";
+import Link from "next/link";
+import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+import { IconInnerShadowTop } from "@tabler/icons-react";
 
 
 const user = {
@@ -27,7 +26,7 @@ const user = {
     avatar: "/images/avatar.png",
 };
 
-// Menu items.
+// Menu items
 const items = [
     {
         title: "Home",
