@@ -60,15 +60,15 @@ export type SendEmailForRegistrationDtoType = z.infer<typeof SendEmailForRegistr
 export const AdminResponseDto = z.object({
     _id: z.string(),
     email: z.email(),
-    userId: z.string(),
+    baseUserId: z.string(),
+    role: z.string(),
     isVerified: z.boolean(),
-    fullName: z.string().optional().nullish(),
-    contact: z.string().optional().nullish(),
-    profilePictureUrl: z.string().optional().nullish(),
-    role: z.string().optional().nullish(),
-    createdAt: z.date().optional(),
-    updatedAt: z.date().optional(),
+    fullName: z.string().nullish(),
+    contact: z.string().nullish(),
     isPermanentlyBanned: z.boolean(),
+    profilePictureUrl: z.string().nullish(),
+    createdAt: z.date().nullish(),
+    updatedAt: z.date().nullish(),
 });
 
 export type AdminResponseDtoType = {

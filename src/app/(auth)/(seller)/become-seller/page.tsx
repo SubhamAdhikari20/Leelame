@@ -42,7 +42,7 @@ import { SellerVerifyAccountRegistrationSchema, SellerVerifyAccountRegistrationS
 import { SellerForgotPasswordSchema, SellerForgotPasswordSchemaType } from "@/schemas/auth/seller/forgot-password.schema.ts";
 import { SellerResetPasswordSchema, SellerResetPasswordSchemaType } from "@/schemas/auth/seller/reset-password.schema.ts";
 import { getSession, signIn } from "next-auth/react";
-import { handleSellerForgotPassword, handleSellerResetPassword, handleSellerSendAccountRegistrationEmail, handleSellerSignUp, handleSellerVerifyAccountRegistration } from "@/lib/actions/auth/seller-auth.action.ts";
+import { handleSellerForgotPassword, handleSellerLoginTokenAndSetCookies, handleSellerResetPassword, handleSellerSendAccountRegistrationEmail, handleSellerSignUp, handleSellerVerifyAccountRegistration } from "@/lib/actions/auth/seller-auth.action.ts";
 
 
 const VALID_TABS = new Set([
@@ -275,6 +275,20 @@ const BecomeSeller = () => {
 
             if (!updatedSession) {
                 toast.error("Session not found.");
+                return;
+            }
+
+            if (!updatedSession.accessToken) {
+                toast.error("Access token not found in session.");
+                return;
+            }
+
+            const loginResponse = await handleSellerLoginTokenAndSetCookies(updatedSession.accessToken, updatedSession.user);
+
+            if (!loginResponse.success) {
+                toast.error("Failed to set authentication cookies", {
+                    description: loginResponse.message,
+                });
                 return;
             }
 

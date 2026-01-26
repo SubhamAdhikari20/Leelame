@@ -13,25 +13,19 @@ export type LoginUserDtoType = z.infer<typeof LoginUserDto>;
 
 export const AuthResponseDto = z.object({
     _id: z.string(),
-    email: z.email().optional().nullish(),
+    email: z.email(),
     role: z.string(),
     isVerified: z.boolean(),
-    fullName: z.string().optional().nullish(),
-    username: z.string().optional().nullish(),
-    contact: z.string().optional().nullish(),
-    googleId: z.string().optional().nullish(),
-    profilePictureUrl: z.string().optional().nullish(),
-    // bio: z.string().optional().nullish(),
-    buyerProfile: z.string().optional().nullish(),
-    sellerProfile: z.string().optional().nullish(),
-    adminProfile: z.string().optional().nullish(),
-    createAt: z.date().optional(),
-    updatedAt: z.date().optional(),
+    baseUserId: z.string(),
+    fullName: z.string().nullish(),
+    username: z.string().nullish(),
+    contact: z.string().nullish(),
 });
 
 export type AuthResponseDtoType = {
     success: boolean;
     message?: string | null;
     status?: number | null;
+    token?: string | null;
     user?: z.infer<typeof AuthResponseDto> | null;
 };

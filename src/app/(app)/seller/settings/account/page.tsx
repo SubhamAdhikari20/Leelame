@@ -1,8 +1,7 @@
 // src/app/(app)/seller/settings/account/page.tsx
 "use client";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button.tsx";
 import {
     Field,
@@ -26,17 +25,16 @@ import { toast } from "sonner";
 import { Loader2, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
 import { useForm, Controller } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { updateUserDetailsSchema } from "@/schemas/buyer/update-user-details.schema.ts";
 import { useSession } from "next-auth/react";
-import axios, { AxiosError } from "axios";
+import { handleDeleteSellerAccount, handleSellerProfileDetails } from "@/lib/actions/seller/profile-details.action.ts";
+import { UpdateProfileDetailsSchema, UpdateProfileDetailsSchemaType } from "@/schemas/seller/update-profile-details.schema.ts";
+import axios from "axios";
 import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
 
 
 const SellerProfile = () => {
     const { data: session } = useSession();
     const currentUser = session?.user
-    const router = useRouter();
 
     const [preview, setPreview] = useState("");
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -45,11 +43,10 @@ const SellerProfile = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-    const userDetailsForm = useForm<z.infer<typeof updateUserDetailsSchema>>({
-        resolver: zodResolver(updateUserDetailsSchema),
+    const sellerProfileDetailsForm = useForm<UpdateProfileDetailsSchemaType>({
+        resolver: zodResolver(UpdateProfileDetailsSchema),
         defaultValues: {
             fullName: currentUser?.fullName || "",
-            username: currentUser?.username || "",
             email: currentUser?.email || "",
             contact: currentUser?.contact || "",
         }
@@ -68,26 +65,25 @@ const SellerProfile = () => {
         }
     };
 
-    const onSubmit = async (data: z.infer<typeof updateUserDetailsSchema>) => {
+    const onSubmit = async (data: UpdateProfileDetailsSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.put<BuyerResponseDtoType>("", data);
-
-            if (response.data.success) {
-                toast.success("Success", {
-                    description: response.data.message
+            const response = await handleSellerProfileDetails(data);
+            if (!response.success) {
+                toast.error("Failed", {
+                    description: response.message
                 });
-
-                if (response.data.user?.username !== currentUser?.username) {
-                    router.replace(`/verify-account-registration/${response.data.user?.username}`);
-                }
+                return;
             }
+
+            toast.success("Success", {
+                description: response.message
+            });
         }
-        catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
-            console.error("Error updating user details: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error updating user details: ", error);
             toast.error("Error updating user details", {
-                description: axiosError.response?.data?.message
+                description: error.message
             });
         }
         finally {
@@ -96,9 +92,8 @@ const SellerProfile = () => {
     };
 
     const handleClear = () => {
-        userDetailsForm.reset({
+        sellerProfileDetailsForm.reset({
             fullName: "",
-            username: "",
             email: "",
             contact: "",
         });
@@ -107,21 +102,21 @@ const SellerProfile = () => {
     // Handle delete
     const handleDelete = async (userId: string) => {
         try {
-            const response = await axios.delete<BuyerResponseDtoType>("",);
-            if (response.data.success) {
-                toast.success("Successful", {
-                    description: response.data.message,
+            const response = await handleDeleteSellerAccount(userId);
+            if (!response.success) {
+                toast.error("Failed", {
+                    description: response.message,
                 });
             }
-            toast.error("Failed", {
-                description: response.data.message,
+
+            toast.success("Successful", {
+                description: response.message,
             });
         }
-        catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
-            console.error("Error deleting user account: ", axiosError);
-            toast.error("Error deleting user account: ", {
-                description: axiosError.response?.data?.message
+        catch (error: Error | any) {
+            console.error("Error deleting user account: ", error);
+            toast.error("Error deleting user account", {
+                description: error.message
             });
         }
     };
@@ -131,7 +126,6 @@ const SellerProfile = () => {
             toast.error("Please select an image before uploading.");
             return;
         }
-
         setIsUploadingImage(true);
 
         try {
@@ -139,21 +133,24 @@ const SellerProfile = () => {
             formData.append("profilePicture", selectedFile);
 
             const response = await axios.put<BuyerResponseDtoType>("",);
-            if (response.data.success) {
-                toast.success("Successful", {
+            if (!response.data.success) {
+                toast.error("Failed", {
                     description: response.data.message,
                 });
-                setPreview("");
-                setSelectedFile(null);
+                return;
             }
-            toast.error("Failed", {
+
+            toast.success("Successful", {
                 description: response.data.message,
             });
+            setPreview("");
+            setSelectedFile(null);
         }
-        catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
-            console.error("Image upload failed", axiosError);
-            toast.error(`Image upload failed: ${axiosError.response?.data?.message}`);
+        catch (error: Error | any) {
+            console.error("Image upload failed: ", error);
+            toast.error("Image upload failed", {
+                description: error.message
+            });
         }
         finally {
             setIsUploadingImage(false);
@@ -266,13 +263,13 @@ const SellerProfile = () => {
                 <div className="w-full flex-1 max-w-2xl xl:max-w-xl space-y-8 bg-white dark:bg-gray-900 border dark:border-gray-700 p-8 rounded-lg shadow-lg">
                     <form
                         id="update-user-details-form"
-                        onSubmit={userDetailsForm.handleSubmit(onSubmit)}
+                        onSubmit={sellerProfileDetailsForm.handleSubmit(onSubmit)}
                         className="space-y-6"
                     >
                         <FieldGroup>
                             <Controller
                                 name="fullName"
-                                control={userDetailsForm.control}
+                                control={sellerProfileDetailsForm.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor={field.name}>
@@ -294,7 +291,7 @@ const SellerProfile = () => {
 
                             <Controller
                                 name="email"
-                                control={userDetailsForm.control}
+                                control={sellerProfileDetailsForm.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor={field.name}>
@@ -316,7 +313,7 @@ const SellerProfile = () => {
 
                             <Controller
                                 name="contact"
-                                control={userDetailsForm.control}
+                                control={sellerProfileDetailsForm.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor={field.name}>

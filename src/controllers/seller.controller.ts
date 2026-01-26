@@ -1,6 +1,6 @@
 // src/controllers/seller.controller.ts
 import { NextRequest, NextResponse } from "next/server";
-import { SellerResponseDto, CreatedSellerDto, VerifyOtpForRegistrationDto, ForgotPasswordDto, ResetPasswordDto, SendEmailForRegistrationDto } from "@/dtos/seller.dto.ts";
+import { SellerResponseDto, CreatedSellerDto, VerifyOtpForRegistrationDto, ForgotPasswordDto, ResetPasswordDto, SendEmailForRegistrationDto, UpdateSellerProfileDetailsDto } from "@/dtos/seller.dto.ts";
 import { SellerService } from "@/services/seller.service.ts";
 import { z } from "zod";
 import { HttpError } from "@/errors/http-error.ts";
@@ -239,6 +239,65 @@ export class SellerController {
                 {
                     success: result?.success,
                     message: result?.message,
+                },
+                { status: result?.status ?? 200 }
+            );
+        }
+        catch (error: Error | any) {
+            console.error("Error sending verication email for seller controller: ", error);
+
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
+
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Internal Server Error"
+                },
+                { status: 500 }
+            );
+        }
+    };
+
+    updateSellerProfileDetails = async (req: NextRequest) => {
+        try {
+            const body = await req.json();
+            const validatedData = UpdateSellerProfileDetailsDto.safeParse(body);
+
+            if (!validatedData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
+            const result = await this.sellerService.updateSellerProfileDetails(validatedData.data);
+            const validatedResponseSellerData = SellerResponseDto.safeParse(result?.user);
+            if (!validatedResponseSellerData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedResponseSellerData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
+            return NextResponse.json(
+                {
+                    success: result?.success,
+                    message: result?.message,
+                    user: validatedResponseSellerData.data,
                 },
                 { status: result?.status ?? 200 }
             );

@@ -5,7 +5,6 @@ import { IUser } from "@/models/user.model.ts";
 
 export const userSchema = z.object({
     email: z.email().min(5).max(50),
-    profilePictureUrl: z.string().nullish(),
     role: z.enum(["admin", "seller", "buyer"]),
     isVerified: z.boolean(),
     verifyCode: z.string().nullish(),
@@ -17,21 +16,8 @@ export const userSchema = z.object({
     bannedAt: z.date().nullish(),
     bannedDateFrom: z.date().nullish(),
     bannedDateTo: z.date().nullish(),
-
-    buyerProfile: z.string().nullish(),
-    sellerProfile: z.string().nullish(),
-    adminProfile: z.string().nullish(),
 });
 
 export type User = z.infer<typeof userSchema>;
 
 export type UserDocument = IUser;
-
-// export type UserDocument = User & {
-//     _id: string;
-//     buyerProfile?: string | null;
-//     sellerProfile?: string | null;
-//     adminProfile?: string | null;
-//     createdAt: Date;
-//     updatedAt: Date;
-// };

@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { getAuthToken } from "./lib/cookie.ts";
 
 type AuthToken = {
     _id: string;
@@ -9,6 +10,7 @@ type AuthToken = {
     role: "buyer" | "seller" | "admin" | string;
     isVerified?: boolean;
     username?: string | null;
+    contact?: string | null;
     buyerProfile?: string | null;
     sellerProfile?: string | null;
     adminProfile?: string | null;
@@ -69,6 +71,7 @@ const isAdminAuthPath = (pathname: string) =>
 
 export async function proxy(req: NextRequest) {
     const token = (await getToken({ req: req, secret: process.env.NEXTAUTH_SECRET })) as AuthToken | null;
+    const authToken = (await getAuthToken()) as AuthToken | null;
     const pathname = req.nextUrl.pathname;
 
     // allow internal runtime and static assets
@@ -84,12 +87,12 @@ export async function proxy(req: NextRequest) {
 
     // Public Routes
     if (isPublicPath(pathname)) {
-        if (!token) {
+        if (!token || !authToken) {
             return NextResponse.next();
             // return NextResponse.rewrite(new URL("/not-found", req.url));
         }
 
-        if (!token.isVerified) {
+        if (!token.isVerified || !authToken.isVerified) {
             if (
                 pathname.startsWith("/verify-account/registration") ||
                 pathname.startsWith("/verify-account/reset-password")

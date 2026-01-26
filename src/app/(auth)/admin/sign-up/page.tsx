@@ -42,7 +42,7 @@ const AdminSignUp = () => {
     const onSubmit = async (data: AdminSignUpSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await handleAdminSignUp(data)
+            const response = await handleAdminSignUp(data);
             if (!response.success) {
                 toast.error("Sign Up Failed", {
                     description: response.message,

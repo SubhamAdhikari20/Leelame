@@ -1,47 +1,11 @@
 // src/models/user.model.ts
 import mongoose, { Schema, Document } from "mongoose";
-import type { IBuyer } from "./buyer.model.ts";
-import type { ISeller } from "./seller.model.ts";
-import type { IAdmin } from "./admin.model.ts";
 import type { User } from "@/types/user.type.ts";
 
-export interface IUser extends Omit<User, ("buyerProfile" | "sellerProfile" | "adminProfile")>, Document {
-    // export interface IUser extends User, Document {
-    // email: string;
-    // profilePictureUrl?: string | null;
-    // role: "admin" | "seller" | "buyer";
-
-    // Relations and References
-    buyerProfile?: Schema.Types.ObjectId | string | null;
-    sellerProfile?: Schema.Types.ObjectId | string | null;
-    adminProfile?: Schema.Types.ObjectId | string | null;
-
-    // Account Verification and Security
-    // isVerified: boolean;
-    // verifyCode?: string | null;
-    // verifyCodeExpiryDate?: Date | null;
-    // verifyEmailResetPassword?: string | null;
-    // verifyEmailResetPasswordExpiryDate?: Date | null;
-
-    // // Ban and Moderation
-    // isPermanentlyBanned: boolean;
-    // banReason?: string | null;
-    // bannedAt?: Date | null;
-    // bannedDateFrom?: Date | null;
-    // bannedDateTo?: Date | null;
-
+export interface IUser extends User, Document {
     createdAt: Date;
     updatedAt: Date;
 }
-
-export interface IUserPopulated extends Omit<IUser, ("buyerProfile" | "sellerProfile" | "adminProfile")> {
-    buyerProfile?: IBuyer | null;
-    sellerProfile?: ISeller | null;
-    adminProfile?: IAdmin | null;
-}
-// export interface IUserBuyerPopulated extends Omit<IUser, "buyerProfile"> {
-//     buyerProfile?: IBuyer | null;
-// }
 
 const userSchema: Schema<IUser> = new Schema({
     email: {
@@ -52,29 +16,10 @@ const userSchema: Schema<IUser> = new Schema({
         trim: true,
         match: [/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Invalid email format"]
     },
-    profilePictureUrl: {
-        type: String,
-        default: null
-    },
     role: {
         type: String,
         enum: ["admin", "seller", "buyer"],
         default: "buyer"
-    },
-    buyerProfile: {
-        type: Schema.Types.ObjectId,
-        ref: "buyers",
-        default: null
-    },
-    sellerProfile: {
-        type: Schema.Types.ObjectId,
-        ref: "sellers",
-        default: null
-    },
-    adminProfile: {
-        type: Schema.Types.ObjectId,
-        ref: "admins",
-        default: null
     },
     isVerified: {
         type: Boolean,

@@ -1,9 +1,9 @@
 // src/services/buyer.service.ts
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { CreatedBuyerDtoType, BuyerResponseDtoType, CheckUsernameUniqueDtoType, ForgotPasswordDtoType, VerifyOtpForRegistrationDtoType, VerifyOtpForResetPasswordDtoType, ResetPasswordDtoType, SendEmailForRegistrationDtoType } from "@/dtos/buyer.dto.ts";
-import { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interface.ts";
-import { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
+import type { CreatedBuyerDtoType, BuyerResponseDtoType, CheckUsernameUniqueDtoType, ForgotPasswordDtoType, VerifyOtpForRegistrationDtoType, VerifyOtpForResetPasswordDtoType, ResetPasswordDtoType, SendEmailForRegistrationDtoType } from "@/dtos/buyer.dto.ts";
+import type { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interface.ts";
+import type { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
 import { sendVerificationEmail } from "@/helpers/send-registration-verification-email.tsx";
 import { sendResetPasswordVerificationEmail } from "@/helpers/send-reset-password-verification-email.tsx";
 import { HttpError } from "@/errors/http-error.ts";
@@ -75,7 +75,7 @@ export class BuyerService {
 
             if (!buyerProfile) {
                 buyerProfile = await this.buyerRepo.createBuyer({
-                    userId: newUser._id.toString(),
+                    baseUserId: newUser._id.toString(),
                     fullName,
                     username,
                     contact,
@@ -112,7 +112,7 @@ export class BuyerService {
             }
 
             buyerProfile = await this.buyerRepo.createBuyer({
-                userId: newUser._id.toString(),
+                baseUserId: newUser._id.toString(),
                 fullName,
                 username,
                 contact,
@@ -133,7 +133,7 @@ export class BuyerService {
 
         // Generate Token
         const token = jwt.sign(
-            { _id: newUser?._id, email: newUser?.email, username: buyerProfile?.username, role: newUser?.role },
+            { _id: buyerProfile._id.toString(), baseUserId: newUser._id.toString() ?? buyerProfile.baseUserId.toString(), email: newUser.email, username: buyerProfile.username, contact: buyerProfile.contact, role: newUser.role },
             process.env.JWT_SECRET!,
             { expiresIn: expiresInSeconds }
         );
@@ -162,14 +162,6 @@ export class BuyerService {
             throw new HttpError(500, emailResponse.message ?? "Failed to send verification email!");
         }
 
-        newUser = await this.userRepo.updateUser(newUser._id.toString(), {
-            buyerProfile: buyerProfile._id.toString()
-        });
-
-        if (!newUser) {
-            throw new HttpError(404, "User with this id not found!");
-        }
-
         const respose: BuyerResponseDtoType = {
             success: true,
             message: "User registered successfully. Please verify your email.",
@@ -177,7 +169,7 @@ export class BuyerService {
             token,
             user: {
                 _id: buyerProfile._id.toString(),
-                userId: buyerProfile.userId.toString(),
+                baseUserId: buyerProfile.baseUserId.toString(),
                 email: newUser.email,
                 fullName: buyerProfile.fullName,
                 username: buyerProfile.username,
@@ -207,7 +199,7 @@ export class BuyerService {
             return response;
         }
 
-        const linkedUser = await this.userRepo.findUserById(existingBuyer.userId.toString());
+        const linkedUser = await this.userRepo.findUserById(existingBuyer.baseUserId.toString());
         if (linkedUser && linkedUser.isVerified === true) {
             throw new HttpError(400, "Username is already taken!");
         }
@@ -238,7 +230,7 @@ export class BuyerService {
             throw new HttpError(404, "Buyer with this username does not exist!");
         }
 
-        const existingUserById = await this.userRepo.findUserById(existingBuyerByUsername.userId.toString());
+        const existingUserById = await this.userRepo.findUserById(existingBuyerByUsername.baseUserId.toString());
         if (!existingUserById) {
             throw new HttpError(404, "User with this id does not exist!");
         }
@@ -293,7 +285,7 @@ export class BuyerService {
             throw new HttpError(400, "This account is not verified! Please verify your email first.");
         }
 
-        const existingBuyerByBaseUserId = await this.buyerRepo.findUserById(existingUserByEmail._id.toString());
+        const existingBuyerByBaseUserId = await this.buyerRepo.findBuyerByBaseUserId(existingUserByEmail._id.toString());
         if (!existingBuyerByBaseUserId) {
             throw new HttpError(404, "Buyer with this base user id not found!");
         }
@@ -403,7 +395,7 @@ export class BuyerService {
             throw new HttpError(400, "OTP has expired! Please request for a new OTP.");
         }
 
-        const existingBuyerByBaseUserId = await this.buyerRepo.findUserById(existingUserByEmail._id.toString());
+        const existingBuyerByBaseUserId = await this.buyerRepo.findBuyerByBaseUserId(existingUserByEmail._id.toString());
         if (!existingBuyerByBaseUserId) {
             throw new HttpError(404, "Buyer with this base user id not found!");
         }
@@ -452,7 +444,7 @@ export class BuyerService {
             throw new HttpError(400, "This account is already verified! Please login.");
         }
 
-        const existingBuyerByBaseUserId = await this.buyerRepo.findUserById(existingUserByEmail._id.toString());
+        const existingBuyerByBaseUserId = await this.buyerRepo.findBuyerByBaseUserId(existingUserByEmail._id.toString());
         if (!existingBuyerByBaseUserId) {
             throw new HttpError(404, "Buyer with this base user id not found!");
         }
@@ -482,7 +474,7 @@ export class BuyerService {
             status: 200,
             user: {
                 _id: existingBuyerByBaseUserId._id.toString(),
-                userId: existingBuyerByBaseUserId.userId.toString(),
+                baseUserId: existingBuyerByBaseUserId.baseUserId.toString(),
                 email: existingUserByEmail.email,
                 fullName: existingBuyerByBaseUserId.fullName,
                 username: existingBuyerByBaseUserId.username,
@@ -490,8 +482,6 @@ export class BuyerService {
                 role: existingUserByEmail.role,
                 isVerified: existingUserByEmail.isVerified,
                 isPermanentlyBanned: existingUserByEmail.isPermanentlyBanned,
-                createdAt: existingBuyerByBaseUserId.createdAt,
-                updatedAt: existingBuyerByBaseUserId.updatedAt,
             }
         };
         return response;

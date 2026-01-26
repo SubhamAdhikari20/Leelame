@@ -1,7 +1,7 @@
 // src/types/buyer.type.ts
 import { z } from "zod";
 import { fullNameValidation, usernameValidation, contactValidation, passwordValidation, bioValidation, termsAndConditionsValidation } from "@/schemas/user.schema.ts";
-import { IBuyer } from "@/models/buyer.model.ts";
+import type { IBuyer } from "@/models/buyer.model.ts";
 
 
 export const buyerSchema = z.object({
@@ -10,7 +10,8 @@ export const buyerSchema = z.object({
     contact: contactValidation.nullish(),
     password: passwordValidation.nullish(),
     terms: termsAndConditionsValidation,
-    userId: z.string(),
+    baseUserId: z.string(),
+    profilePictureUrl: z.string().nullish(),
 
     googleId: z.string().nullish(),
     bio: bioValidation,
@@ -19,12 +20,6 @@ export const buyerSchema = z.object({
 export type Buyer = z.infer<typeof buyerSchema>;
 
 export type BuyerDocument = IBuyer;
-// export type BuyerDocument = Buyer & {
-//     _id: string;
-//     // userId: string;
-//     createdAt: Date;
-//     updatedAt: Date;
-// };
 
 // Google Provider
 export const googleProviderBuyerSchema = z.object({
@@ -33,7 +28,8 @@ export const googleProviderBuyerSchema = z.object({
     contact: contactValidation.nullish(),
     password: passwordValidation.nullish(),
     terms: termsAndConditionsValidation,
-    userId: z.string(),
+    baseUserId: z.string(),
+    profilePictureUrl: z.string().nullish(),
 
     googleId: z.string().nullish(),
     bio: bioValidation

@@ -5,6 +5,7 @@ import { SellerSignUpSchemaType } from "@/schemas/auth/seller/sign-up.schema.ts"
 import { SellerVerifyAccountRegistrationSchemaType } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
 import { SellerForgotPasswordSchemaType } from "@/schemas/auth/seller/forgot-password.schema.ts";
 import { SellerResetPasswordSchemaType } from "@/schemas/auth/seller/reset-password.schema.ts";
+import { setAuthToken, setUserData, clearAuthCookies } from "@/lib/cookie.ts"
 
 
 // Sign Up Handler
@@ -27,6 +28,41 @@ export const handleSellerSignUp = async (signUpData: SellerSignUpSchemaType) => 
         return {
             success: false,
             message: error.message || "An unexpected error occurred during sign up."
+        };
+    }
+};
+
+// Login Token and Set Cookies Handler
+export const handleSellerLoginTokenAndSetCookies = async (token: string, userData: any) => {
+    try {
+        await setAuthToken(token);
+        await setUserData(userData);
+        return {
+            success: true,
+            message: "Authentication cookies set successfully."
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred while setting authentication cookies."
+        };
+    }
+};
+
+// Clear Auth Cookies Handler
+export const handleClearSellerAuthCookies = async () => {
+    try {
+        await clearAuthCookies();
+        return {
+            success: true,
+            message: "Authentication cookies cleared successfully."
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred while clearing authentication cookies."
         };
     }
 };

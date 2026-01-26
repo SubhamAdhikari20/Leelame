@@ -1,9 +1,9 @@
 // src/services/seller.service.ts
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { CreatedSellerDtoType, VerifyOtpForRegistrationDtoType, ForgotPasswordDtoType, ResetPasswordDtoType, SendEmailForRegistrationDtoType, SellerResponseDtoType } from "@/dtos/seller.dto.ts";
-import { SellerRepositoryInterface } from "@/interfaces/seller.repository.interface.ts";
-import { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
+import type { CreatedSellerDtoType, VerifyOtpForRegistrationDtoType, ForgotPasswordDtoType, ResetPasswordDtoType, SendEmailForRegistrationDtoType, SellerResponseDtoType, UpdateSellerProfileDetailsDtoType } from "@/dtos/seller.dto.ts";
+import type { SellerRepositoryInterface } from "@/interfaces/seller.repository.interface.ts";
+import type { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
 import { sendVerificationEmail } from "@/helpers/send-registration-verification-email.tsx";
 import { sendResetPasswordVerificationEmail } from "@/helpers/send-reset-password-verification-email.tsx";
 import { HttpError } from "@/errors/http-error.ts";
@@ -64,7 +64,7 @@ export class SellerService {
 
             if (!sellerProfile) {
                 sellerProfile = await this.sellerRepo.createSeller({
-                    userId: newUser._id.toString(),
+                    baseUserId: newUser._id.toString(),
                     fullName,
                     contact,
                 });
@@ -95,7 +95,7 @@ export class SellerService {
             }
 
             sellerProfile = await this.sellerRepo.createSeller({
-                userId: newUser._id.toString(),
+                baseUserId: newUser._id.toString(),
                 fullName,
                 contact,
             });
@@ -142,14 +142,6 @@ export class SellerService {
             throw new HttpError(500, emailResponse.message ?? "Failed to send verification email!");
         }
 
-        newUser = await this.userRepo.updateUser(newUser._id.toString(), {
-            sellerProfile: sellerProfile._id.toString()
-        });
-
-        if (!newUser) {
-            throw new HttpError(404, "User with this id not found!");
-        }
-
         const respose: SellerResponseDtoType = {
             success: true,
             message: "Seller registered successfully. Please verify your email.",
@@ -157,15 +149,13 @@ export class SellerService {
             token,
             user: {
                 _id: sellerProfile._id.toString(),
-                userId: sellerProfile.userId.toString(),
+                baseUserId: sellerProfile.baseUserId.toString(),
                 email: newUser.email,
                 fullName: sellerProfile.fullName,
                 contact: sellerProfile.contact,
                 role: newUser.role,
                 isVerified: newUser.isVerified,
                 isPermanentlyBanned: newUser.isPermanentlyBanned,
-                createdAt: sellerProfile.createdAt,
-                updatedAt: sellerProfile.updatedAt,
             }
         };
         return respose;
@@ -208,7 +198,7 @@ export class SellerService {
             throw new HttpError(400, "Invalid OTP! Please try again.");
         }
 
-        const existingSellerByBaseUserId = await this.sellerRepo.findUserById(existingUserByEmail._id.toString());
+        const existingSellerByBaseUserId = await this.sellerRepo.findSellerByBaseUserId(existingUserByEmail._id.toString());
         if (!existingSellerByBaseUserId) {
             throw new HttpError(404, "Seller with this id not found!");
         }
@@ -258,7 +248,7 @@ export class SellerService {
             throw new HttpError(400, "This account is not verified! Please verify your email first.");
         }
 
-        const existingSellerByBaseUserId = await this.sellerRepo.findUserById(existingUserByEmail._id.toString());
+        const existingSellerByBaseUserId = await this.sellerRepo.findSellerByBaseUserId(existingUserByEmail._id.toString());
         if (!existingSellerByBaseUserId) {
             throw new HttpError(404, "Seller with this base user id not found!");
         }
@@ -327,7 +317,7 @@ export class SellerService {
             throw new HttpError(400, "Invalid OTP! Please try again.");
         }
 
-        const existingSellerByBaseUserId = await this.sellerRepo.findUserById(existingUserByEmail._id.toString());
+        const existingSellerByBaseUserId = await this.sellerRepo.findSellerByBaseUserId(existingUserByEmail._id.toString());
         if (!existingSellerByBaseUserId) {
             throw new HttpError(404, "Seller with this base user id not found!");
         }
@@ -375,7 +365,7 @@ export class SellerService {
             throw new HttpError(400, "This account is already verified! Please login.");
         }
 
-        const existingSellerByBaseUserId = await this.sellerRepo.findUserById(existingUserByEmail._id.toString());
+        const existingSellerByBaseUserId = await this.sellerRepo.findSellerByBaseUserId(existingUserByEmail._id.toString());
         if (!existingSellerByBaseUserId) {
             throw new HttpError(404, "Seller with this base user id not found!");
         }
@@ -406,4 +396,31 @@ export class SellerService {
         };
         return response;
     };
+
+    updateSellerProfileDetails = async (userId: string, updateSellerProfileDetailsDto: UpdateSellerProfileDetailsDtoType) => {
+        const { fullName, contact, email, bio } = updateSellerProfileDetailsDto;
+
+        const existingSellerById = await this.sellerRepo.findSellerById(userId);
+        if (!existingSellerById) {
+            throw new HttpError(404, "Seller with this user id not found!");
+        }
+
+        const updatedSeller = await this.sellerRepo.updateSeller(existingSellerById._id.toString(), {
+            fullName,
+            contact
+        });
+
+        const updateBaseUser = await this.userRepo.updateUser(existingSellerById.baseUserId.toString(), { email });
+
+        if (!updatedSeller) {
+            throw new HttpError(404, "Seller is not updated and not found!");
+        }
+
+        const response: SellerResponseDtoType = {
+            success: true,
+            message: "Seller profile details updated successfully.",
+            status: 200
+        };
+        return response;
+    }
 }

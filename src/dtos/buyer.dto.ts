@@ -60,20 +60,18 @@ export type SendEmailForRegistrationDtoType = z.infer<typeof SendEmailForRegistr
 export const BuyerResponseDto = z.object({
     _id: z.string(),
     email: z.email(),
-    userId: z.string(),
+    baseUserId: z.string(),
+    role: z.string(),
     isVerified: z.boolean(),
-    fullName: z.string().optional().nullish(),
-    username: z.string().optional().nullish(),
-    contact: z.string().optional().nullish(),
-    profilePictureUrl: z.string().optional().nullish(),
-    bio: z.string().optional().nullish(),
-    role: z.string().optional().nullish(),
-    createdAt: z.date().optional(),
-    updatedAt: z.date().optional(),
+    fullName: z.string().nullish(),
+    username: z.string().nullish(),
+    contact: z.string().nullish(),
     isPermanentlyBanned: z.boolean(),
+    profilePictureUrl: z.string().nullish(),
+    bio: z.string().nullish(),
+    createdAt: z.date().nullish(),
+    updatedAt: z.date().nullish(),
 });
-
-// export type BuyerResponseDtoType = z.infer<typeof BuyerResponseDto>;
 
 export type BuyerResponseDtoType = {
     success: boolean;
@@ -81,5 +79,4 @@ export type BuyerResponseDtoType = {
     status?: number | null;
     token?: string | null;
     user?: z.infer<typeof BuyerResponseDto> | null;
-    // user?: Partial<UserDocument> & Partial<BuyerDocument> | null;
 };

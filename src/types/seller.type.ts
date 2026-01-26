@@ -1,14 +1,15 @@
 // src/types/user.type.ts
 import { z } from "zod";
 import { fullNameValidation, contactValidation, passwordValidation } from "@/schemas/user.schema.ts";
-import { ISeller } from "@/models/seller.model.ts";
+import type { ISeller } from "@/models/seller.model.ts";
 
 
 export const sellerSchema = z.object({
     fullName: fullNameValidation,
     contact: contactValidation,
     password: passwordValidation.nullish(),
-    userId: z.string(),
+    profilePictureUrl: z.string().nullish(),
+    baseUserId: z.string(),
 
     sellerNotes: z.string().nullish(),
     sellerStatus: z.enum(["none", "pending", "verified", "rejected"]),

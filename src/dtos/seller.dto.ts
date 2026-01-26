@@ -41,20 +41,29 @@ export const SendEmailForRegistrationDto = z.object({
 export type SendEmailForRegistrationDtoType = z.infer<typeof SendEmailForRegistrationDto>;
 
 
+// Update Profile Details DTO
+export const UpdateSellerProfileDetailsDto = z.object({
+    fullName: fullNameValidation.optional(),
+    contact: contactValidation.optional(),
+    email: emailValidation.optional(),
+    bio: z.string().max(500).nullish(),
+});
+export type UpdateSellerProfileDetailsDtoType = z.infer<typeof UpdateSellerProfileDetailsDto>;
+
 // Seller Response
 export const SellerResponseDto = z.object({
     _id: z.string(),
     email: z.email(),
-    userId: z.string(),
+    baseUserId: z.string(),
+    role: z.string(),
     isVerified: z.boolean(),
-    fullName: z.string().optional().nullish(),
-    contact: z.string().optional().nullish(),
-    profilePictureUrl: z.string().optional().nullish(),
-    bio: z.string().optional().nullish(),
-    role: z.string().optional().nullish(),
-    createdAt: z.date().optional(),
-    updatedAt: z.date().optional(),
+    fullName: z.string().nullish(),
+    contact: z.string().nullish(),
     isPermanentlyBanned: z.boolean(),
+    profilePictureUrl: z.string().nullish(),
+    bio: z.string().nullish(),
+    createdAt: z.date().nullish(),
+    updatedAt: z.date().nullish(),
 });
 
 export type SellerResponseDtoType = {

@@ -1,35 +1,16 @@
 // src/models/seller.model.ts
 import mongoose, { Schema, Document } from "mongoose";
-import type { IUser } from "./user.model.ts";
 import type { Seller } from "@/types/seller.type.ts";
 
-export interface ISeller extends Omit<Seller, 'userId'>, Document {
-    // export interface ISeller extends Seller, Document {
-    userId: Schema.Types.ObjectId | string,
-    // fullName: string;
-    // contact: string;
-    // password: string;
 
-    // sellerNotes?: string | null;
-    // sellerStatus: "none" | "pending" | "verified" | "rejected";
-    // sellerVerificationDate?: Date | null;
-    // sellerAttemptCount: number;
-    // sellerRuleViolationCount: number;
-    // isSellerPermanentlyBanned: boolean;
-    // sellerBannedAt?: Date | null;
-    // sellerBannedDateFrom?: Date | null;
-    // sellerBannedDateTo?: Date | null;
-
+export interface ISeller extends Omit<Seller, "baseUserId">, Document {
+    baseUserId: Schema.Types.ObjectId | string,
     createdAt: Date;
     updatedAt: Date;
 }
 
-export interface ISellerPopulated extends Omit<ISeller, "userId"> {
-    userId: IUser;
-}
-
 const sellerSchema: Schema<ISeller> = new Schema({
-    userId: {
+    baseUserId: {
         type: Schema.Types.ObjectId,
         ref: "users",
         required: true,
@@ -51,6 +32,10 @@ const sellerSchema: Schema<ISeller> = new Schema({
     password: {
         type: String,
         minLength: [8, "Password must be at least 8 characters"],
+        default: null
+    },
+    profilePictureUrl: {
+        type: String,
         default: null
     },
     sellerNotes: {

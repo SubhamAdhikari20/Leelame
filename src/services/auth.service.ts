@@ -1,10 +1,11 @@
 // src/services/auth.service.ts
 import bcrypt from "bcryptjs";
-import { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
-import { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interface.ts";
-import { SellerRepositoryInterface } from "@/interfaces/seller.repository.interface.ts";
-import { AdminRepositoryInterface } from "@/interfaces/admin.repository.interface.ts";
-import { AuthResponseDtoType, LoginUserDtoType } from "@/dtos/auth.dto.ts";
+import jwt from "jsonwebtoken";
+import type { UserRepositoryInterface } from "@/interfaces/user.repository.interface.ts";
+import type { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interface.ts";
+import type { SellerRepositoryInterface } from "@/interfaces/seller.repository.interface.ts";
+import type { AdminRepositoryInterface } from "@/interfaces/admin.repository.interface.ts";
+import type { AuthResponseDtoType, LoginUserDtoType } from "@/dtos/auth.dto.ts";
 import { HttpError } from "@/errors/http-error.ts";
 
 
@@ -29,24 +30,26 @@ export class AuthService {
         this.adminRepo = adminRepo;
     }
 
-    private normalizeForResponse = (baseUser: any, profile: any = null) => {
+    private normalizeForResponse = (baseUser: any, profile: any) => {
         return {
             _id: typeof baseUser?._id === "object" && baseUser?._id?.toString
                 ? baseUser._id.toString()
                 : baseUser?._id,
-            email: baseUser.email ?? null,
+            email: baseUser.email,
             role: baseUser.role ?? "buyer",
             isVerified: Boolean(baseUser.isVerified),
+            baseUserId: (profile && (baseUser.role === "buyer")) ? (profile._id?.toString() ?? profile._id) : (profile && (baseUser.role === "seller")) ? (profile._id?.toString?.() ?? profile._id) : (profile && (baseUser.role === "admin")) ? profile._id?.toString() : profile._id,
             fullName: profile?.fullName ?? null,
             username: profile?.username ?? null,
             contact: profile?.contact ?? null,
-            googleId: profile?.googleId ?? null,
-            profilePictureUrl: baseUser.profilePictureUrl ?? null,
-            buyerProfile: profile && baseUser.role === "buyer" ? (profile._id?.toString?.() ?? profile._id) : null,
-            sellerProfile: profile && baseUser.role === "seller" ? (profile._id?.toString?.() ?? profile._id) : null,
-            adminProfile: profile && baseUser.role === "admin" ? (profile._id?.toString?.() ?? profile._id) : null,
-            createAt: baseUser.createdAt ?? null,
-            updatedAt: baseUser.updatedAt ?? null,
+
+            // profilePictureUrl: baseUser.profilePictureUrl ?? null,
+            // googleId: profile?.googleId ?? null,
+            // updatedAt: baseUser.updatedAt ?? null,
+            // createAt: baseUser.createdAt ?? null,
+            // buyerProfile: profile && baseUser.role === "buyer" ? (profile._id?.toString?.() ?? profile._id) : null,
+            // sellerProfile: profile && baseUser.role === "seller" ? (profile._id?.toString?.() ?? profile._id) : null,
+            // adminProfile: profile && baseUser.role === "admin" ? (profile._id?.toString?.() ?? profile._id) : null,
         };
     };
 
@@ -59,7 +62,6 @@ export class AuthService {
 
         if (!identifier || !password) {
             throw new HttpError(400, "Missing credentails! Credentails are required!");
-            // throw new Error("MISSING_CREDENTIALS");
         }
 
         // 1) Admin: email-only
@@ -73,30 +75,37 @@ export class AuthService {
             const user = await this.userRepo.findUserByEmail(identifier);
             if (!user || user.role !== role) {
                 throw new HttpError(404, "Invalid email! No admim found with this email.");
-                // throw new Error("ADMIN_NOT_FOUND");
             }
 
-            const adminProfile = await this.adminRepo.findUserById(user._id.toString());
+            const adminProfile = await this.adminRepo.findAdminByBaseUserId(user._id.toString());
             if (!adminProfile) {
                 throw new HttpError(404, "Admin user not found for this email.");
-                // throw new Error("ADMIN_NOT_FOUND");
             }
 
             const hashed = adminProfile.password;
             if (!hashed) {
                 throw new HttpError(400, "Password not found for admin!");
-                // throw new Error("ADMIN_NO_PASSWORD");
             }
 
             const isMatched = await bcrypt.compare(password, hashed);
             if (!isMatched) {
                 throw new HttpError(400, "Invalid password! Please enter correct password.");
-                // throw new Error("INVALID_PASSWORD");
             }
+
+            // JWT Expiry Calculation in seconds for Login Token (1 Day)
+            const expiresInSeconds = Number(process.env.JWT_LOGIN_EXPIRES_IN) * 60 * 60;
+
+            // Generate Token
+            const token = jwt.sign(
+                { _id: adminProfile._id.toString(), baseUserId: user._id.toString() ?? adminProfile.baseUserId.toString(), email: user.email, role: user.role },
+                process.env.JWT_SECRET!,
+                { expiresIn: expiresInSeconds }
+            );
 
             const response: AuthResponseDtoType = {
                 success: true,
                 message: "Logged in as admin successfully.",
+                token,
                 user: this.normalizeForResponse(user, adminProfile)
             };
             return response;
@@ -114,36 +123,45 @@ export class AuthService {
 
             let user;
             let sellerProfile;
+            let expiresInSeconds;
+            let token;
 
             if (isEmailFormat) {
                 user = await this.userRepo.findUserByEmail(identifier);
                 if (!user || user.role !== role) {
                     throw new HttpError(404, "Invalid email! No seller account found with this email.");
-                    // throw new Error("USER_NOT_FOUND");
                 }
 
-                sellerProfile = await this.sellerRepo.findUserById(user._id.toString());
+                sellerProfile = await this.sellerRepo.findSellerByBaseUserId(user._id.toString());
                 if (!sellerProfile) {
                     throw new HttpError(404, "Seller user not found for this email.");
-                    // throw new Error("SELLER_NOT_FOUND");
                 }
 
                 const hashedPassword = sellerProfile.password;
                 if (!hashedPassword) {
                     throw new HttpError(400, "Password not found for seller!");
-                    // throw new Error("SELLER_NO_PASSWORD");
                 }
 
                 const isMatched = await bcrypt.compare(password, hashedPassword);
                 if (!isMatched) {
                     throw new HttpError(400, "Invalid password! Please enter correct password.");
-                    // throw new Error("INVALID_PASSWORD");
                 }
+
+                // JWT Expiry Calculation in seconds for Login Token (1 Day)
+                expiresInSeconds = Number(process.env.JWT_LOGIN_EXPIRES_IN) * 60 * 60;
+
+                // Generate Token
+                token = jwt.sign(
+                    { _id: sellerProfile._id.toString(), baseUserId: user._id.toString() ?? sellerProfile.baseUserId.toString(), email: user.email, contact: sellerProfile.contact, role: user.role },
+                    process.env.JWT_SECRET!,
+                    { expiresIn: expiresInSeconds }
+                );
 
                 const response: AuthResponseDtoType = {
                     success: true,
                     message: "Logged in as seller successfully.",
-                    user: this.normalizeForResponse(user, sellerProfile)
+                    token,
+                    user: this.normalizeForResponse(user, sellerProfile),
                 };
                 return response;
             }
@@ -152,30 +170,37 @@ export class AuthService {
             sellerProfile = await this.sellerRepo.findSellerByContact(identifier);
             if (!sellerProfile) {
                 throw new HttpError(404, "Invalid phone number! No buyer account found with this phone number.");
-                // throw new Error("SELLER_NOT_FOUND");
             }
 
             if (!sellerProfile.password) {
                 throw new HttpError(400, "Password not found for seller!");
-                // throw new Error("SELLER_NO_PASSWORD");
             }
 
             const isMatched = await bcrypt.compare(password, sellerProfile.password);
             if (!isMatched) {
                 throw new HttpError(400, "Invalid password! Please enter correct password.");
-                // throw new Error("INVALID_PASSWORD");
             }
 
             // get linked user doc
-            user = await this.userRepo.findUserById(sellerProfile.userId.toString());
+            user = await this.userRepo.findUserById(sellerProfile.baseUserId.toString());
             if (!user) {
                 throw new HttpError(404, "User not found!");
-                // throw new Error("USER_NOT_FOUND");
             }
+
+            // JWT Expiry Calculation in seconds for Login Token (1 Day)
+            expiresInSeconds = Number(process.env.JWT_LOGIN_EXPIRES_IN) * 60 * 60;
+
+            // Generate Token
+            token = jwt.sign(
+                { _id: sellerProfile._id.toString(), baseUserId: user._id.toString() ?? sellerProfile.baseUserId.toString(), email: user.email, contact: sellerProfile.contact, role: user.role },
+                process.env.JWT_SECRET!,
+                { expiresIn: expiresInSeconds }
+            );
 
             const response: AuthResponseDtoType = {
                 success: true,
                 message: "Logged in as seller successfully.",
+                token,
                 user: this.normalizeForResponse(user, sellerProfile)
             };
             return response;
@@ -192,35 +217,44 @@ export class AuthService {
 
             let user;
             let buyerProfile;
+            let expiresInSeconds;
+            let token;
 
             if (isEmailFormat) {
                 user = await this.userRepo.findUserByEmail(identifier);
                 if (!user || user.role !== role) {
                     throw new HttpError(404, "Invalid email! No buyer account found with this email.");
-                    // throw new Error("USER_NOT_FOUND");
                 }
 
-                buyerProfile = await this.buyerRepo.findUserById(user._id.toString());
+                buyerProfile = await this.buyerRepo.findBuyerByBaseUserId(user._id.toString());
                 if (!buyerProfile) {
                     throw new HttpError(404, "Buyer user not found for this email.");
-                    // throw new Error("BUYER_NOT_FOUND");
                 }
 
                 const hashedPassword = buyerProfile.password;
                 if (!hashedPassword) {
                     throw new HttpError(400, "Password not found for buyer!");
-                    // throw new Error("BUYER_NO_PASSWORD");
                 }
 
                 const isMatched = await bcrypt.compare(password, hashedPassword);
                 if (!isMatched) {
                     throw new HttpError(400, "Invalid password! Please enter correct password.");
-                    // throw new Error("INVALID_PASSWORD");
                 }
+
+                // JWT Expiry Calculation in seconds for Login Token (1 Day)
+                expiresInSeconds = Number(process.env.JWT_LOGIN_EXPIRES_IN) * 60 * 60;
+
+                // Generate Token
+                token = jwt.sign(
+                    { _id: buyerProfile._id.toString(), baseUserId: user._id.toString() ?? buyerProfile.baseUserId.toString(), email: user.email, username: buyerProfile.username, contact: buyerProfile.contact, role: user.role },
+                    process.env.JWT_SECRET!,
+                    { expiresIn: expiresInSeconds }
+                );
 
                 const response: AuthResponseDtoType = {
                     success: true,
                     message: "Logged in as buyer successfully.",
+                    token,
                     user: this.normalizeForResponse(user, buyerProfile)
                 };
                 return response;
@@ -230,58 +264,63 @@ export class AuthService {
             buyerProfile = await this.buyerRepo.findBuyerByUsername(identifier);
             if (!buyerProfile) {
                 throw new HttpError(404, "Invalid username! No buyer account found with this username.");
-                // throw new Error("BUYER_NOT_FOUND");
             }
 
             if (!buyerProfile.password) {
                 throw new HttpError(400, "Password not found for buyer!");
-                // throw new Error("BUYER_NO_PASSWORD");
             }
 
             const isMatched = await bcrypt.compare(password, buyerProfile.password);
             if (!isMatched) {
                 throw new HttpError(400, "Invalid password! Please enter correct password.");
-                // throw new Error("INVALID_PASSWORD");
             }
 
-            user = await this.userRepo.findUserById(buyerProfile.userId.toString());
+            user = await this.userRepo.findUserById(buyerProfile.baseUserId.toString());
             if (!user) {
                 throw new HttpError(404, "User not found!");
-                // throw new Error("USER_NOT_FOUND");
             }
+
+            // JWT Expiry Calculation in seconds for Login Token (1 Day)
+            expiresInSeconds = Number(process.env.JWT_LOGIN_EXPIRES_IN) * 60 * 60;
+
+            // Generate Token
+            token = jwt.sign(
+                { _id: buyerProfile._id.toString(), baseUser: user._id.toString() ?? buyerProfile.baseUserId.toString(), email: user.email, username: buyerProfile.username, contact: buyerProfile.contact, role: user.role },
+                process.env.JWT_SECRET!,
+                { expiresIn: expiresInSeconds }
+            );
 
             const response: AuthResponseDtoType = {
                 success: true,
                 message: "Logged in as buyer successfully.",
+                token,
                 user: this.normalizeForResponse(user, buyerProfile)
             };
             return response;
         }
 
         throw new HttpError(400, "Invalid role! Role is unknown.");
-        // throw new Error("UNKNOWN_ROLE");
     };
 
     // Example for provider (Google) sign-in: find or create user/buyer profile
     findOrCreateFromProvider = async (profile: any, provider: string): Promise<AuthResponseDtoType> => {
         if (!profile || !profile.id) {
             throw new HttpError(400, "Invalid provider profile! Provider profile is not valid.");
-            // throw new Error("INVALID_PROVIDER_PROFILE");
         }
 
         const email = profile.email;
         if (!email) {
             // In many flows you may require email from provider, otherwise return code to ask the user for email.
             throw new HttpError(400, "Invalid provider email! Please, provide correct provider email.");
-            // throw new Error("PROVIDER_EMAIL_REQUIRED");
         }
 
-        // Try existing user by email
+        // Try existing user or buyer by email
         let user = await this.userRepo.findUserByEmail(email);
-        if (user) {
+        let buyer = await this.buyerRepo.findBuyerByEmail(email);
+        if (user && buyer) {
             // if buyer role and buyerProfile exists, update googleId if missing
-            if (user.role === "buyer" && user.buyerProfile) {
-                const buyerProfile = await this.buyerRepo.findBuyerById(user.buyerProfile.toString());
+            if (user.role === "buyer" && buyer._id) {
+                const buyerProfile = await this.buyerRepo.findBuyerById(buyer._id.toString());
                 if (buyerProfile && !buyerProfile.googleId) {
                     await this.buyerRepo.updateBuyer(buyerProfile._id.toString(), { googleId: profile.id });
                 }
@@ -306,28 +345,23 @@ export class AuthService {
             isPermanentlyBanned: false,
             role: "buyer",
             isVerified: true,
-            profilePictureUrl: profile.picture,
         });
 
         if (!newUser) {
             throw new HttpError(404, "Newly created user not found.");
-            // throw new Error("USER_NOT_FOUND");
         }
 
         const newBuyer = await this.buyerRepo.createGoogleProviderBuyer({
-            userId: newUser._id.toString(),
+            baseUserId: newUser._id.toString(),
             fullName: profile.name,
+            profilePictureUrl: profile.picture,
             terms: true,
             googleId: profile.id,
         });
 
         if (!newUser) {
             throw new HttpError(404, "Newly created buyer user not found.");
-            // throw new Error("BUYER_NOT_FOUND");
         }
-
-        // attach buyerProfile to user
-        await this.userRepo.updateUser(newUser._id.toString(), { buyerProfile: newUser._id.toString() });
 
         const response: AuthResponseDtoType = {
             success: true,

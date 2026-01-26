@@ -1,8 +1,9 @@
 // src/repositories/seller.repository.ts
-import { SellerRepositoryInterface } from "@/interfaces/seller.repository.interface.ts";
-import { Seller, SellerDocument } from "@/types/seller.type.ts";
+import type { SellerRepositoryInterface } from "@/interfaces/seller.repository.interface.ts";
+import type { Seller, SellerDocument } from "@/types/seller.type.ts";
 import SellerModel from "@/models/seller.model.ts";
-// import { Types } from "mongoose";
+import UserModel from "@/models/user.model.ts";
+
 
 export class SellerRepository implements SellerRepositoryInterface {
     createSeller = async (seller: Partial<Seller>): Promise<SellerDocument | null> => {
@@ -24,9 +25,20 @@ export class SellerRepository implements SellerRepositoryInterface {
         return seller;
     };
 
-    findUserById = async (userId: string): Promise<SellerDocument | null> => {
-        const seller = await SellerModel.findOne({ userId: userId }).lean();
+    findSellerByBaseUserId = async (baseUserId: string): Promise<SellerDocument | null> => {
+        const seller = await SellerModel.findOne({ baseUserId: baseUserId }).lean();
         // const seller = await SellerModel.findOne({ userId: new Types.ObjectId(userId) } as any).lean();
+        return seller;
+    };
+
+    findSellerByEmail = async (email: string): Promise<SellerDocument | null> => {
+        const baseUser = await UserModel.findOne({ email }).lean();
+        if (!baseUser) {
+            return null;
+            // throw new HttpError(404, "Invalid email! Base user not found!");
+        }
+        // const seller = await SellerModel.findOne({ userId: new Schema.Types.ObjectId(baseUser._id.toString()) }).lean();
+        const seller = await SellerModel.findOne({ baseUserId: baseUser._id.toString() }).lean();
         return seller;
     };
 

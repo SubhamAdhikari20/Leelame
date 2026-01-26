@@ -1,8 +1,9 @@
 // src/repositories/buyer.repository.ts
-import { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interface.ts";
-import { Buyer, BuyerDocument, ProviderBuyer } from "@/types/buyer.type.ts";
+import type { BuyerRepositoryInterface } from "@/interfaces/buyer.repository.interface.ts";
+import type { Buyer, BuyerDocument, ProviderBuyer } from "@/types/buyer.type.ts";
 import BuyerModel from "@/models/buyer.model.ts";
-// import { Schema } from "mongoose";
+import UserModel from "@/models/user.model.ts";
+
 
 export class BuyerRepository implements BuyerRepositoryInterface {
     createBuyer = async (buyer: Buyer): Promise<BuyerDocument | null> => {
@@ -24,9 +25,20 @@ export class BuyerRepository implements BuyerRepositoryInterface {
         return buyer;
     };
 
-    findUserById = async (userId: string): Promise<BuyerDocument | null> => {
-        const buyer = await BuyerModel.findOne({ userId: userId }).lean();
+    findBuyerByBaseUserId = async (baseUserId: string): Promise<BuyerDocument | null> => {
+        const buyer = await BuyerModel.findOne({ baseUserId: baseUserId }).lean();
         // const buyer = await BuyerModel.findOne({ userId: new Schema.Types.ObjectId(userId) }).lean();
+        return buyer;
+    };
+
+    findBuyerByEmail = async (email: string): Promise<BuyerDocument | null> => {
+        const baseUser = await UserModel.findOne({ email }).lean();
+        if (!baseUser) {
+            return null;
+            // throw new HttpError(404, "Invalid email! Base user not found!");
+        }
+        // const buyer = await BuyerModel.findOne({ userId: new Schema.Types.ObjectId(baseUser._id.toString()) }).lean();
+        const buyer = await BuyerModel.findOne({ baseUserId: baseUser._id.toString() }).lean();
         return buyer;
     };
 

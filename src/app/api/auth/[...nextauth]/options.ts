@@ -19,34 +19,34 @@ type RawCredentials = {
 };
 
 const buildReturnUser = (user: any) => {
-    // const baseUser = user.userId ?? user;
     return {
         _id: typeof user?._id === "object" && user?._id?.toString
             ? user._id.toString()
             : user?._id ?? user?.id,
-        email: user?.email ?? null,
+        email: user?.email,
         role: user?.role ?? "buyer",
         isVerified: Boolean(user?.isVerified),
-        profilePictureUrl: user?.profilePictureUrl ?? null,
-        username: user?.role === "buyer" ? user?.username : null,
-        googleId: user?.role === "buyer" ? user?.googleId : null,
+        baseUserId: user?.baseUserId.toString(),
         fullName: (user?.role === "buyer") ? (user?.fullName) : (user?.role === "seller") ? (user?.fullName) : (user?.role === "admin") ? (user?.fullName) : null,
+        username: user?.role === "buyer" ? user?.username : null,
         contact: (user?.role === "buyer") ? (user?.contact) : (user?.role === "seller") ? (user?.contact) : (user?.role === "admin") ? (user?.contact) : null,
 
-        buyerProfile:
-            user?.role === "buyer"
-                ? user?.buyerProfile?.toString() || null
-                : null,
+        // profilePictureUrl: user?.profilePictureUrl ?? null,
+        // googleId: user?.role === "buyer" ? user?.googleId : null,
+        // buyerProfile:
+        //     user?.role === "buyer"
+        //         ? user?.buyerProfile?.toString() || null
+        //         : null,
 
-        sellerProfile:
-            user?.role === "seller"
-                ? user?.sellerProfile?.toString() || null
-                : null,
+        // sellerProfile:
+        //     user?.role === "seller"
+        //         ? user?.sellerProfile?.toString() || null
+        //         : null,
 
-        adminProfile:
-            user?.role === "admin"
-                ? user?.adminProfile?.toString() || null
-                : null,
+        // adminProfile:
+        //     user?.role === "admin"
+        //         ? user?.adminProfile?.toString() || null
+        //         : null,
     };
 };
 
@@ -69,23 +69,12 @@ export const authOptions: NextAuthOptions = {
             async authorize(credentials?: RawCredentials): Promise<any | null> {
                 if (!credentials?.identifier || !credentials?.password || !credentials?.role) {
                     throw new HttpError(400, "Missing credentails! Credentails are required!");
-                    // throw new Error("MISSING_CREDENTIALS");
                 }
-
-                // const identifier = credentials.identifier.trim();
-                // const password = credentials.password.trim();
-                // const role = (credentials.role ?? "buyer").toString();
-
-                // if (!identifier || !password || !role) {
-                //     throw new Error("Missing credentails! Credentails are required!");
-                //     // throw new Error("MISSING_CREDENTIALS");
-                // }
 
                 try {
                     const validatedData = LoginUserDto.safeParse(credentials);
                     if (!validatedData.success) {
                         throw new HttpError(400, z.prettifyError(validatedData.error));
-                        // throw new Error("Missing credentails! Credentails are required!");
                     }
 
                     const response = await authService.authenticate(validatedData.data);
@@ -95,18 +84,16 @@ export const authOptions: NextAuthOptions = {
                         throw new HttpError(400, z.prettifyError(validatedResponseAuthData.error) ?? "Unknown error!");
                     }
 
-                    return buildReturnUser(validatedResponseAuthData.data);
+                    return { ...buildReturnUser(validatedResponseAuthData.data), accessToken: response.token };
                 }
                 catch (error: any) {
                     console.error("Error in login:", error);
 
                     if (error instanceof HttpError) {
                         throw new HttpError(error.status, error.message);
-                        // throw new Error(error.message);
                     }
 
                     throw new HttpError(500, "Internal Server Error");
-                    // throw new Error("Internal Server Error");
                 }
             }
         }),
@@ -122,24 +109,27 @@ export const authOptions: NextAuthOptions = {
             // user object present on first sign in (credentials or provider)
             if (user) {
                 const normalized = buildReturnUser(user);
+                const userAccessToken = (user as any)?.accessToken ?? (user as any)?.token(user as any)?.token.accessToken ?? null;
                 return {
                     ...token,
                     ...normalized,
+                    accessToken: userAccessToken ?? token.accessToken ?? null,
                 };
             }
             else if (account && profile) {
                 try {
                     const response = await authService.findOrCreateFromProvider(profile as any, account.provider);
                     if (response && response.user) {
-                        token._id = response.user._id ?? token._id;
-                        token.email = response.user.email ?? token.email;
-                        token.role = response.user.role as any ?? token.role;
-                        token.isVerified = token.isVerified ?? response.user.isVerified;
-                        token.fullName = response.user.fullName ?? token.fullName;
-                        token.username = response.user.username ?? token.username;
-                        token.profilePictureUrl = response.user.profilePictureUrl ?? token.profilePictureUrl;
-                        token.buyerProfile = response.user.buyerProfile ?? token.buyerProfile;
-                        token.googleId = response.user.googleId ?? token.googleId;
+                        token.user._id = response.user._id ?? token.user._id;
+                        token.user.email = response.user.email ?? token.user.email;
+                        token.user.role = response.user.role as any ?? token.user.role;
+                        token.user.isVerified = response.user.isVerified ?? token.user.isVerified;
+                        token.user.fullName = response.user.fullName ?? token.user.fullName;
+                        token.user.username = response.user.username ?? token.user.username;
+                        token.user.contact = response.user.contact ?? token.user.contact;
+                        token.user.baseUserId = response.user.baseUserId ?? token.buyerProfile;
+
+                        token.accessToken = response.token ?? token.accessToken ?? null
 
                         const normalized = buildReturnUser(response.user);
                         return {
@@ -153,11 +143,9 @@ export const authOptions: NextAuthOptions = {
 
                     if (error instanceof HttpError) {
                         throw new HttpError(error.status, error.message);
-                        // throw new Error(error.message);
                     }
 
                     throw new HttpError(500, "Internal Server Error");
-                    // throw new Error("Internal Server Error");
                 }
             }
             return token;
@@ -168,22 +156,18 @@ export const authOptions: NextAuthOptions = {
             if (!session.user) {
                 session.user = {} as any;
             }
+            session.accessToken = token.accessToken ?? null;
 
             session.user = {
                 ...session.user,
-                _id: token._id,
-                fullName: token.fullName,
-                email: token.email,
-                contact: token.contact ?? null,
-                username: token.username ?? null,
-                role: token.role,
-                isVerified: token.isVerified,
-                profilePictureUrl: token.profilePictureUrl ?? null,
-                googleId: token.googleId ?? null,
-
-                buyerProfile: token.buyerProfile ?? null,
-                sellerProfile: token.sellerProfile ?? null,
-                adminProfile: token.adminProfile ?? null,
+                _id: token.user._id,
+                email: token.user.email,
+                role: token.user.role,
+                isVerified: token.user.isVerified,
+                baseUserId: token.user.baseUserId,
+                fullName: token.user.fullName,
+                contact: token.user.contact ?? null,
+                username: token.user.username ?? null,
             };
 
             return session;

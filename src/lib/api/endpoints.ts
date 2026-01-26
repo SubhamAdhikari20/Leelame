@@ -19,7 +19,10 @@ export const API = {
             SEND_ACCOUNT_REGISTRATION_EMAIL: "/api/users/seller/send-account-registration-email",
             VERIFY_ACCOUNT_REGISTRATION: "/api/users/seller/verify-account-registration",
             FORGOT_PASSWORD: "/api/users/seller/forgot-password",
-            RESET_PASSWORD: "/api/users/seller/reset-password"
+            RESET_PASSWORD: "/api/users/seller/reset-password",
+            UPDATE_PROFILE_DETAILS: "/api/users/seller/update-profile-details",
+            DELETE_ACCOUNT: "/api/users/seller/delete-account",
+            UPLOAD_PROFILE_PICTURE: "/api/users/seller/upload-profile-picture"
         },
         ADMIN: {
             SIGN_UP: "/api/users/admin/sign-up",

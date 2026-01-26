@@ -10,60 +10,44 @@ import { IAdmin } from "@/models/admin.model.ts";
 type UserRole = "buyer" | "seller" | "admin";
 
 declare module "next-auth" {
-    interface User extends Partial<IUser> {
+    interface User {
         _id: string;
-        fullName: string;
         email: string;
+        role: UserRole;
+        baseUserId: string;
+        isVerified: boolean;
+        fullName?: string | null;
         username?: string | null;
         contact?: string | null;
-        role: UserRole;
-        isVerified: boolean;
-        profilePictureUrl?: string | null;
-        googleId?: string | null;
-
-        buyerProfile?: string | null;
-        sellerProfile?: string | null;
-        adminProfile?: string | null;
-
-        // Optional populated references
-        // buyerProfile?: IBuyer | Types.ObjectId | null;
-        // sellerProfile?: ISeller | Types.ObjectId | null;
-        // adminProfile?: IAdmin | Types.ObjectId | null;
     }
 
     interface Session {
         user: {
             _id: string;
-            fullName: string;
             email: string;
-            username?: string | null;
-            contact?: string | null;
             role: UserRole;
             isVerified: boolean;
-            profilePictureUrl?: string | null;
-            googleId?: string | null;
-
-            buyerProfile?: string | null;
-            sellerProfile?: string | null;
-            adminProfile?: string | null;
-        } & DefaultSession["user"]
+            baseUserId: string;
+            fullName?: string | null;
+            username?: string | null;
+            contact?: string | null;
+        } & DefaultSession["user"];
+        accessToken?: string | null;
     }
 }
 
 declare module "next-auth/jwt" {
     interface JWT {
-        _id: string;
-        fullName: string;
-        email: string;
-        username?: string | null;
-        contact?: string | null;
-        role: UserRole;
-        isVerified: boolean;
-        profilePictureUrl?: string | null;
-        googleId?: string | null;
-
-        buyerProfile?: string | null;
-        sellerProfile?: string | null;
-        adminProfile?: string | null;
+        user: {
+            _id: string;
+            email: string;
+            role: UserRole;
+            isVerified: boolean;
+            baseUserId: string;
+            fullName?: string | null;
+            username?: string | null;
+            contact?: string | null;
+        }
+        accessToken?: string | null;
     }
 }

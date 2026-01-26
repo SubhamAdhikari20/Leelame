@@ -1,5 +1,6 @@
 // src/interfaces/user.repository.interface.ts
-import { UserDocument, User } from "@/types/user.type.ts";
+import type { UserDocument, User } from "@/types/user.type.ts";
+
 
 export interface UserRepositoryInterface {
     createUser(user: User): Promise<UserDocument | null>;

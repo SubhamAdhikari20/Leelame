@@ -1,11 +1,12 @@
 // src/repositories/admin.repository.ts
-import { AdminRepositoryInterface } from "@/interfaces/admin.repository.interface.ts";
-import { Admin, AdminDocument } from "@/types/admin.type.ts";
+import type { AdminRepositoryInterface } from "@/interfaces/admin.repository.interface.ts";
+import type { Admin, AdminDocument } from "@/types/admin.type.ts";
 import AdminModel from "@/models/admin.model.ts";
-// import { Types } from "mongoose";
+import UserModel from "@/models/user.model.ts";
+
 
 export class AdminRepository implements AdminRepositoryInterface {
-    createAdmin = async (admin: Partial<Admin>): Promise<AdminDocument | null> => {
+    createAdmin = async (admin: Admin): Promise<AdminDocument | null> => {
         const newAdmin = await AdminModel.create(admin);
         return newAdmin;
     };
@@ -24,9 +25,20 @@ export class AdminRepository implements AdminRepositoryInterface {
         return admin;
     };
 
-    findUserById = async (userId: string): Promise<AdminDocument | null> => {
-        const admin = await AdminModel.findOne({ userId: userId }).lean();
+    findAdminByBaseUserId = async (baseUserId: string): Promise<AdminDocument | null> => {
+        const admin = await AdminModel.findOne({ baseUserId: baseUserId }).lean();
         // const admin = await AdminModel.findOne({ userId: new Types.ObjectId(userId) } as any).lean();
+        return admin;
+    };
+
+    findAdminByEmail = async (email: string): Promise<AdminDocument | null> => {
+        const baseUser = await UserModel.findOne({ email }).lean();
+        if (!baseUser) {
+            return null;
+            // throw new HttpError(404, "Invalid email! Base user not found!");
+        }
+        // const admin = await AdminModel.findOne({ userId: new Schema.Types.ObjectId(baseUser._id.toString()) }).lean();
+        const admin = await AdminModel.findOne({ baseUserId: baseUser._id.toString() }).lean();
         return admin;
     };
 
