@@ -1,11 +1,12 @@
 // src/lib/api/auth/seller-auth.api.ts
-import axios, { AxiosErrorType } from "@/lib/api/axios.ts";
+import axios from "@/lib/api/axios.ts";
 import { API } from "@/lib/api/endpoints.ts";
-import { SellerResponseDtoType } from "@/dtos/seller.dto.ts";
-import { SellerSignUpSchemaType } from "@/schemas/auth/seller/sign-up.schema.ts";
-import { SellerVerifyAccountRegistrationSchemaType } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
-import { SellerForgotPasswordSchemaType } from "@/schemas/auth/seller/forgot-password.schema.ts";
-import { SellerResetPasswordSchemaType } from "@/schemas/auth/seller/reset-password.schema.ts";
+import type { AxiosErrorType } from "@/lib/api/axios.ts";
+import type { SellerResponseDtoType } from "@/dtos/seller.dto.ts";
+import type { SellerSignUpSchemaType } from "@/schemas/auth/seller/sign-up.schema.ts";
+import type { SellerVerifyAccountRegistrationSchemaType } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
+import type { SellerForgotPasswordSchemaType } from "@/schemas/auth/seller/forgot-password.schema.ts";
+import type { SellerResetPasswordSchemaType } from "@/schemas/auth/seller/reset-password.schema.ts";
 
 
 // Sign Up Axios
@@ -16,6 +17,7 @@ export const sellerSignUp = async (signUpData: SellerSignUpSchemaType) => {
     }
     catch (error: Error | any) {
         const axiosError = error as AxiosErrorType;
+        console.error(axiosError);
         throw new Error(axiosError.response?.data.message || "Sign Up failed");
     }
 };

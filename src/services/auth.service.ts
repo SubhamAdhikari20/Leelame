@@ -32,13 +32,13 @@ export class AuthService {
 
     private normalizeForResponse = (baseUser: any, profile: any) => {
         return {
-            _id: typeof baseUser?._id === "object" && baseUser?._id?.toString
-                ? baseUser._id.toString()
-                : baseUser?._id,
+            _id: typeof profile?._id === "object" && profile?._id?.toString()
+                ? profile._id.toString()
+                : profile?._id,
             email: baseUser.email,
             role: baseUser.role ?? "buyer",
             isVerified: Boolean(baseUser.isVerified),
-            baseUserId: (profile && (baseUser.role === "buyer")) ? (profile._id?.toString() ?? profile._id) : (profile && (baseUser.role === "seller")) ? (profile._id?.toString?.() ?? profile._id) : (profile && (baseUser.role === "admin")) ? profile._id?.toString() : profile._id,
+            baseUserId: (baseUser && (baseUser.role === "buyer")) ? (baseUser._id?.toString() ?? baseUser._id) : (baseUser && (baseUser.role === "seller")) ? (baseUser._id?.toString?.() ?? baseUser._id) : (baseUser && (baseUser.role === "admin")) ? baseUser._id?.toString() : baseUser._id,
             fullName: profile?.fullName ?? null,
             username: profile?.username ?? null,
             contact: profile?.contact ?? null,

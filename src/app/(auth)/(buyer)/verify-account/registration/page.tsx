@@ -18,8 +18,9 @@ import {
     InputOTPSlot,
 } from "@/components/ui/input-otp.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { VerifyAccountRegistrationSchema, VerifyAccountRegistrationSchemaType } from "@/schemas/auth/buyer/verify-account-registration.schema.ts";
 import { handleBuyerVerifyAccountRegistration } from "@/lib/actions/auth/buyer-auth.action.ts";
+import { VerifyAccountRegistrationSchema } from "@/schemas/auth/buyer/verify-account-registration.schema.ts";
+import type { VerifyAccountRegistrationSchemaType } from "@/schemas/auth/buyer/verify-account-registration.schema.ts";
 
 
 const VerifyAccountRegistration = () => {

@@ -1,11 +1,13 @@
 // src/lib/actions/auth/admin-auth.action.ts
 "use server";
 import { adminForgotPassword, adminResetPassword, adminSendAccountRegistrationEmail, adminSignUp, adminVerifyAccountRegistration, adminVerifyAccountResetPassword } from "@/lib/api/auth/admin-auth.api.ts";
-import { AdminForgotPasswordSchemaType } from "@/schemas/auth/admin/forgot-password.schema.ts";
-import { AdminSignUpSchemaType } from "@/schemas/auth/admin/sign-up.schema.ts";
-import { AdminVerifyAccountRegistrationSchemaType } from "@/schemas/auth/admin/verify-account-registration.schema.ts";
-import { AdminVerifyAccountResetPasswordSchemaType } from "@/schemas/auth/admin/verify-account-reset-password.schema.ts";
-import { AdminResetPasswordSchemaType } from "@/schemas/auth/admin/reset-password.schema.ts";
+import type { AdminForgotPasswordSchemaType } from "@/schemas/auth/admin/forgot-password.schema.ts";
+import type { AdminSignUpSchemaType } from "@/schemas/auth/admin/sign-up.schema.ts";
+import type { AdminVerifyAccountRegistrationSchemaType } from "@/schemas/auth/admin/verify-account-registration.schema.ts";
+import type { AdminVerifyAccountResetPasswordSchemaType } from "@/schemas/auth/admin/verify-account-reset-password.schema.ts";
+import type { AdminResetPasswordSchemaType } from "@/schemas/auth/admin/reset-password.schema.ts";
+import type { UserData } from "@/lib/cookie.ts";
+import { setAuthToken, setUserData } from "@/lib/cookie.ts";
 
 
 // Sign Up Handler
@@ -76,6 +78,24 @@ export const handleAdminVerifyAccountRegistration = async (username: string, ver
         return {
             success: false,
             message: error.message || "An unexpected error occurred during account registration verification."
+        };
+    }
+};
+
+// Login Token and Set Cookies Handler
+export const handleAdminLoginTokenAndSetCookies = async (token: string, userData: UserData) => {
+    try {
+        await setAuthToken(token);
+        await setUserData(userData);
+        return {
+            success: true,
+            message: "Authentication cookies set successfully."
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred while setting authentication cookies."
         };
     }
 };

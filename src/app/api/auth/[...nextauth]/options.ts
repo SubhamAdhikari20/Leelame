@@ -20,7 +20,7 @@ type RawCredentials = {
 
 const buildReturnUser = (user: any) => {
     return {
-        _id: typeof user?._id === "object" && user?._id?.toString
+        _id: typeof user?._id === "object" && user?._id?.toString()
             ? user._id.toString()
             : user?._id ?? user?.id,
         email: user?.email,
@@ -109,33 +109,48 @@ export const authOptions: NextAuthOptions = {
             // user object present on first sign in (credentials or provider)
             if (user) {
                 const normalized = buildReturnUser(user);
-                const userAccessToken = (user as any)?.accessToken ?? (user as any)?.token(user as any)?.token.accessToken ?? null;
-                return {
-                    ...token,
+
+                token.user = {
+                    ...((token as any).user ?? {}),
                     ...normalized,
-                    accessToken: userAccessToken ?? token.accessToken ?? null,
                 };
+                (token as any)._id = token.user._id ?? (token as any)._id ?? null;
+                (token as any).email = token.user.email ?? (token as any).email ?? null;
+                (token as any).role = token.user.role ?? (token as any).role ?? "buyer";
+                (token as any).isVerified = token.user.isVerified ?? (token as any).isVerified ?? false;
+                (token as any).baseUserId = token.user.baseUserId ?? (token as any).baseUserId ?? null;
+                (token as any).fullName = token.user.fullName ?? (token as any).fullName ?? null;
+                (token as any).username = token.user.username ?? (token as any).username ?? null;
+                (token as any).contact = token.user.contact ?? (token as any).contact ?? null;
+
+                const userAccessToken = (user as any)?.accessToken ?? null;
+                (token as any).accessToken = userAccessToken ?? (token as any).accessToken ?? null;
+
+                return token;
             }
             else if (account && profile) {
                 try {
                     const response = await authService.findOrCreateFromProvider(profile as any, account.provider);
                     if (response && response.user) {
-                        token.user._id = response.user._id ?? token.user._id;
-                        token.user.email = response.user.email ?? token.user.email;
-                        token.user.role = response.user.role as any ?? token.user.role;
-                        token.user.isVerified = response.user.isVerified ?? token.user.isVerified;
-                        token.user.fullName = response.user.fullName ?? token.user.fullName;
-                        token.user.username = response.user.username ?? token.user.username;
-                        token.user.contact = response.user.contact ?? token.user.contact;
-                        token.user.baseUserId = response.user.baseUserId ?? token.buyerProfile;
-
-                        token.accessToken = response.token ?? token.accessToken ?? null
-
                         const normalized = buildReturnUser(response.user);
-                        return {
-                            ...token,
+
+                        token.user = {
+                            ...((token as any).user ?? {}),
                             ...normalized,
                         };
+
+                        (token as any)._id = token.user._id ?? (token as any)._id ?? null;
+                        (token as any).email = token.user.email ?? (token as any).email ?? null;
+                        (token as any).role = token.user.role ?? (token as any).role ?? "buyer";
+                        (token as any).isVerified = token.user.isVerified ?? (token as any).isVerified ?? false;
+                        (token as any).baseUserId = token.user.baseUserId ?? (token as any).baseUserId ?? null;
+                        (token as any).fullName = token.user.fullName ?? (token as any).fullName ?? null;
+                        (token as any).username = token.user.username ?? (token as any).username ?? null;
+                        (token as any).contact = token.user.contact ?? (token as any).contact ?? null;
+
+                        (token as any).accessToken = response.token ?? (token as any).accessToken ?? null;
+
+                        return token;
                     }
                 }
                 catch (error: any) {
@@ -156,19 +171,42 @@ export const authOptions: NextAuthOptions = {
             if (!session.user) {
                 session.user = {} as any;
             }
-            session.accessToken = token.accessToken ?? null;
+            // Prefer token.user if present, otherwise use top-level values.
+            const tokenUser = (token as any).user ?? {
+                _id: (token as any)._id ?? null,
+                email: (token as any).email ?? null,
+                role: (token as any).role ?? "buyer",
+                isVerified: (token as any).isVerified ?? false,
+                baseUserId: (token as any).baseUserId ?? null,
+                fullName: (token as any).fullName ?? null,
+                username: (token as any).username ?? null,
+                contact: (token as any).contact ?? null,
+            };
+            session.accessToken = (token as any).accessToken ?? null;
 
             session.user = {
                 ...session.user,
-                _id: token.user._id,
-                email: token.user.email,
-                role: token.user.role,
-                isVerified: token.user.isVerified,
-                baseUserId: token.user.baseUserId,
-                fullName: token.user.fullName,
-                contact: token.user.contact ?? null,
-                username: token.user.username ?? null,
+                _id: tokenUser._id,
+                email: tokenUser.email,
+                role: tokenUser.role,
+                isVerified: tokenUser.isVerified,
+                baseUserId: tokenUser.baseUserId,
+                fullName: tokenUser.fullName ?? null,
+                username: tokenUser.username ?? null,
+                contact: tokenUser.contact ?? null,
             };
+
+            // session.user = {
+            //     ...session.user,
+            //     _id: token.user._id,
+            //     email: token.user.email,
+            //     role: token.user.role,
+            //     isVerified: token.user.isVerified,
+            //     baseUserId: token.user.baseUserId,
+            //     fullName: token.user.fullName ?? null,
+            //     contact: token.user.contact ?? null,
+            //     username: token.user.username ?? null,
+            // };
 
             return session;
         }

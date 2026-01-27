@@ -39,6 +39,8 @@ import { CurrentUser } from "@/types/current-user.ts";
 import { toast } from "sonner";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
+import { handleBuyerLogout } from "@/lib/actions/auth/buyer-auth.action.ts";
+
 
 const Navbar = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -127,11 +129,19 @@ const Navbar = () => {
     };
 
     const handleLogout = async () => {
-        // await signOut({ callbackUrl: "/login" });
+        const logoutResponse = await handleBuyerLogout();
+        if (!logoutResponse.success) {
+            toast.error("Failed to logout: ", {
+                description: logoutResponse.message,
+            });
+            return;
+        }
         await signOut({ redirect: false });
         router.replace("/login");
         toggleMenu();
-        toast.success("Logout Successful");
+        toast.success("Logout Successful.", {
+            description: logoutResponse.message
+        });
     };
 
     return (
@@ -155,20 +165,20 @@ const Navbar = () => {
                     {/* Desktop Navigation - Navbar Left*/}
                     <ul className="hidden lg:flex items-center gap-8 text-gray-500 dark:text-gray-300">
                         {navLinks.map((link) => {
-                            if (link.authRequired && (!currentUser || !currentUser.buyerProfile)) {
+                            if (link.authRequired && !currentUser) {
                                 return null;
                             }
 
                             const actualPath =
                                 link.path === "/"
-                                    ? (currentUser && currentUser.buyerProfile)
+                                    ? currentUser
                                         ? `/${currentUser.username}`
                                         : "/"
                                     : link.path;
 
                             let isActive = false;
                             if (link.path === "/") {
-                                if (currentUser && currentUser.buyerProfile) {
+                                if (currentUser) {
                                     isActive = currentPath === `/${currentUser.username}`;
                                 }
                                 else {
@@ -245,7 +255,7 @@ const Navbar = () => {
 
                 {/* Desktop Navigation - Navbar Right*/}
                 <div className="hidden lg:flex items-center gap-8">
-                    {currentUser && currentUser.buyerProfile ? (
+                    {currentUser ? (
                         <div className="relative" ref={menuRef}>
                             <Avatar
                                 className="h-10 w-10 cursor-pointer border border-gray-900 dark:border-gray-100"
@@ -254,7 +264,7 @@ const Navbar = () => {
                                 {currentUser.profilePictureUrl ? (
                                     <AvatarImage
                                         src={currentUser.profilePictureUrl}
-                                        alt={currentUser.fullName}
+                                        alt={currentUser.fullName ?? "Profile Picture Preview"}
                                     />
                                 ) : (
                                     <AvatarFallback>
@@ -368,14 +378,14 @@ const Navbar = () => {
 
                             const actualPath =
                                 link.path === "/"
-                                    ? currentUser && currentUser.buyerProfile
+                                    ? currentUser
                                         ? `/${currentUser.username}`
                                         : "/"
                                     : link.path;
 
                             let isActive = false;
                             if (link.path === "/") {
-                                if (currentUser && currentUser.buyerProfile) {
+                                if (currentUser) {
                                     isActive = currentPath === `/${currentUser.username}`;
                                 }
                                 else {
@@ -403,7 +413,7 @@ const Navbar = () => {
                         })}
                     </ul>
 
-                    {currentUser && currentUser.buyerProfile ? (
+                    {currentUser ? (
                         <>
                             <Link
                                 href={`/${currentUser.username}/my-profile/dashboard`}
@@ -414,7 +424,7 @@ const Navbar = () => {
                                     {currentUser.profilePictureUrl ? (
                                         <AvatarImage
                                             src={currentUser.profilePictureUrl}
-                                            alt={currentUser.fullName}
+                                            alt={currentUser.fullName ?? "Profile Picture Preview"}
                                         />
                                     ) : (
                                         <AvatarFallback>

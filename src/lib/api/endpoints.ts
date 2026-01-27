@@ -22,7 +22,8 @@ export const API = {
             RESET_PASSWORD: "/api/users/seller/reset-password",
             UPDATE_PROFILE_DETAILS: "/api/users/seller/update-profile-details",
             DELETE_ACCOUNT: "/api/users/seller/delete-account",
-            UPLOAD_PROFILE_PICTURE: "/api/users/seller/upload-profile-picture"
+            UPLOAD_PROFILE_PICTURE: "/api/users/seller/upload-profile-picture",
+            GET_CURRENT_SELLER_USER: "/api/users/seller/get-current-user"
         },
         ADMIN: {
             SIGN_UP: "/api/users/admin/sign-up",

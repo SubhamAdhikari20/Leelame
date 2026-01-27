@@ -1,12 +1,13 @@
 // src/lib/api/auth/admin-auth.api.ts
-import axios, { AxiosErrorType } from "@/lib/api/axios.ts";
+import axios from "@/lib/api/axios.ts";
 import { API } from "@/lib/api/endpoints.ts";
-import { AdminResponseDtoType } from "@/dtos/admin.dto.ts";
-import { AdminSignUpSchemaType } from "@/schemas/auth/admin/sign-up.schema.ts";
-import { AdminVerifyAccountRegistrationSchemaType } from "@/schemas/auth/admin/verify-account-registration.schema.ts";
-import { AdminForgotPasswordSchemaType } from "@/schemas/auth/admin/forgot-password.schema.ts";
-import { AdminVerifyAccountResetPasswordSchemaType } from "@/schemas/auth/admin/verify-account-reset-password.schema.ts";
-import { AdminResetPasswordSchemaType } from "@/schemas/auth/admin/reset-password.schema.ts";
+import type { AxiosErrorType } from "@/lib/api/axios.ts";
+import type { AdminResponseDtoType } from "@/dtos/admin.dto.ts";
+import type { AdminSignUpSchemaType } from "@/schemas/auth/admin/sign-up.schema.ts";
+import type { AdminVerifyAccountRegistrationSchemaType } from "@/schemas/auth/admin/verify-account-registration.schema.ts";
+import type { AdminForgotPasswordSchemaType } from "@/schemas/auth/admin/forgot-password.schema.ts";
+import type { AdminVerifyAccountResetPasswordSchemaType } from "@/schemas/auth/admin/verify-account-reset-password.schema.ts";
+import type { AdminResetPasswordSchemaType } from "@/schemas/auth/admin/reset-password.schema.ts";
 
 
 // Sign Up Axios

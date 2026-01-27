@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 
 type UserRole = "buyer" | "seller" | "admin";
 
-interface UserData {
+export type UserData = {
     _id: string;
     email: string;
     role: UserRole;

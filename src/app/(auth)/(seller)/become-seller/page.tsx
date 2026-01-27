@@ -36,13 +36,18 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs.t
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { SellerSignUpSchema, SellerSignUpSchemaType } from "@/schemas/auth/seller/sign-up.schema.ts";
-import { SellerLoginSchema, SellerLoginSchemaType } from "@/schemas/auth/seller/login.schema.ts";
-import { SellerVerifyAccountRegistrationSchema, SellerVerifyAccountRegistrationSchemaType } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
-import { SellerForgotPasswordSchema, SellerForgotPasswordSchemaType } from "@/schemas/auth/seller/forgot-password.schema.ts";
-import { SellerResetPasswordSchema, SellerResetPasswordSchemaType } from "@/schemas/auth/seller/reset-password.schema.ts";
+import { SellerSignUpSchema } from "@/schemas/auth/seller/sign-up.schema.ts";
+import { SellerLoginSchema } from "@/schemas/auth/seller/login.schema.ts";
+import { SellerVerifyAccountRegistrationSchema } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
+import { SellerForgotPasswordSchema } from "@/schemas/auth/seller/forgot-password.schema.ts";
+import { SellerResetPasswordSchema } from "@/schemas/auth/seller/reset-password.schema.ts";
 import { getSession, signIn } from "next-auth/react";
 import { handleSellerForgotPassword, handleSellerLoginTokenAndSetCookies, handleSellerResetPassword, handleSellerSendAccountRegistrationEmail, handleSellerSignUp, handleSellerVerifyAccountRegistration } from "@/lib/actions/auth/seller-auth.action.ts";
+import type { SellerSignUpSchemaType } from "@/schemas/auth/seller/sign-up.schema.ts";
+import type { SellerLoginSchemaType } from "@/schemas/auth/seller/login.schema.ts";
+import type { SellerVerifyAccountRegistrationSchemaType } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
+import type { SellerForgotPasswordSchemaType } from "@/schemas/auth/seller/forgot-password.schema.ts";
+import type { SellerResetPasswordSchemaType } from "@/schemas/auth/seller/reset-password.schema.ts";
 
 
 const VALID_TABS = new Set([
@@ -52,17 +57,6 @@ const VALID_TABS = new Set([
 // Keys used for sessionStorage persistence
 const TAB_KEY = "become-seller:tab";
 const EMAIL_KEY = "become-seller:email";
-
-// const getInitialTab = (): string => {
-//     if (typeof window === "undefined") return "sign-up";
-//     const stored = sessionStorage.getItem(TAB_KEY);
-//     return (stored && VALID_TABS.has(stored)) ? stored : "sign-up";
-// };
-
-// const getInitialEmail = (): string => {
-//     if (typeof window === "undefined") return "";
-//     return sessionStorage.getItem(EMAIL_KEY) ?? "";
-// };
 
 const clearPersisted = () => {
     if (typeof window === "undefined") return;

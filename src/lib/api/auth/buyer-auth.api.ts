@@ -1,12 +1,13 @@
 // src/lib/api/auth/buyer-auth.api.ts
-import axios, { AxiosErrorType } from "@/lib/api/axios.ts";
+import axios from "@/lib/api/axios.ts";
 import { API } from "@/lib/api/endpoints.ts";
-import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
-import { BuyerSignUpSchemaType } from "@/schemas/auth/buyer/sign-up.schema.ts";
-import { VerifyAccountRegistrationSchemaType } from "@/schemas/auth/buyer/verify-account-registration.schema.ts";
-import { ForgotPasswordSchemaType } from "@/schemas/auth/buyer/forgot-password.schema.ts";
-import { VerifyAccountResetPasswordSchemaType } from "@/schemas/auth/buyer/verify-account-reset-password.schema.ts";
-import { ResetPasswordSchemaType } from "@/schemas/auth/buyer/reset-password.schema.ts";
+import type { AxiosErrorType } from "@/lib/api/axios.ts";
+import type { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
+import type { BuyerSignUpSchemaType } from "@/schemas/auth/buyer/sign-up.schema.ts";
+import type { VerifyAccountRegistrationSchemaType } from "@/schemas/auth/buyer/verify-account-registration.schema.ts";
+import type { ForgotPasswordSchemaType } from "@/schemas/auth/buyer/forgot-password.schema.ts";
+import type { VerifyAccountResetPasswordSchemaType } from "@/schemas/auth/buyer/verify-account-reset-password.schema.ts";
+import type { ResetPasswordSchemaType } from "@/schemas/auth/buyer/reset-password.schema.ts";
 
 
 // Sign Up Axios
@@ -24,7 +25,7 @@ export const buyerSignUp = async (signUpData: BuyerSignUpSchemaType) => {
 // Check Username Unique Axios
 export const buyerCheckUsernameUnique = async (username: string) => {
     try {
-        const response = await axios.get<BuyerResponseDtoType>(API.AUTH.BUYER.CHECK_USERNAME_UNIQUE, { params: username });
+        const response = await axios.get<BuyerResponseDtoType>(API.AUTH.BUYER.CHECK_USERNAME_UNIQUE, { params: { username } });
         return response.data;
     }
     catch (error: Error | any) {
@@ -60,7 +61,7 @@ export const buyerSendAccountRegistrationEmail = async (email: string) => {
 // Verify Account Registration Axios
 export const buyerVerifyAccountRegistration = async (username: string, verifyAccountRegistrationData: VerifyAccountRegistrationSchemaType) => {
     try {
-        const response = await axios.put<BuyerResponseDtoType>(API.AUTH.BUYER.VERIFY_ACCOUNT_REGISTRATION, { username, verifyAccountRegistrationData });
+        const response = await axios.put<BuyerResponseDtoType>(API.AUTH.BUYER.VERIFY_ACCOUNT_REGISTRATION, { username, ...verifyAccountRegistrationData });
         return response.data;
     }
     catch (error: Error | any) {
@@ -84,7 +85,7 @@ export const buyerForgotPassword = async (forgotPasswordData: ForgotPasswordSche
 // Verify Account Reset Password Axios
 export const buyerVerifyAccountResetPassword = async (username: string, verifyAccountResetPasswordData: VerifyAccountResetPasswordSchemaType) => {
     try {
-        const response = await axios.put<BuyerResponseDtoType>(API.AUTH.BUYER.VERIFY_ACCOUNT_RESET_PASSWORD, { username, verifyAccountResetPasswordData });
+        const response = await axios.put<BuyerResponseDtoType>(API.AUTH.BUYER.VERIFY_ACCOUNT_RESET_PASSWORD, { username, ...verifyAccountResetPasswordData });
         return response.data;
     }
     catch (error: Error | any) {
@@ -96,7 +97,7 @@ export const buyerVerifyAccountResetPassword = async (username: string, verifyAc
 // Reset Password Axios
 export const buyerResetPassword = async (email: string, resetPasswordData: ResetPasswordSchemaType) => {
     try {
-        const response = await axios.put<BuyerResponseDtoType>(API.AUTH.BUYER.RESET_PASSWORD, { email, resetPasswordData });
+        const response = await axios.put<BuyerResponseDtoType>(API.AUTH.BUYER.RESET_PASSWORD, { email, ...resetPasswordData });
         return response.data;
     }
     catch (error: Error | any) {

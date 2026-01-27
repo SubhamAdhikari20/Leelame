@@ -36,7 +36,7 @@ const ProfilePopover: React.FC<ProfilePopoverProps> = ({
     setMobileMenuOpen,
     handleLogout,
 }) => {
-    if (!currentUser || !currentUser.buyerProfile) {
+    if (!currentUser) {
         return null;
     }
 

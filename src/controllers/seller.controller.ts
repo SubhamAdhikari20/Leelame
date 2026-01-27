@@ -266,6 +266,54 @@ export class SellerController {
         }
     };
 
+    getCurrentSellerUser = async (req: NextRequest, { params }: { params: { id: string } }) => {
+        try {
+            const { id } = await params;
+
+            const result = await this.sellerService.getCurrentSellerUser(id);
+            const validatedResponseSellerData = SellerResponseDto.safeParse(result?.user);
+            if (!validatedResponseSellerData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedResponseSellerData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
+            return NextResponse.json(
+                {
+                    success: result?.success,
+                    message: result?.message,
+                    user: validatedResponseSellerData.data,
+                },
+                { status: result?.status ?? 200 }
+            );
+        }
+        catch (error: Error | any) {
+            console.error("Error fetching current seller controller: ", error);
+
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
+
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Internal Server Error"
+                },
+                { status: 500 }
+            );
+        }
+    };
+
     updateSellerProfileDetails = async (req: NextRequest) => {
         try {
             const body = await req.json();
@@ -281,7 +329,7 @@ export class SellerController {
                 );
             }
 
-            const result = await this.sellerService.updateSellerProfileDetails(validatedData.data);
+            const result = await this.sellerService.updateSellerProfileDetails("", validatedData.data);
             const validatedResponseSellerData = SellerResponseDto.safeParse(result?.user);
             if (!validatedResponseSellerData.success) {
                 return NextResponse.json(

@@ -18,7 +18,7 @@ import NavUser from "@/components/seller/nav-user.tsx";
 import Link from "next/link";
 import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
 import { IconInnerShadowTop } from "@tabler/icons-react";
-import { useSession } from "next-auth/react";
+import { CurrentUserProps } from "@/types/current-user.ts";
 
 
 const user = {
@@ -56,9 +56,8 @@ const items = [
     },
 ];
 
-const SellerSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
-    const { data: session } = useSession();
 
+const SellerSidebar = ({ currentUser, ...props }: CurrentUserProps & React.ComponentProps<typeof Sidebar>) => {
     return (
         <div>
             <Sidebar collapsible="icon" {...props}>
@@ -98,7 +97,7 @@ const SellerSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                 </SidebarContent>
                 <Separator />
                 <SidebarFooter>
-                    <NavUser user={user} />
+                    <NavUser currentUser={currentUser} />
                 </SidebarFooter>
                 <SidebarRail />
             </Sidebar>

@@ -1,10 +1,10 @@
 // src/lib/actions/auth/seller-auth.action.ts
 "use server";
 import { sellerForgotPassword, sellerResetPassword, sellerSendAccountRegistrationEmail, sellerSignUp, sellerVerifyAccountRegistration } from "@/lib/api/auth/seller-auth.api.ts";
-import { SellerSignUpSchemaType } from "@/schemas/auth/seller/sign-up.schema.ts";
-import { SellerVerifyAccountRegistrationSchemaType } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
-import { SellerForgotPasswordSchemaType } from "@/schemas/auth/seller/forgot-password.schema.ts";
-import { SellerResetPasswordSchemaType } from "@/schemas/auth/seller/reset-password.schema.ts";
+import type { SellerSignUpSchemaType } from "@/schemas/auth/seller/sign-up.schema.ts";
+import type { SellerVerifyAccountRegistrationSchemaType } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
+import type { SellerForgotPasswordSchemaType } from "@/schemas/auth/seller/forgot-password.schema.ts";
+import type { SellerResetPasswordSchemaType } from "@/schemas/auth/seller/reset-password.schema.ts";
 import { setAuthToken, setUserData, clearAuthCookies } from "@/lib/cookie.ts"
 
 
@@ -162,3 +162,20 @@ export const handleSellerResetPassword = async (email: string, resetPasswordData
         };
     }
 };
+
+// Logout
+export const handleSellerLogout = async () => {
+    try {
+        await clearAuthCookies();
+        return {
+            success: true,
+            message: "Authentication cookies deleted successfully."
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred while logging out and deleting authentication cookies."
+        };
+    }
+}

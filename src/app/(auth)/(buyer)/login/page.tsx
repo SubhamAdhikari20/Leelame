@@ -26,10 +26,9 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc"
 import { useGoogleLogin } from "@react-oauth/google";
 import { getSession, signIn } from "next-auth/react";
-import axios, { AxiosError } from "axios";
-import { BuyerLoginSchema, BuyerLoginSchemaType } from "@/schemas/auth/buyer/login.schema.ts";
-import { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
-import { handleBuyerLoginWithGoogle, handleBuyerSendAccountRegistrationEmail } from "@/lib/actions/auth/buyer-auth.action.ts";
+import { handleBuyerLoginTokenAndSetCookies, handleBuyerLoginWithGoogle, handleBuyerSendAccountRegistrationEmail } from "@/lib/actions/auth/buyer-auth.action.ts";
+import { BuyerLoginSchema } from "@/schemas/auth/buyer/login.schema.ts";
+import type { BuyerLoginSchemaType } from "@/schemas/auth/buyer/login.schema.ts";
 
 
 const Login = () => {
@@ -102,6 +101,20 @@ const Login = () => {
                 return;
             }
 
+            if (!updatedSession.accessToken) {
+                toast.error("Access token not found in session.");
+                return;
+            }
+
+            const loginResponse = await handleBuyerLoginTokenAndSetCookies(updatedSession.accessToken, updatedSession.user);
+
+            if (!loginResponse.success) {
+                toast.error("Failed to set authentication cookies", {
+                    description: loginResponse.message,
+                });
+                return;
+            }
+
             const { user } = updatedSession;
 
             if (user.isVerified) {
@@ -156,11 +169,10 @@ const Login = () => {
                 });
                 startTransition(() => router.replace("/"));
             }
-            catch (error) {
-                const axiosError = error as AxiosError<BuyerResponseDtoType>;
-                console.error("Error in google login: ", axiosError);
+            catch (error: Error | any) {
+                console.error("Error in google login: ", error);
                 toast.error("Error in google login", {
-                    description: axiosError.response?.data.message
+                    description: error.message
                 });
             }
         },

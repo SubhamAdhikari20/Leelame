@@ -397,7 +397,38 @@ export class SellerService {
         return response;
     };
 
-    updateSellerProfileDetails = async (userId: string, updateSellerProfileDetailsDto: UpdateSellerProfileDetailsDtoType) => {
+    getCurrentSellerUser = async (userId: string): Promise<SellerResponseDtoType> => {
+        const existingSellerById = await this.sellerRepo.findSellerById(userId);
+        if (!existingSellerById) {
+            throw new HttpError(404, "Seller with this id not found!");
+        }
+
+        const exisitingBaseUserById = await this.userRepo.findUserById(existingSellerById.baseUserId.toString());
+        if (!exisitingBaseUserById) {
+            throw new HttpError(404, "Base user with this user id not found!");
+        }
+
+        const response: SellerResponseDtoType = {
+            success: true,
+            message: "Seller profile details updated successfully.",
+            status: 200,
+            user: {
+                _id: existingSellerById._id.toString(),
+                baseUserId: existingSellerById.baseUserId.toString(),
+                email: exisitingBaseUserById.email,
+                fullName: existingSellerById.fullName,
+                contact: existingSellerById.contact,
+                role: exisitingBaseUserById.role,
+                isVerified: exisitingBaseUserById.isVerified,
+                profilePictureUrl: existingSellerById.profilePictureUrl,
+                isPermanentlyBanned: exisitingBaseUserById.isPermanentlyBanned,
+            }
+        };
+        return response;
+
+    };
+
+    updateSellerProfileDetails = async (userId: string, updateSellerProfileDetailsDto: UpdateSellerProfileDetailsDtoType): Promise<SellerResponseDtoType> => {
         const { fullName, contact, email, bio } = updateSellerProfileDetailsDto;
 
         const existingSellerById = await this.sellerRepo.findSellerById(userId);

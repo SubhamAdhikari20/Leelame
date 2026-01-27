@@ -15,14 +15,15 @@ const axiosInstance = axios.create(
 );
 
 axiosInstance.interceptors.request.use(async (config) => {
-    const token = await getAuthToken();
-    if (!token) {
-        throw Error("No active session found.");
+    try {
+        const token = await getAuthToken();
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
     }
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+    catch (error: Error | any) {
+        throw Error("Internal Error with axios interceptors!");
     }
-
     return config;
 });
 

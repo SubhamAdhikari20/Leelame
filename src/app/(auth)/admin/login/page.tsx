@@ -24,8 +24,9 @@ import { Label } from "@/components/ui/label.tsx";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { getSession, signIn } from "next-auth/react";
-import { AdminLoginSchema, AdminLoginSchemaType } from "@/schemas/auth/admin/login.schema.ts";
-import { handleAdminSendAccountRegistrationEmail } from "@/lib/actions/auth/admin-auth.action.ts";
+import { handleAdminLoginTokenAndSetCookies, handleAdminSendAccountRegistrationEmail } from "@/lib/actions/auth/admin-auth.action.ts";
+import { AdminLoginSchema } from "@/schemas/auth/admin/login.schema.ts";
+import type { AdminLoginSchemaType } from "@/schemas/auth/admin/login.schema.ts";
 
 
 const AdminLogin = () => {
@@ -67,6 +68,20 @@ const AdminLogin = () => {
 
             if (!updatedSession) {
                 toast.error("Session not found.");
+                return;
+            }
+
+            if (!updatedSession.accessToken) {
+                toast.error("Access token not found in session.");
+                return;
+            }
+
+            const loginResponse = await handleAdminLoginTokenAndSetCookies(updatedSession.accessToken, updatedSession.user);
+
+            if (!loginResponse.success) {
+                toast.error("Failed to set authentication cookies", {
+                    description: loginResponse.message,
+                });
                 return;
             }
 

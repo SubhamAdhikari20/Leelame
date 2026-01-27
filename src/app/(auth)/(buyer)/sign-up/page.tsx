@@ -46,10 +46,11 @@ const SignUp = () => {
                         toast.error("Error checking username uniqueness: ", {
                             description: response.message
                         });
+                        setUsernameMessage(response.message);
                         return;
                     }
 
-                    setUsername(response.message || "");
+                    setUsernameMessage(response.message);
                 }
                 catch (error: Error | any) {
                     setUsernameMessage(
@@ -93,7 +94,7 @@ const SignUp = () => {
             toast.success("Sign Up Successful", {
                 description: response.message,
             });
-            startTransition(() => router.replace(`/verify-account/registration?username=${data.username}`));
+            startTransition(() => router.replace(`/verify-account/registration?username=${response.data?.username}`));
         }
         catch (error: Error | any) {
             console.error("Error in sign up of user: ", error);

@@ -1,6 +1,6 @@
 // /src/components/buyer/sidebar.tsx
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -35,8 +35,9 @@ import {
     AlertDialogTrigger,
 } from "../ui/alert-dialog.tsx";
 import { toast } from "sonner";
-import { useSession } from "next-auth/react";
-import { CurrentUser } from "@/types/current-user.ts";
+import { signOut, useSession } from "next-auth/react";
+import { handleBuyerLogout } from "@/lib/actions/auth/buyer-auth.action.ts";
+import type { CurrentUser } from "@/types/current-user.ts";
 
 
 const Sidebar = () => {
@@ -53,7 +54,15 @@ const Sidebar = () => {
         { name: "Profile Settings", icon: <UserCog size={18} />, path: "settings" },
     ];
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        const logoutResponse = await handleBuyerLogout();
+        if (!logoutResponse.success) {
+            toast.error("Failed to set authentication cookies", {
+                description: logoutResponse.message,
+            });
+            return;
+        }
+        await signOut({ redirect: false });
         router.replace("/login");
         toast.success("Logout Successful");
     };

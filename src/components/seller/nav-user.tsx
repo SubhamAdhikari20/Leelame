@@ -40,32 +40,29 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog.tsx";
 import { useRouter } from "next/navigation";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { toast } from "sonner";
+import { CurrentUserProps } from "@/types/current-user.ts";
+import { handleSellerLogout } from "@/lib/actions/auth/seller-auth.action.ts";
 
 
-const NavUser = ({
-    user,
-}: {
-    user: {
-        name: string
-        email: string
-        avatar: string
-    }
-}) => {
+const NavUser = ({ currentUser }: CurrentUserProps) => {
     const router = useRouter();
     const { isMobile } = useSidebar();
-    const { data: session } = useSession();
-    const currentUser = session?.user;
-
-    // if (!currentUser) {
-    //     return null;
-    // }
 
     const handleLogout = async () => {
+        const logoutResponse = await handleSellerLogout();
+        if (!logoutResponse.success) {
+            toast.error("Failed to logout.", {
+                description: logoutResponse.message,
+            });
+            return;
+        }
         await signOut({ redirect: false });
         router.replace("/become-seller");
-        toast.success("Logout Successful.");
+        toast.success("Logout Successful.", {
+            description: logoutResponse.message
+        });
     };
 
     return (
@@ -81,7 +78,7 @@ const NavUser = ({
                                 {currentUser && currentUser.profilePictureUrl ? (
                                     <AvatarImage
                                         src={currentUser.profilePictureUrl}
-                                        alt={currentUser.fullName}
+                                        alt={currentUser.fullName ?? "Profile Picture Preview"}
                                     />
                                 ) : (
                                     <AvatarFallback>
@@ -116,7 +113,7 @@ const NavUser = ({
                                     {currentUser && currentUser.profilePictureUrl ? (
                                         <AvatarImage
                                             src={currentUser.profilePictureUrl}
-                                            alt={currentUser.fullName}
+                                            alt={currentUser.fullName ?? "Profile Picture Preview"}
                                         />
                                     ) : (
                                         <AvatarFallback>

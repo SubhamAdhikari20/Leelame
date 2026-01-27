@@ -1,11 +1,13 @@
 // src/lib/actions/auth/buyer-auth.action.ts
 "use server";
 import { buyerCheckUsernameUnique, buyerForgotPassword, buyerLoginWithGoogle, buyerResetPassword, buyerSendAccountRegistrationEmail, buyerSignUp, buyerVerifyAccountRegistration, buyerVerifyAccountResetPassword } from "@/lib/api/auth/buyer-auth.api.ts";
-import { ForgotPasswordSchemaType } from "@/schemas/auth/buyer/forgot-password.schema.ts";
-import { BuyerSignUpSchemaType } from "@/schemas/auth/buyer/sign-up.schema.ts";
-import { VerifyAccountRegistrationSchemaType } from "@/schemas/auth/buyer/verify-account-registration.schema.ts";
-import { VerifyAccountResetPasswordSchemaType } from "@/schemas/auth/buyer/verify-account-reset-password.schema.ts";
-import { ResetPasswordSchemaType } from "@/schemas/auth/buyer/reset-password.schema.ts";
+import type { ForgotPasswordSchemaType } from "@/schemas/auth/buyer/forgot-password.schema.ts";
+import type { BuyerSignUpSchemaType } from "@/schemas/auth/buyer/sign-up.schema.ts";
+import type { VerifyAccountRegistrationSchemaType } from "@/schemas/auth/buyer/verify-account-registration.schema.ts";
+import type { VerifyAccountResetPasswordSchemaType } from "@/schemas/auth/buyer/verify-account-reset-password.schema.ts";
+import type { ResetPasswordSchemaType } from "@/schemas/auth/buyer/reset-password.schema.ts";
+import type { UserData } from "@/lib/cookie.ts";
+import { setAuthToken, setUserData, clearAuthCookies } from "@/lib/cookie.ts";
 
 
 // Sign Up Handler
@@ -51,6 +53,24 @@ export const handleBuyerCheckUsernameUnique = async (username: string) => {
         return {
             success: false,
             message: error.message || "An unexpected error occurred while checking username uniqueness."
+        };
+    }
+};
+
+// Login Token and Set Cookies Handler
+export const handleBuyerLoginTokenAndSetCookies = async (token: string, userData: UserData) => {
+    try {
+        await setAuthToken(token);
+        await setUserData(userData);
+        return {
+            success: true,
+            message: "Authentication cookies set successfully."
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred while setting authentication cookies."
         };
     }
 };
@@ -198,3 +218,20 @@ export const handleBuyerResetPassword = async (email: string, resetPasswordData:
         };
     }
 };
+
+// Logout
+export const handleBuyerLogout = async () => {
+    try {
+        await clearAuthCookies();
+        return {
+            success: true,
+            message: "Authentication cookies deleted successfully."
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred while logging out deleting authentication cookies."
+        };
+    }
+}

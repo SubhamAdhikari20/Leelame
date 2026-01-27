@@ -1,22 +1,23 @@
 // src/types/current-user.ts
-// import { IBuyer } from "@/models/buyer.model";
-// import { ISeller } from "@/models/seller.model";
-// import { IAdmin } from "@/models/admin.model";
 
 type UserRole = "buyer" | "seller" | "admin";
 
-export interface CurrentUser {
+export type CurrentUser = {
     _id: string;
-    fullName: string;
+    email: string;
+    role: UserRole | string;
+    isVerified: boolean;
+    baseUserId: string;
+    fullName?: string | null;
     username?: string | null;
     contact?: string | null;
-    email: string;
-    role: UserRole;
-    isVerified: boolean;
+    bio?: string | null;
+    isPermanentlyBanned: boolean;
     profilePictureUrl?: string | null;
-    googleId?: string | null;
-
-    buyerProfile?: string | null;
-    sellerProfile?: string | null;
-    adminProfile?: string | null;
+    createdAt?: Date | null;
+    updatedAt?: Date | null;
 }
+
+export type CurrentUserProps = {
+    currentUser: CurrentUser;
+};
