@@ -387,4 +387,52 @@ export class BuyerController {
             );
         }
     };
+
+    getCurrentBuyerUser = async (req: NextRequest, { params }: { params: { id: string } }) => {
+        try {
+            const { id } = await params;
+
+            const result = await this.buyerService.getCurrentBuyerUser(id);
+            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
+            if (!validatedResponseBuyerData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedResponseBuyerData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
+            return NextResponse.json(
+                {
+                    success: result?.success,
+                    message: result?.message,
+                    user: validatedResponseBuyerData.data,
+                },
+                { status: result?.status ?? 200 }
+            );
+        }
+        catch (error: Error | any) {
+            console.error("Error fetching current buyer controller: ", error);
+
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
+
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Internal Server Error"
+                },
+                { status: 500 }
+            );
+        }
+    };
 }

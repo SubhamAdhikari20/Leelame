@@ -11,7 +11,8 @@ export const API = {
             VERIFY_ACCOUNT_REGISTRATION: "/api/users/buyer/verify-account/registration",
             FORGOT_PASSWORD: "/api/users/buyer/forgot-password",
             VERIFY_ACCOUNT_RESET_PASSWORD: "/api/users/buyer/verify-account/reset-password",
-            RESET_PASSWORD: "/api/users/buyer/reset-password"
+            RESET_PASSWORD: "/api/users/buyer/reset-password",
+            GET_CURRENT_BUYER_USER: "/api/users/buyer/get-current-user"
         },
         SELLER: {
             SIGN_UP: "/api/users/seller/sign-up",

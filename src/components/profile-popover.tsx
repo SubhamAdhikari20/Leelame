@@ -16,11 +16,11 @@ import {
     AlertDialogTrigger,
 } from "./ui/alert-dialog.tsx";
 import { Button } from "./ui/button.tsx";
-import { CurrentUser } from "@/types/current-user.ts";
+import type { CurrentUser } from "@/types/current-user.ts";
 
 
 interface ProfilePopoverProps {
-    currentUser: CurrentUser | null;
+    currentUser: CurrentUser;
     logoutDialogOpen: boolean;
     setLogoutDialogOpen: (open: boolean) => void;
     setDesktopMenuOpen: (open: boolean) => void;
@@ -50,7 +50,7 @@ const ProfilePopover: React.FC<ProfilePopoverProps> = ({
                             src={
                                 currentUser.profilePictureUrl
                             }
-                            alt={currentUser.fullName}
+                            alt={currentUser.fullName ?? "Profile Picture Preview"}
                         />
                     ) : (
                         <AvatarFallback>

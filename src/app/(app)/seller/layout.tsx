@@ -1,8 +1,7 @@
 // src/app/(app)/seller/layout.tsx
 import React from "react";
-import { getServerSession } from "next-auth/next";
+import { getCurrentServerSession } from "@/lib/get-server-session.ts";
 import { handleGetCurrentSellerUser } from "@/lib/actions/seller/profile-details.action.ts";
-import { authOptions } from "@/app/api/auth/[...nextauth]/options.ts";
 import { notFound, redirect } from "next/navigation";
 import SellerSidebar from "@/components/seller/sidebar.tsx";
 import { SidebarProvider } from "@/components/ui/sidebar.tsx";
@@ -12,12 +11,18 @@ import SiteFooter from "@/components/common/site-footer.tsx";
 
 
 const SellerLayout = async ({ children }: { children: React.ReactNode }) => {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user?._id) {
+    const response = await getCurrentServerSession();
+
+    if (!response.success) {
+        throw new Error(response.message ?? "Unknown");
+    }
+
+    const session = response.session;
+    if (!session || !session.user._id) {
         redirect("/seller/login");
     }
-    const result = await handleGetCurrentSellerUser(session.user._id);
 
+    const result = await handleGetCurrentSellerUser(session.user._id);
     if (!result.success) {
         throw new Error(`Error fetching user data: ${result.message ?? "Unknown"}`);
     }

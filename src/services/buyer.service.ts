@@ -486,4 +486,36 @@ export class BuyerService {
         };
         return response;
     };
+
+    getCurrentBuyerUser = async (userId: string): Promise<BuyerResponseDtoType> => {
+        const existingBuyerById = await this.buyerRepo.findBuyerById(userId);
+        if (!existingBuyerById) {
+            throw new HttpError(404, "Buyer with this id not found!");
+        }
+
+        const exisitingBaseUserById = await this.userRepo.findUserById(existingBuyerById.baseUserId.toString());
+        if (!exisitingBaseUserById) {
+            throw new HttpError(404, "Base user with this user id not found!");
+        }
+
+        const response: BuyerResponseDtoType = {
+            success: true,
+            message: "Buyer profile details updated successfully.",
+            status: 200,
+            user: {
+                _id: existingBuyerById._id.toString(),
+                baseUserId: existingBuyerById.baseUserId.toString(),
+                email: exisitingBaseUserById.email,
+                fullName: existingBuyerById.fullName,
+                username: existingBuyerById.username,
+                contact: existingBuyerById.contact,
+                role: exisitingBaseUserById.role,
+                isVerified: exisitingBaseUserById.isVerified,
+                profilePictureUrl: existingBuyerById.profilePictureUrl,
+                isPermanentlyBanned: exisitingBaseUserById.isPermanentlyBanned,
+            }
+        };
+        return response;
+
+    };
 }

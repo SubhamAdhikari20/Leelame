@@ -7,17 +7,14 @@ import { Button } from "@/components/ui/button.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Quote } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
-import { useSession } from "next-auth/react";
-import { CurrentUser } from "@/types/current-user.ts";
+import type { CurrentUserProps } from "@/types/current-user.ts";
 
 
-const HomeUser = () => {
+const HomeUser = ({ currentUser }: CurrentUserProps) => {
     const [phraseIndex, setPhraseIndex] = useState(0);
-    const { data: session } = useSession();
-    const currentUser: CurrentUser | null = session?.user as CurrentUser | null;
 
     // Hero Text Phrases
-    const phrases = (currentUser && currentUser.buyerProfile)
+    const phrases = currentUser
         ? [
             `Welcome, ${currentUser.fullName ?? currentUser.username}`,
             `Hello, ${currentUser.fullName ?? currentUser.username}`,

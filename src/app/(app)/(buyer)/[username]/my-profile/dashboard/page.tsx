@@ -2,14 +2,9 @@
 "use client";
 import React from "react";
 import { IndianRupee, Medal, Star } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { CurrentUser } from "@/types/current-user.ts";
 
 
 const ProfileDashboard = () => {
-    const { data: session } = useSession();
-    const currentUser: CurrentUser | null = session?.user as CurrentUser | null;
-
     const activityData = [
         {
             title: "Balance",

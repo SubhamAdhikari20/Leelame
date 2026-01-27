@@ -35,16 +35,14 @@ import {
     AlertDialogTrigger,
 } from "../ui/alert-dialog.tsx";
 import { toast } from "sonner";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { handleBuyerLogout } from "@/lib/actions/auth/buyer-auth.action.ts";
-import type { CurrentUser } from "@/types/current-user.ts";
+import type { CurrentUserProps } from "@/types/current-user.ts";
 
 
-const Sidebar = () => {
+const Sidebar = ({ currentUser }: CurrentUserProps) => {
     const router = useRouter();
     const currentPath = usePathname();
-    const { data: session } = useSession();
-    const currentUser: CurrentUser | null = session?.user as CurrentUser | null;
 
 
     const menuItems = [
@@ -57,14 +55,16 @@ const Sidebar = () => {
     const handleLogout = async () => {
         const logoutResponse = await handleBuyerLogout();
         if (!logoutResponse.success) {
-            toast.error("Failed to set authentication cookies", {
+            toast.error("Failed to logout: ", {
                 description: logoutResponse.message,
             });
             return;
         }
         await signOut({ redirect: false });
         router.replace("/login");
-        toast.success("Logout Successful");
+        toast.success("Logout Successful.", {
+            description: logoutResponse.message
+        });
     };
 
     const SidebarContent = () => (
@@ -75,7 +75,7 @@ const Sidebar = () => {
                     {currentUser?.profilePictureUrl ? (
                         <AvatarImage
                             src={currentUser.profilePictureUrl}
-                            alt={currentUser.fullName}
+                            alt={currentUser.fullName ?? "Profile Picture Preview"}
                         />
                     ) : (
                         <AvatarFallback>
@@ -92,13 +92,13 @@ const Sidebar = () => {
                     )}
                 </Avatar>
                 <h1 className="mt-2 font-bold text-gray-900 dark:text-gray-100">
-                    {currentUser?.fullName}
+                    {currentUser.fullName}
                 </h1>
                 <h2 className="font-semibold text-gray-800 dark:text-gray-200">
-                    {currentUser?.username}
+                    {currentUser.username}
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                    {currentUser?.email}
+                    {currentUser.email}
                 </p>
             </div>
 
@@ -110,7 +110,7 @@ const Sidebar = () => {
                         return (
                             <Link
                                 key={index}
-                                href={`/${currentUser?.username}/my-profile/${item.path}`}
+                                href={`/${currentUser.username}/my-profile/${item.path}`}
                             >
                                 <Button
                                     variant={isActive ? "secondary" : "ghost"}

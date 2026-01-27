@@ -12,7 +12,7 @@ export type CurrentUser = {
     username?: string | null;
     contact?: string | null;
     bio?: string | null;
-    isPermanentlyBanned: boolean;
+    isPermanentlyBanned?: boolean | null;
     profilePictureUrl?: string | null;
     createdAt?: Date | null;
     updatedAt?: Date | null;
@@ -20,4 +20,10 @@ export type CurrentUser = {
 
 export type CurrentUserProps = {
     currentUser: CurrentUser;
+};
+
+export type CurrentUserResponseType = {
+    success: boolean;
+    message: string;
+    user?: CurrentUser | null;
 };
