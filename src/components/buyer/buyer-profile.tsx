@@ -1,8 +1,7 @@
 // src/components/buyer/buyer-profile.tsx
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button.tsx";
 import {
     Field,
@@ -28,11 +27,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx"
 import { useForm, Controller } from "react-hook-form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { updateUserDetailsSchema } from "@/schemas/buyer/update-user-details.schema.ts";
 import { useDebounceCallback } from "usehooks-ts";
 import axios, { AxiosError } from "axios";
+import { UpdateProfileDetailsSchema } from "@/schemas/buyer/update-profile-details.schema.ts";
+import { handleGetCurrentBuyerUser, handleUploadBuyerProfilePicture } from "@/lib/actions/buyer/profile-details.action.ts";
+import type { UpdateProfileDetailsSchemaType } from "@/schemas/buyer/update-profile-details.schema.ts";
+import type { CurrentUser, CurrentUserProps } from "@/types/current-user.ts";
 import type { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
-import type { CurrentUserProps } from "@/types/current-user.ts";
 
 
 const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
@@ -49,29 +50,29 @@ const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
     const [isCheckingUsername, setIsCheckingUsername] = useState(false);
     const debounced = useDebounceCallback(setUsername, 300);
 
-    // const getCurrentUser = useCallback(async () => {
-    //     try {
-    //         const response = await axios.get<BuyerResponseDtoType>("",);
-    //         // console.log("User data:", res.data.user);
-    //     }
-    //     catch (error) {
-    //         const axiosError = error as AxiosError<BuyerResponseDtoType>;
-    //         console.error("Failed to fetch user:", axiosError.response?.data?.message);
-    //     }
-    // }, []);
+    const getCurrentUser = useCallback(async () => {
+        try {
+            const result = await handleGetCurrentBuyerUser(currentUser._id);
+            if (!result.success) {
+                toast.error("Error fetching user data", {
+                    description: result.message ?? "Unknown"
+                });
+                return;
+            }
+            currentUser = result.data as CurrentUser;
+            // console.log("User data:", res.data.user);
+        }
+        catch (error: Error | any) {
+            console.error("Failed to fetch user:", error.message);
+        }
+    }, []);
 
-    // useEffect(() => {
-    //     getCurrentUser();
-    //     // toast.success("Success", {
-    //     //     description: "User data fetched successfully!"
-    //     // });
-    //     // toast.error("Error updating user details", {
-    //     //     description: "TypeError: User.findyId is not a function"
-    //     // });
-    // }, [getCurrentUser]);
+    useEffect(() => {
+        getCurrentUser();
+    }, [getCurrentUser]);
 
-    const userDetailsForm = useForm<z.infer<typeof updateUserDetailsSchema>>({
-        resolver: zodResolver(updateUserDetailsSchema),
+    const userDetailsForm = useForm<UpdateProfileDetailsSchemaType>({
+        resolver: zodResolver(UpdateProfileDetailsSchema),
         defaultValues: {
             fullName: currentUser?.fullName || "",
             username: currentUser?.username || "",
@@ -118,27 +119,25 @@ const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
         }
     };
 
-    const onSubmit = async (data: z.infer<typeof updateUserDetailsSchema>) => {
+    const onSubmit = async (data: UpdateProfileDetailsSchemaType) => {
         setIsSubmitting(true);
         try {
             const response = await axios.put<BuyerResponseDtoType>("", data);
-
             if (response.data.success) {
                 toast.success("Success", {
                     description: response.data.message
                 });
                 // await getCurrentUser();
 
-                if (response.data.user?.username !== currentUser?.username) {
-                    router.replace(`/verify-account-registration/${response.data.user?.username}`);
+                if (response.data.user?.username !== currentUser.username) {
+                    router.replace(`/verify-account/registration/${response.data.user?.username}`);
                 }
             }
         }
-        catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
-            console.error("Error updating user details: ", axiosError);
+        catch (error: Error | any) {
+            console.error("Error updating user details: ", error);
             toast.error("Error updating user details", {
-                description: axiosError.response?.data?.message
+                description: error.message
             });
         }
         finally {
@@ -184,23 +183,24 @@ const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
         }
 
         setIsUploadingImage(true);
-
         try {
             const formData = new FormData();
-            formData.append("profilePicture", selectedFile);
+            formData.append("profile-picture", selectedFile);
 
-            const response = await axios.put<BuyerResponseDtoType>("",);
-            if (response.data.success) {
-                toast.success("Successful", {
-                    description: response.data.message,
+            const response = await handleUploadBuyerProfilePicture(currentUser._id, formData);
+            if (!response.success) {
+                toast.error("Failed", {
+                    description: response.message,
                 });
-                setPreview("");
-                setSelectedFile(null);
+                return;
             }
-            toast.error("Failed", {
-                description: response.data.message,
+
+            toast.success("Successful", {
+                description: response.message,
             });
-            // await getCurrentUser();
+            setPreview("");
+            setSelectedFile(null);
+            await getCurrentUser();
         }
         catch (error) {
             const axiosError = error as AxiosError<BuyerResponseDtoType>;

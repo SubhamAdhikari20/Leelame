@@ -113,7 +113,7 @@ export class SellerService {
 
         // Generate Token
         const token = jwt.sign(
-            { _id: newUser._id, email: newUser.email, contact: sellerProfile.contact, role: newUser.role },
+            { _id: newUser._id, baseUserId: newUser._id.toString() || sellerProfile.baseUserId.toString(), email: newUser.email, contact: sellerProfile.contact, role: newUser.role },
             process.env.JWT_SECRET!,
             { expiresIn: expiresInSeconds }
         );
@@ -453,5 +453,5 @@ export class SellerService {
             status: 200
         };
         return response;
-    }
+    };
 }

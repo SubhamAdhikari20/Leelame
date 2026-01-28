@@ -1,6 +1,6 @@
 // src/controllers/buyer.controller.ts
 import { NextRequest, NextResponse } from "next/server";
-import { BuyerResponseDto, CheckUsernameUniqueDto, CreatedBuyerDto, ForgotPasswordDto, ResetPasswordDto, SendEmailForRegistrationDto, VerifyOtpForRegistrationDto, VerifyOtpForResetPasswordDto } from "@/dtos/buyer.dto.ts";
+import { BuyerResponseDto, CheckUsernameUniqueDto, CreatedBuyerDto, ForgotPasswordDto, ResetPasswordDto, SendEmailForRegistrationDto, UpdateBuyerProfileDetailsDto, UploadImageResponseDto, UploadProfilePictureDto, VerifyOtpForRegistrationDto, VerifyOtpForResetPasswordDto } from "@/dtos/buyer.dto.ts";
 import { BuyerService } from "@/services/buyer.service.ts";
 import { z } from "zod";
 import { HttpError } from "@/errors/http-error.ts";
@@ -415,6 +415,137 @@ export class BuyerController {
         }
         catch (error: Error | any) {
             console.error("Error fetching current buyer controller: ", error);
+
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
+
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Internal Server Error"
+                },
+                { status: 500 }
+            );
+        }
+    };
+
+    updateBuyerProfileDetails = async (req: NextRequest, { params }: { params: { id: string } }) => {
+        try {
+            const { id } = await params;
+            const body = await req.json();
+            const validatedData = UpdateBuyerProfileDetailsDto.safeParse(body);
+
+            if (!validatedData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
+            const result = await this.buyerService.updateBuyerProfileDetails(id, validatedData.data);
+            const validatedResponseBuyerData = BuyerResponseDto.safeParse(result?.user);
+            if (!validatedResponseBuyerData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedResponseBuyerData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
+            return NextResponse.json(
+                {
+                    success: result?.success,
+                    message: result?.message,
+                    user: validatedResponseBuyerData.data,
+                },
+                { status: result?.status ?? 200 }
+            );
+        }
+        catch (error: Error | any) {
+            console.error("Error updating buyer details in controller: ", error);
+
+            if (error instanceof HttpError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: error.message
+                    },
+                    { status: error.status }
+                );
+            }
+
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Internal Server Error"
+                },
+                { status: 500 }
+            );
+        }
+    };
+
+    uploadProfilePicture = async (req: NextRequest, { params }: { params: { id: string } }) => {
+        try {
+            const { id } = await params;
+            const form = await req.formData();
+
+            const file = {
+                profilePicture: form.get("profile-picture")
+            };
+
+            // if (!file) {
+            //     return NextResponse.json(
+            //         { success: false, message: "No file provided!" },
+            //         { status: 400 }
+            //     );
+            // }
+
+            const validatedData = UploadProfilePictureDto.safeParse(file);
+            if (!validatedData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
+            const result = await this.buyerService.uploadProfilePicture(id, validatedData.data);
+            const validatedResponseBuyerData = UploadImageResponseDto.safeParse(result?.data);
+            if (!validatedResponseBuyerData.success) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: z.prettifyError(validatedResponseBuyerData.error)
+                    },
+                    { status: 400 }
+                );
+            }
+
+            return NextResponse.json(
+                {
+                    success: result?.success,
+                    message: result?.message,
+                    data: validatedResponseBuyerData.data,
+                },
+                { status: result?.status ?? 200 }
+            );
+        }
+        catch (error: Error | any) {
+            console.error("Error uploading buyer profile picture in controller: ", error);
 
             if (error instanceof HttpError) {
                 return NextResponse.json(

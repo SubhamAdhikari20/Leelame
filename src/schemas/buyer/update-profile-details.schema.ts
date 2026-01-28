@@ -1,10 +1,12 @@
-// src/schemas/buyer/update-user-details.schemats
+// src/schemas/buyer/update-profile-details.schemats
 import { z } from "zod";
 import { fullNameValidation, usernameValidation, emailValidation, contactValidation } from "../user.schema.ts";
 
-export const updateUserDetailsSchema = z.object({
+
+export const UpdateProfileDetailsSchema = z.object({
     fullName: fullNameValidation,
     username: usernameValidation,
     email: emailValidation,
     contact: contactValidation,
 });
+export type UpdateProfileDetailsSchemaType = z.infer<typeof UpdateProfileDetailsSchema>;

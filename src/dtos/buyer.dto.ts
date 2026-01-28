@@ -55,6 +55,56 @@ export const SendEmailForRegistrationDto = z.object({
 });
 export type SendEmailForRegistrationDtoType = z.infer<typeof SendEmailForRegistrationDto>;
 
+// Update Profile Details DTO
+export const UpdateBuyerProfileDetailsDto = z.object({
+    fullName: fullNameValidation,
+    email: emailValidation,
+    username: usernameValidation,
+    contact: contactValidation,
+    bio: z.string().max(500)
+});
+export type UpdateBuyerProfileDetailsDtoType = z.infer<typeof UpdateBuyerProfileDetailsDto>;
+
+// Upload Profile Picture DTO
+export const UploadProfilePictureDto = z.object({
+    profilePicture: z.instanceof(File, { message: "No file provided! Upload a file." }),
+});
+export type UploadProfilePictureDtoType = z.infer<typeof UploadProfilePictureDto>;
+
+// const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+// const ACCEPTED_IMAGE_TYPES = [
+//     "image/jpeg",
+//     "image/jpg",
+//     "image/png",
+//     "image/webp",
+// ];
+// export const imageUploadSchema = z.object({
+//     image: z
+//         .instanceof(File)
+//         .refine((file) => file.size <= MAX_FILE_SIZE, {
+//             message: "Max image size is 5MB",
+//         })
+//         .refine((file) => ACCEPTED_IMAGE_TYPES.includes(file.type), {
+//             message: "Only .jpg, .jpeg, .png, .webp formats are supported",
+//         }),
+// });
+
+// export const multipleImageSchema = z.object({
+//     images: z
+//         .array(z.instanceof(File))
+//         .min(1, "At least one image is required")
+//         .max(5, "Max 5 images allowed")
+//         .refine(
+//             (files) => files.every((file) => file.size <= MAX_FILE_SIZE),
+//             "Each image must be ≤ 5MB"
+//         )
+//         .refine(
+//             (files) =>
+//                 files.every((file) => ACCEPTED_IMAGE_TYPES.includes(file.type)),
+//             "Only image files are allowed"
+//         ),
+// });
+
 
 // what server responds with when sending user data 
 export const BuyerResponseDto = z.object({
@@ -80,3 +130,14 @@ export type BuyerResponseDtoType = {
     token?: string | null;
     user?: z.infer<typeof BuyerResponseDto> | null;
 };
+
+export const UploadImageResponseDto = z.object({
+    imageUrl: z.url()
+});
+
+export type UploadImageResponseDtoType = {
+    success: boolean;
+    message: string;
+    status?: number | null;
+    data?: z.infer<typeof UploadImageResponseDto> | null;
+}

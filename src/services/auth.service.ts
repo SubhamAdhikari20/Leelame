@@ -42,14 +42,12 @@ export class AuthService {
             fullName: profile?.fullName ?? null,
             username: profile?.username ?? null,
             contact: profile?.contact ?? null,
+            isPermanentlyBanned: Boolean(baseUser.isPermanentlyBanned),
 
             // profilePictureUrl: baseUser.profilePictureUrl ?? null,
             // googleId: profile?.googleId ?? null,
             // updatedAt: baseUser.updatedAt ?? null,
             // createAt: baseUser.createdAt ?? null,
-            // buyerProfile: profile && baseUser.role === "buyer" ? (profile._id?.toString?.() ?? profile._id) : null,
-            // sellerProfile: profile && baseUser.role === "seller" ? (profile._id?.toString?.() ?? profile._id) : null,
-            // adminProfile: profile && baseUser.role === "admin" ? (profile._id?.toString?.() ?? profile._id) : null,
         };
     };
 

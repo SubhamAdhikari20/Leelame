@@ -38,6 +38,11 @@ const sellerSchema: Schema<ISeller> = new Schema({
         type: String,
         default: null
     },
+    bio: {
+        type: String,
+        maxLength: [500, "Bio cannot exceed 500 characters"],
+        default: null
+    },
     sellerNotes: {
         type: String,
         default: null

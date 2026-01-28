@@ -2,7 +2,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 import type { Buyer } from "@/types/buyer.type.ts";
 
-
 export interface IBuyer extends Omit<Buyer, "baseUserId">, Document {
     baseUserId: Schema.Types.ObjectId | string,
     createdAt: Date;
@@ -40,6 +39,7 @@ const buyerSchema: Schema<IBuyer> = new Schema({
     password: {
         type: String,
         minLength: [8, "Password must be at least 8 characters"],
+        default: null
     },
     profilePictureUrl: {
         type: String,
@@ -53,7 +53,7 @@ const buyerSchema: Schema<IBuyer> = new Schema({
     bio: {
         type: String,
         maxLength: [500, "Bio cannot exceed 500 characters"],
-        // default: null
+        default: null
     },
     terms: {
         type: Boolean,
