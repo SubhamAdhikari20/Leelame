@@ -36,7 +36,7 @@ import ProfilePopover from "./profile-popover.tsx";
 import { toast } from "sonner";
 import { useTheme } from "@/app/context/theme-provider.tsx";
 import { signOut } from "next-auth/react";
-import { CurrentUserProps } from "@/types/current-user.ts";
+import { CurrentUserProps } from "@/types/current-user.type.ts";
 import { handleBuyerLogout } from "@/lib/actions/auth/buyer-auth.action.ts";
 
 

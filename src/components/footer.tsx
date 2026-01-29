@@ -3,7 +3,7 @@
 import React from "react";
 import { FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
 import Link from "next/link";
-import { CurrentUserProps } from "@/types/current-user.ts";
+import { CurrentUserProps } from "@/types/current-user.type.ts";
 
 
 const Footer = ({ currentUser }: CurrentUserProps) => {

@@ -1,13 +1,13 @@
 // src/lib/get-server-session.ts
-import type { Session } from "next-auth";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/options.ts";
+import type { UserData } from "./cookie.ts";
+import { getAuthToken, getUserData } from "./cookie.ts";
 
 
-export const getCurrentServerSession = async (): Promise<ServerSessionResponseType> => {
-    const session = await getServerSession(authOptions);
+export const getServerSession = async (): Promise<ServerSessionResponseType> => {
+    const token = await getAuthToken();
+    const userData = await getUserData();
 
-    if (!session || !session.user) {
+    if (!token || !userData) {
         const response: ServerSessionResponseType = {
             success: false,
             message: "Session Error! Session does not exist with stored user.",
@@ -18,7 +18,8 @@ export const getCurrentServerSession = async (): Promise<ServerSessionResponseTy
     const response: ServerSessionResponseType = {
         success: true,
         message: "Session fetched successfully.",
-        session: session
+        token: token,
+        data: userData
     }
     return response;
 };
@@ -26,5 +27,6 @@ export const getCurrentServerSession = async (): Promise<ServerSessionResponseTy
 export type ServerSessionResponseType = {
     success: boolean;
     message: string;
-    session?: Session | null;
+    token?: string | null;
+    data?: UserData | null;
 };

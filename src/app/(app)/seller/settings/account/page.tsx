@@ -1,24 +1,25 @@
 // src/app/(app)/seller/settings/account/page.tsx
 import React from "react";
-import { getCurrentServerSession } from "@/lib/get-server-session.ts";
+import { getServerSession } from "@/lib/get-server-session.ts";
 import { handleGetCurrentSellerUser } from "@/lib/actions/seller/profile-details.action.ts";
 import { notFound, redirect } from "next/navigation";
 import SellerProfile from "@/components/seller/seller-profile.tsx";
 
 
 const SellerProfilePage = async () => {
-    const response = await getCurrentServerSession();
+    const response = await getServerSession();
 
     if (!response.success) {
         throw new Error(response.message ?? "Unknown");
     }
 
-    const session = response.session;
-    if (!session || !session.user._id) {
-        redirect("/seller/login");
+    const token = response.token;
+    const user = response.data;
+    if (!token || !user || !user._id) {
+        redirect("/login");
     }
 
-    const result = await handleGetCurrentSellerUser(session.user._id);
+    const result = await handleGetCurrentSellerUser(user._id);
     if (!result.success) {
         throw new Error("Error fetching user data");
     }

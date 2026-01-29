@@ -2,7 +2,7 @@
 import axios from "@/lib/api/axios.ts";
 import { API } from "@/lib/api/endpoints.ts";
 import type { AxiosErrorType } from "@/lib/api/axios.ts";
-import type { AdminResponseDtoType } from "@/dtos/admin.dto.ts";
+import type { AdminApiResponseType } from "@/types/api-response.type.ts";
 import type { AdminSignUpSchemaType } from "@/schemas/auth/admin/sign-up.schema.ts";
 import type { AdminVerifyAccountRegistrationSchemaType } from "@/schemas/auth/admin/verify-account-registration.schema.ts";
 import type { AdminForgotPasswordSchemaType } from "@/schemas/auth/admin/forgot-password.schema.ts";
@@ -13,7 +13,7 @@ import type { AdminResetPasswordSchemaType } from "@/schemas/auth/admin/reset-pa
 // Sign Up Axios
 export const adminSignUp = async (signUpData: AdminSignUpSchemaType) => {
     try {
-        const response = await axios.post<AdminResponseDtoType>(API.AUTH.ADMIN.SIGN_UP, signUpData);
+        const response = await axios.post<AdminApiResponseType>(API.AUTH.ADMIN.SIGN_UP, signUpData);
         return response.data;
     }
     catch (error: Error | any) {
@@ -25,7 +25,7 @@ export const adminSignUp = async (signUpData: AdminSignUpSchemaType) => {
 // Send Account Registration Email Axios
 export const adminSendAccountRegistrationEmail = async (email: string) => {
     try {
-        const response = await axios.put<AdminResponseDtoType>(API.AUTH.ADMIN.SEND_ACCOUNT_REGISTRATION_EMAIL, email);
+        const response = await axios.put<AdminApiResponseType>(API.AUTH.ADMIN.SEND_ACCOUNT_REGISTRATION_EMAIL, email);
         return response.data;
     }
     catch (error: Error | any) {
@@ -37,7 +37,7 @@ export const adminSendAccountRegistrationEmail = async (email: string) => {
 // Verify Account Registration Axios
 export const adminVerifyAccountRegistration = async (username: string, verifyAccountRegistrationData: AdminVerifyAccountRegistrationSchemaType) => {
     try {
-        const response = await axios.put<AdminResponseDtoType>(API.AUTH.ADMIN.VERIFY_ACCOUNT_REGISTRATION, { username, ...verifyAccountRegistrationData });
+        const response = await axios.put<AdminApiResponseType>(API.AUTH.ADMIN.VERIFY_ACCOUNT_REGISTRATION, { username, ...verifyAccountRegistrationData });
         return response.data;
     }
     catch (error: Error | any) {
@@ -49,7 +49,7 @@ export const adminVerifyAccountRegistration = async (username: string, verifyAcc
 // Forgot Password Axios
 export const adminForgotPassword = async (forgotPasswordData: AdminForgotPasswordSchemaType) => {
     try {
-        const response = await axios.put<AdminResponseDtoType>(API.AUTH.ADMIN.FORGOT_PASSWORD, forgotPasswordData);
+        const response = await axios.put<AdminApiResponseType>(API.AUTH.ADMIN.FORGOT_PASSWORD, forgotPasswordData);
         return response.data;
     }
     catch (error: Error | any) {
@@ -61,7 +61,7 @@ export const adminForgotPassword = async (forgotPasswordData: AdminForgotPasswor
 // Verify Account Reset Password Axios
 export const adminVerifyAccountResetPassword = async (username: string, verifyAccountResetPasswordData: AdminVerifyAccountResetPasswordSchemaType) => {
     try {
-        const response = await axios.put<AdminResponseDtoType>(API.AUTH.ADMIN.VERIFY_ACCOUNT_RESET_PASSWORD, { username, ...verifyAccountResetPasswordData });
+        const response = await axios.put<AdminApiResponseType>(API.AUTH.ADMIN.VERIFY_ACCOUNT_RESET_PASSWORD, { username, ...verifyAccountResetPasswordData });
         return response.data;
     }
     catch (error: Error | any) {
@@ -73,7 +73,7 @@ export const adminVerifyAccountResetPassword = async (username: string, verifyAc
 // Reset Password Axios
 export const adminResetPassword = async (email: string, resetPasswordData: AdminResetPasswordSchemaType) => {
     try {
-        const response = await axios.put<AdminResponseDtoType>(API.AUTH.ADMIN.RESET_PASSWORD, { email, ...resetPasswordData });
+        const response = await axios.put<AdminApiResponseType>(API.AUTH.ADMIN.RESET_PASSWORD, { email, ...resetPasswordData });
         return response.data;
     }
     catch (error: Error | any) {

@@ -32,8 +32,8 @@ import axios, { AxiosError } from "axios";
 import { UpdateProfileDetailsSchema } from "@/schemas/buyer/update-profile-details.schema.ts";
 import { handleGetCurrentBuyerUser, handleUploadBuyerProfilePicture } from "@/lib/actions/buyer/profile-details.action.ts";
 import type { UpdateProfileDetailsSchemaType } from "@/schemas/buyer/update-profile-details.schema.ts";
-import type { CurrentUser, CurrentUserProps } from "@/types/current-user.ts";
-import type { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
+import type { CurrentUser, CurrentUserProps } from "@/types/current-user.type.ts";
+import type { BuyerApiResponseType } from "@/types/api-response.type.ts";
 
 
 const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
@@ -52,7 +52,7 @@ const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
 
     const getCurrentUser = useCallback(async () => {
         try {
-            const result = await handleGetCurrentBuyerUser(currentUser._id);
+            const result = await handleGetCurrentBuyerUser(currentUser!._id);
             if (!result.success) {
                 toast.error("Error fetching user data", {
                     description: result.message ?? "Unknown"
@@ -87,13 +87,13 @@ const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
                 setIsCheckingUsername(true);
                 setUsernameMessage("");
                 try {
-                    const response = await axios.get<BuyerResponseDtoType>(`/api/users/buyer/check-username-unique?username=${username}`);
+                    const response = await axios.get<BuyerApiResponseType>(`/api/users/buyer/check-username-unique?username=${username}`);
                     if (response.data.success) {
                         setUsernameMessage(response.data.message);
                     }
                 }
                 catch (error) {
-                    const axiosError = error as AxiosError<BuyerResponseDtoType>;
+                    const axiosError = error as AxiosError<BuyerApiResponseType>;
                     setUsernameMessage(
                         axiosError.response?.data?.message || "Error checking username uniqueness!"
                     );
@@ -122,14 +122,14 @@ const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
     const onSubmit = async (data: UpdateProfileDetailsSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.put<BuyerResponseDtoType>("", data);
+            const response = await axios.put<BuyerApiResponseType>("", data);
             if (response.data.success) {
                 toast.success("Success", {
                     description: response.data.message
                 });
                 // await getCurrentUser();
 
-                if (response.data.user?.username !== currentUser.username) {
+                if (response.data.user?.username !== currentUser!.username) {
                     router.replace(`/verify-account/registration/${response.data.user?.username}`);
                 }
             }
@@ -157,7 +157,7 @@ const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
     // Handle delete
     const handleDelete = async (userId: string) => {
         try {
-            const response = await axios.delete<BuyerResponseDtoType>("",);
+            const response = await axios.delete<BuyerApiResponseType>("",);
             if (response.data.success) {
                 toast.success("Successful", {
                     description: response.data.message,
@@ -168,7 +168,7 @@ const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
             });
         }
         catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
+            const axiosError = error as AxiosError<BuyerApiResponseType>;
             console.error("Error deleting user account: ", axiosError);
             toast.error("Error deleting user account: ", {
                 description: axiosError.response?.data?.message
@@ -187,7 +187,7 @@ const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
             const formData = new FormData();
             formData.append("profile-picture", selectedFile);
 
-            const response = await handleUploadBuyerProfilePicture(currentUser._id, formData);
+            const response = await handleUploadBuyerProfilePicture(currentUser!._id, formData);
             if (!response.success) {
                 toast.error("Failed", {
                     description: response.message,
@@ -203,7 +203,7 @@ const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
             await getCurrentUser();
         }
         catch (error) {
-            const axiosError = error as AxiosError<BuyerResponseDtoType>;
+            const axiosError = error as AxiosError<BuyerApiResponseType>;
             console.error("Image upload failed", axiosError);
             toast.error(`Image upload failed: ${axiosError.response?.data?.message}`);
         }

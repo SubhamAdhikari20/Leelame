@@ -16,7 +16,7 @@ import {
     AlertDialogTrigger,
 } from "./ui/alert-dialog.tsx";
 import { Button } from "./ui/button.tsx";
-import type { CurrentUser } from "@/types/current-user.ts";
+import type { CurrentUser } from "@/types/current-user.type.ts";
 
 
 interface ProfilePopoverProps {

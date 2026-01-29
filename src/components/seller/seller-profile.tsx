@@ -28,8 +28,8 @@ import { useForm, Controller } from "react-hook-form";
 import { handleDeleteSellerAccount, handleSellerProfileDetails } from "@/lib/actions/seller/profile-details.action.ts";
 import { UpdateProfileDetailsSchema, UpdateProfileDetailsSchemaType } from "@/schemas/seller/update-profile-details.schema.ts";
 import axios from "axios";
-import type { BuyerResponseDtoType } from "@/dtos/buyer.dto.ts";
-import type { CurrentUserProps } from "@/types/current-user.ts";
+import type { BuyerApiResponseType } from "@/types/api-response.type.ts";
+import type { CurrentUserProps } from "@/types/current-user.type.ts";
 
 
 const SellerProfile = ({ currentUser }: CurrentUserProps) => {
@@ -129,7 +129,7 @@ const SellerProfile = ({ currentUser }: CurrentUserProps) => {
             const formData = new FormData();
             formData.append("profilePicture", selectedFile);
 
-            const response = await axios.put<BuyerResponseDtoType>("",);
+            const response = await axios.put<BuyerApiResponseType>("",);
             if (!response.data.success) {
                 toast.error("Failed", {
                     description: response.data.message,

@@ -18,14 +18,8 @@ import NavUser from "@/components/seller/nav-user.tsx";
 import Link from "next/link";
 import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
 import { IconInnerShadowTop } from "@tabler/icons-react";
-import { CurrentUserProps } from "@/types/current-user.ts";
+import { CurrentUserProps } from "@/types/current-user.type";
 
-
-const user = {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/images/avatar.png",
-};
 
 // Menu items
 const items = [

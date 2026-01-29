@@ -1,4 +1,4 @@
-// src/components/admin/nav-user.tsx
+// src/components/admin/nav-currentUser.tsx
 "use client"
 import { Bell } from "lucide-react";
 import {
@@ -41,17 +41,10 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { CurrentUserProps } from "@/types/current-user.type.ts";
 
 
-const NavUser = ({
-    user,
-}: {
-    user: {
-        name: string
-        email: string
-        avatar: string
-    }
-}) => {
+const NavUser = ({ currentUser }: CurrentUserProps) => {
     const router = useRouter();
     const { isMobile } = useSidebar();
 
@@ -71,12 +64,28 @@ const NavUser = ({
                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer mt-auto px-3 py-2"
                         >
                             <Avatar className="h-8 w-8 rounded-lg">
-                                <AvatarImage src={user.avatar} alt={user.name} />
-                                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                                {currentUser && currentUser.profilePictureUrl ? (
+                                    <AvatarImage
+                                        src={currentUser.profilePictureUrl}
+                                        alt={currentUser.fullName ?? "Profile Picture Preview"}
+                                    />
+                                ) : (
+                                    <AvatarFallback>
+                                        {(
+                                            (currentUser && currentUser.fullName) ??
+                                            (currentUser && currentUser.username) ??
+                                            "U"
+                                        )
+                                            .split(" ")
+                                            .map((n) => n[0])
+                                            .join("")
+                                            .toUpperCase()}
+                                    </AvatarFallback>
+                                )}
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-medium">{user.name}</span>
-                                <span className="truncate text-xs">{user.email}</span>
+                                <span className="truncate font-medium">{currentUser?.fullName}</span>
+                                <span className="truncate text-xs">{currentUser?.email}</span>
                             </div>
                             <IconDotsVertical className="ml-auto size-4" />
                         </SidebarMenuButton>
@@ -90,12 +99,31 @@ const NavUser = ({
                         <DropdownMenuLabel className="p-0 font-normal">
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <Avatar className="h-8 w-8 rounded-lg">
-                                    <AvatarImage src={user.avatar} alt={user.name} />
-                                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                                    <Avatar className="h-8 w-8 rounded-lg">
+                                        {currentUser && currentUser.profilePictureUrl ? (
+                                            <AvatarImage
+                                                src={currentUser.profilePictureUrl}
+                                                alt={currentUser.fullName ?? "Profile Picture Preview"}
+                                            />
+                                        ) : (
+                                            <AvatarFallback>
+                                                {(
+                                                    (currentUser && currentUser.fullName) ??
+                                                    (currentUser && currentUser.username) ??
+                                                    "U"
+                                                )
+                                                    .split(" ")
+                                                    .map((n) => n[0])
+                                                    .join("")
+                                                    .toUpperCase()}
+                                            </AvatarFallback>
+                                        )}
+                                    </Avatar>
                                 </Avatar>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
-                                    <span className="truncate font-medium">{user.name}</span>
-                                    <span className="truncate text-xs">{user.email}</span>
+                                    <span className="truncate font-medium">{currentUser
+                                        ?.fullName}</span>
+                                    <span className="truncate text-xs">{currentUser?.email}</span>
                                 </div>
                             </div>
                         </DropdownMenuLabel>

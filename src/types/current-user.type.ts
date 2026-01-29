@@ -19,7 +19,7 @@ export type CurrentUser = {
 }
 
 export type CurrentUserProps = {
-    currentUser: CurrentUser;
+    currentUser?: CurrentUser | null;
 };
 
 export type CurrentUserResponseType = {

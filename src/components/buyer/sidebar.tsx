@@ -37,7 +37,7 @@ import {
 import { toast } from "sonner";
 import { signOut } from "next-auth/react";
 import { handleBuyerLogout } from "@/lib/actions/auth/buyer-auth.action.ts";
-import type { CurrentUserProps } from "@/types/current-user.ts";
+import type { CurrentUserProps } from "@/types/current-user.type.ts";
 
 
 const Sidebar = ({ currentUser }: CurrentUserProps) => {
@@ -92,13 +92,13 @@ const Sidebar = ({ currentUser }: CurrentUserProps) => {
                     )}
                 </Avatar>
                 <h1 className="mt-2 font-bold text-gray-900 dark:text-gray-100">
-                    {currentUser.fullName}
+                    {currentUser?.fullName}
                 </h1>
                 <h2 className="font-semibold text-gray-800 dark:text-gray-200">
-                    {currentUser.username}
+                    {currentUser?.username}
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                    {currentUser.email}
+                    {currentUser?.email}
                 </p>
             </div>
 
@@ -110,7 +110,7 @@ const Sidebar = ({ currentUser }: CurrentUserProps) => {
                         return (
                             <Link
                                 key={index}
-                                href={`/${currentUser.username}/my-profile/${item.path}`}
+                                href={`/${currentUser?.username}/my-profile/${item.path}`}
                             >
                                 <Button
                                     variant={isActive ? "secondary" : "ghost"}

@@ -18,15 +18,10 @@ import NavUser from "@/components/admin/nav-user.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import { IconInnerShadowTop } from "@tabler/icons-react";
 import Link from "next/link";
+import { CurrentUserProps } from "@/types/current-user.type";
 
 
-const user = {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/images/avatar.png",
-};
-
-// Menu items.
+// Menu items
 const items = [
     {
         title: "Home",
@@ -55,7 +50,7 @@ const items = [
     },
 ];
 
-const AdminSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
+const AdminSidebar = ({ currentUser, ...props }: CurrentUserProps & React.ComponentProps<typeof Sidebar>) => {
     return (
         <div>
             <Sidebar collapsible="icon" {...props}>
@@ -95,7 +90,7 @@ const AdminSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                 </SidebarContent>
                 <Separator />
                 <SidebarFooter>
-                    <NavUser user={user} />
+                    <NavUser currentUser={currentUser} />
                 </SidebarFooter>
                 <SidebarRail />
             </Sidebar>

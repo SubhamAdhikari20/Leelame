@@ -1,22 +1,6 @@
 // src/proxy.ts
 import { NextResponse, NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
 import { getAuthToken, getUserData } from "./lib/cookie.ts";
-
-
-type UserRole = "buyer" | "seller" | "admin";
-
-type AuthToken = {
-    _id: string;
-    email: string;
-    role: UserRole;
-    isVerified?: boolean;
-    baseUserId: string;
-    fullName?: string | null;
-    username?: string | null;
-    contact?: string | null;
-    [k: string]: any;
-};
 
 const PUBLIC_PATHS = [
     "/login",
@@ -71,7 +55,6 @@ const isAdminAuthPath = (pathname: string) =>
     ADMIN_AUTH_PATHS.some(p => pathname.startsWith(`${p}/`));
 
 export async function proxy(req: NextRequest) {
-    const token = (await getToken({ req: req, secret: process.env.NEXTAUTH_SECRET })) as AuthToken | null;
     const authToken = await getAuthToken();
     const authUserData = await getUserData();
     const pathname = req.nextUrl.pathname;
@@ -89,30 +72,30 @@ export async function proxy(req: NextRequest) {
 
     // Public Routes
     if (isPublicPath(pathname)) {
-        if (!token || !authToken || !authUserData) {
+        if (!authToken || !authUserData) {
             return NextResponse.next();
             // return NextResponse.rewrite(new URL("/not-found", req.url));
         }
 
-        if (!token.isVerified || !authUserData.isVerified) {
+        if (!authUserData.isVerified) {
             if (
                 pathname.startsWith("/verify-account/registration") ||
                 pathname.startsWith("/verify-account/reset-password")
             ) {
                 return NextResponse.next();
             }
-            return NextResponse.redirect(new URL(`/verify-account/registration/${token.username || authUserData.username}`, req.url));
+            return NextResponse.redirect(new URL(`/verify-account/registration/${authUserData.username}`, req.url));
         }
 
         if (isAuthEntryPath(pathname)) {
-            if ((token.role === "buyer") || (authUserData.role === "buyer")) {
-                if (pathname === `/${token.username || authUserData.username}`) {
+            if (authUserData.role === "buyer") {
+                if (pathname === `/${authUserData.username}`) {
                     return NextResponse.next();
                 }
-                return NextResponse.redirect(new URL(`/${token.username || authUserData.username}`, req.url));
+                return NextResponse.redirect(new URL(`/${authUserData.username}`, req.url));
             }
-            if (((token.role === "seller") || (authUserData.role === "seller")) || ((token.role === "admin") || (authUserData.role === "admin"))) {
-                return NextResponse.redirect(new URL(`/${token.role || authUserData.role}/dashboard`, req.url));
+            if ((authUserData.role === "seller") || (authUserData.role === "admin")) {
+                return NextResponse.redirect(new URL(`/${authUserData.role}/dashboard`, req.url));
             }
         }
 
@@ -122,12 +105,12 @@ export async function proxy(req: NextRequest) {
     }
 
     if (isAdminAuthPath(pathname)) {
-        if (!token || !authToken || !authUserData) {
+        if (!authToken || !authUserData) {
             return NextResponse.next();
         }
 
         // already logged in
-        if ((token.role === "admin") || (authUserData.role === "admin")) {
+        if (authUserData.role === "admin") {
             return NextResponse.redirect(new URL("/admin/dashboard", req.url));
         }
 
@@ -136,7 +119,7 @@ export async function proxy(req: NextRequest) {
     }
 
     // Protected Routes
-    if (!token || !authToken || !authUserData) {
+    if (!authToken || !authUserData) {
         // Instead of redirecting unknown routes to login, show not-found
         // if (!/^\/(login|sign-up|verify-account|forgot-password|reset-password)/.test(pathname)) {
         //     return NextResponse.rewrite(new URL("/not-found", req.url));
@@ -146,14 +129,14 @@ export async function proxy(req: NextRequest) {
         // return NextResponse.redirect(new URL("/login", req.url));
     }
 
-    if (!token.isVerified || !authUserData.isVerified) {
+    if (!authUserData.isVerified) {
         if (
             pathname.startsWith("/verify-account/registration") ||
             pathname.startsWith("/verify-account/reset-password")
         ) {
             return NextResponse.next();
         }
-        return NextResponse.redirect(new URL(`/verify-account/registration/${token.username || authUserData.username}`, req.url));
+        return NextResponse.redirect(new URL(`/verify-account/registration/${authUserData.username}`, req.url));
     }
 
     // Split path segments
@@ -162,18 +145,18 @@ export async function proxy(req: NextRequest) {
         const [username] = segments;
 
         // allow only if logged-in buyer whose username matches
-        if ((token.role !== "buyer") || (authUserData.role !== "buyer")) {
+        if (authUserData.role !== "buyer") {
             // redirect to appropriate place for the logged-in user
-            if (((token.role === "seller") || (authUserData.role === "seller")) || ((token.role === "admin") || (authUserData.role === "admin"))) {
-                return NextResponse.redirect(new URL(`/${token.role || authUserData.role}/dashboard`, req.url));
+            if ((authUserData.role === "seller") || (authUserData.role === "admin")) {
+                return NextResponse.redirect(new URL(`/${authUserData.role}/dashboard`, req.url));
             }
             // return NextResponse.redirect(new URL("/", req.url));
             return NextResponse.rewrite(new URL("/not-found", req.url));
         }
 
-        if ((token.username !== username) || (authUserData.username !== username)) {
+        if (authUserData.username !== username) {
             // prevent visiting other buyers' pages: redirect to own buyer home
-            return NextResponse.redirect(new URL(`/${token.username || authUserData.username}`, req.url));
+            return NextResponse.redirect(new URL(`/${authUserData.username}`, req.url));
             // return NextResponse.rewrite(new URL("/not-found", req.url));
         }
         return NextResponse.next();
@@ -183,9 +166,9 @@ export async function proxy(req: NextRequest) {
     if (segments.length >= 2) {
         const [first, second] = segments;
 
-        if (((token.role === "buyer") || (authUserData.role === "buyer")) && second === "my-profile") {
-            if ((token.username !== first) || (authUserData.username !== first)) {
-                return NextResponse.redirect(new URL(`/${token.username || authUserData.username}`, req.url));
+        if ((authUserData.role === "buyer") && (second === "buyer")) {
+            if (authUserData.username !== first) {
+                return NextResponse.redirect(new URL(`/${authUserData.username}`, req.url));
             }
             return NextResponse.next();
         }
@@ -193,16 +176,16 @@ export async function proxy(req: NextRequest) {
         // pattern: /:username/seller/... or /:username/admin/...
         if (second === "seller" || second === "admin") {
             // must match both username and role
-            if ((token.role !== second) || (authUserData.role !== second)) {
+            if (authUserData.role !== second) {
                 // not the correct role; redirect to logged-in user's place
-                if ((token.role === "buyer") || (authUserData.role === "buyer")) {
+                if (authUserData.role === "buyer") {
                     // return NextResponse.redirect(new URL(`/${tokenUsername}`, req.url));
                     return NextResponse.rewrite(new URL("/not-found", req.url));
                 }
                 // return NextResponse.redirect(new URL(`/${token.role}/dashboard`, req.url));
                 return NextResponse.rewrite(new URL("/not-found", req.url));
             }
-            if ((token.username !== first) || (authUserData.username !== first)) {
+            if (authUserData.username !== first) {
                 // username mismatch
                 // return NextResponse.redirect(new URL(`/${token.role}/dashboard`, req.url));
                 return NextResponse.rewrite(new URL("/not-found", req.url));
@@ -212,12 +195,12 @@ export async function proxy(req: NextRequest) {
 
         // pattern: /seller/... or /admin/... (top-level role routes)
         if (first === "seller" || first === "admin") {
-            if ((token.role !== first) || (authUserData.role !== first)) {
-                if ((token.role === "buyer") || (authUserData.role === "buyer")) {
+            if (authUserData.role !== first) {
+                if (authUserData.role === "buyer") {
                     // return NextResponse.redirect(new URL(`/${tokenUsername}`, req.url));
                     return NextResponse.rewrite(new URL("/not-found", req.url));
                 }
-                return NextResponse.redirect(new URL(`/${token.role || authUserData.role}/dashboard`, req.url));
+                return NextResponse.redirect(new URL(`/${authUserData.role}/dashboard`, req.url));
             }
             return NextResponse.next();
         }

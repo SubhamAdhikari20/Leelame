@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Quote } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
-import type { CurrentUserProps } from "@/types/current-user.ts";
+import type { CurrentUserProps } from "@/types/current-user.type.ts";
 
 
 const HomeUser = ({ currentUser }: CurrentUserProps) => {

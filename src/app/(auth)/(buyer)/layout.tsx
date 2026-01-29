@@ -3,7 +3,7 @@ import React from "react";
 import Navbar from "@/components/navbar.tsx";
 import Footer from "@/components/footer.tsx";
 
-const AppLayout = ({ children }: { children: React.ReactNode }) => {
+const BuyerAuthLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <>
             <Navbar />
@@ -15,4 +15,4 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     );
 };
 
-export default AppLayout;
+export default BuyerAuthLayout;

@@ -42,7 +42,7 @@ import {
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { toast } from "sonner";
-import { CurrentUserProps } from "@/types/current-user.ts";
+import { CurrentUserProps } from "@/types/current-user.type.ts";
 import { handleSellerLogout } from "@/lib/actions/auth/seller-auth.action.ts";
 
 
