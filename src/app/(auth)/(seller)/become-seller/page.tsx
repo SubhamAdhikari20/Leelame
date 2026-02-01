@@ -41,8 +41,7 @@ import { SellerLoginSchema } from "@/schemas/auth/seller/login.schema.ts";
 import { SellerVerifyAccountRegistrationSchema } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
 import { SellerForgotPasswordSchema } from "@/schemas/auth/seller/forgot-password.schema.ts";
 import { SellerResetPasswordSchema } from "@/schemas/auth/seller/reset-password.schema.ts";
-import { getSession, signIn } from "next-auth/react";
-import { handleSellerForgotPassword, handleSellerLoginTokenAndSetCookies, handleSellerResetPassword, handleSellerSendAccountRegistrationEmail, handleSellerSignUp, handleSellerVerifyAccountRegistration } from "@/lib/actions/auth/seller-auth.action.ts";
+import { handleSellerForgotPassword, handleSellerLogin, handleSellerResetPassword, handleSellerSendAccountRegistrationEmail, handleSellerSignUp, handleSellerVerifyAccountRegistration } from "@/lib/actions/auth/seller-auth.action.ts";
 import type { SellerSignUpSchemaType } from "@/schemas/auth/seller/sign-up.schema.ts";
 import type { SellerLoginSchemaType } from "@/schemas/auth/seller/login.schema.ts";
 import type { SellerVerifyAccountRegistrationSchemaType } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
@@ -253,54 +252,33 @@ const BecomeSeller = () => {
     const handleLogin = async (data: SellerLoginSchemaType) => {
         setIsSubmitting(true);
         try {
-            const result = await signIn("credentials", {
-                identifier: data.identifier,
-                password: data.password,
-                role: data.role,
-                redirect: false,
-            });
+            const response = await handleSellerLogin(data);
+            const user = response.data;
 
-            if (result?.error) {
-                toast.error("Login failed", { description: result.error ?? "Unknown error!" });
-                return;
-            }
-
-            const updatedSession = await getSession();
-
-            if (!updatedSession) {
-                toast.error("Session not found.");
-                return;
-            }
-
-            if (!updatedSession.accessToken) {
-                toast.error("Access token not found in session.");
-                return;
-            }
-
-            const loginResponse = await handleSellerLoginTokenAndSetCookies(updatedSession.accessToken, updatedSession.user);
-
-            if (!loginResponse.success) {
-                toast.error("Failed to set authentication cookies", {
-                    description: loginResponse.message,
+            if (!response.success || !user) {
+                toast.error("Login failed", {
+                    description: response.message,
                 });
                 return;
             }
 
-            const { user } = updatedSession;
-
-            if (user.isVerified) {
-                toast.success("Login Successful", {
-                    description: `Logged in as a ${user.role}`
-                });
-                if (user.role === "seller") {
-                    startTransition(() => router.replace("/seller/dashboard"));
+            if (user.isVerified || user.role === "seller") {
+                if (user.role !== "seller") {
+                    toast.error("Role error!", {
+                        description: response.message || "Incorrect role from response!",
+                    });
                     return;
                 }
+
+                toast.success("Login Successful", {
+                    description: response.message,
+                });
+                startTransition(() => router.replace("/seller/dashboard"));
                 return;
             }
             else {
-                toast.warning('Account Not Verified', {
-                    description: `Do you want to verify your account?`,
+                toast.warning("Account Not Verified", {
+                    description: "Do you want to verify your account?",
                     action: {
                         label: "Yes",
                         onClick: () => {

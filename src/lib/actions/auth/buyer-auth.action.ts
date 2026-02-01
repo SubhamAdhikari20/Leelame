@@ -1,6 +1,6 @@
 // src/lib/actions/auth/buyer-auth.action.ts
 "use server";
-import { buyerCheckUsernameUnique, buyerForgotPassword, buyerLoginWithGoogle, buyerResetPassword, buyerSendAccountRegistrationEmail, buyerSignUp, buyerVerifyAccountRegistration, buyerVerifyAccountResetPassword } from "@/lib/api/auth/buyer-auth.api.ts";
+import { buyerCheckUsernameUnique, buyerForgotPassword, buyerLogin, buyerLoginWithGoogle, buyerResetPassword, buyerSendAccountRegistrationEmail, buyerSignUp, buyerVerifyAccountRegistration, buyerVerifyAccountResetPassword } from "@/lib/api/auth/buyer-auth.api.ts";
 import type { ForgotPasswordSchemaType } from "@/schemas/auth/buyer/forgot-password.schema.ts";
 import type { BuyerSignUpSchemaType } from "@/schemas/auth/buyer/sign-up.schema.ts";
 import type { VerifyAccountRegistrationSchemaType } from "@/schemas/auth/buyer/verify-account-registration.schema.ts";
@@ -8,6 +8,7 @@ import type { VerifyAccountResetPasswordSchemaType } from "@/schemas/auth/buyer/
 import type { ResetPasswordSchemaType } from "@/schemas/auth/buyer/reset-password.schema.ts";
 import type { UserData } from "@/lib/cookie.ts";
 import { setAuthToken, setUserData, clearAuthCookies } from "@/lib/cookie.ts";
+import { BuyerLoginSchemaType } from "@/schemas/auth/buyer/login.schema";
 
 
 // Sign Up Handler
@@ -53,48 +54,6 @@ export const handleBuyerCheckUsernameUnique = async (username: string) => {
         return {
             success: false,
             message: error.message || "An unexpected error occurred while checking username uniqueness."
-        };
-    }
-};
-
-// Login Token and Set Cookies Handler
-export const handleBuyerLoginTokenAndSetCookies = async (token: string, userData: UserData) => {
-    try {
-        await setAuthToken(token);
-        await setUserData(userData);
-        return {
-            success: true,
-            message: "Authentication cookies set successfully."
-        };
-    }
-    catch (error: Error | any) {
-        return {
-            success: false,
-            message: error.message || "An unexpected error occurred while setting authentication cookies."
-        };
-    }
-};
-
-// Login With Google Handler
-export const handleBuyerLoginWithGoogle = async (tokenId: string) => {
-    try {
-        const result = await buyerLoginWithGoogle(tokenId);
-        if (!result.success) {
-            return {
-                success: false,
-                message: result.message || "Failed to login with Google."
-            };
-        }
-        return {
-            success: true,
-            message: result.message || "Login successful.",
-            data: result.user
-        };
-    }
-    catch (error: Error | any) {
-        return {
-            success: false,
-            message: error.message || "An unexpected error occurred during Google login."
         };
     }
 };
@@ -146,6 +105,92 @@ export const handleBuyerVerifyAccountRegistration = async (username: string, ver
         };
     }
 };
+
+
+// Login handler
+export const handleBuyerLogin = async (loginData: BuyerLoginSchemaType) => {
+    try {
+        const result = await buyerLogin(loginData);
+        const user = result.user;
+
+        if (!result.success || !user) {
+            return {
+                success: false,
+                message: result.message || "Failed to login user."
+            };
+        }
+
+        if (!result.token) {
+            return {
+                success: false,
+                message: result.message || "Access token not found."
+            };
+        }
+
+        const tokenResponse = await handleBuyerLoginTokenAndSetCookies(result.token, user);
+        if (!tokenResponse.success) {
+            return {
+                success: false,
+                message: result.message || "Failed to set authentication cookies"
+            };
+        }
+
+        return {
+            success: true,
+            message: result.message || "User logged in successfully.",
+            data: result.user
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred during login."
+        };
+    }
+};
+
+// Login Token and Set Cookies Handler
+export const handleBuyerLoginTokenAndSetCookies = async (token: string, userData: UserData) => {
+    try {
+        await setAuthToken(token);
+        await setUserData(userData);
+        return {
+            success: true,
+            message: "Authentication cookies set successfully."
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred while setting authentication cookies."
+        };
+    }
+};
+
+// Login With Google Handler
+export const handleBuyerLoginWithGoogle = async (tokenId: string) => {
+    try {
+        const result = await buyerLoginWithGoogle(tokenId);
+        if (!result.success) {
+            return {
+                success: false,
+                message: result.message || "Failed to login with Google."
+            };
+        }
+        return {
+            success: true,
+            message: result.message || "Login successful.",
+            data: result.user
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred during Google login."
+        };
+    }
+};
+
 
 // Forgot Password Handler
 export const handleBuyerForgotPassword = async (forgotPasswordData: ForgotPasswordSchemaType) => {

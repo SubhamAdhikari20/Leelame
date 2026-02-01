@@ -7,6 +7,21 @@ const nextConfig: NextConfig = {
   devIndicators: {
     position: "bottom-right", // top-right, bottom-right, top-left, bottom-left
   },
+  images: {
+    dangerouslyAllowLocalIP: true,
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5050',
+        pathname: '/uploads/**',
+      }, // other external image sources
+      {
+        protocol: 'https',
+        hostname: 'unsplash.com',
+      }
+    ]
+  }
 };
 
 export default nextConfig;

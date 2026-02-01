@@ -23,8 +23,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Label } from "@/components/ui/label.tsx";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { getSession, signIn } from "next-auth/react";
-import { handleAdminLoginTokenAndSetCookies, handleAdminSendAccountRegistrationEmail } from "@/lib/actions/auth/admin-auth.action.ts";
+import { handleAdminLogin, handleAdminSendAccountRegistrationEmail } from "@/lib/actions/auth/admin-auth.action.ts";
 import { AdminLoginSchema } from "@/schemas/auth/admin/login.schema.ts";
 import type { AdminLoginSchemaType } from "@/schemas/auth/admin/login.schema.ts";
 
@@ -42,7 +41,7 @@ const AdminLogin = () => {
     const loginForm = useForm<AdminLoginSchemaType>({
         resolver: zodResolver(AdminLoginSchema),
         defaultValues: {
-            email: "",
+            identifier: "",
             password: "",
             role: "admin"
         },
@@ -52,54 +51,33 @@ const AdminLogin = () => {
     const onSubmit = async (data: AdminLoginSchemaType) => {
         setIsSubmitting(true);
         try {
-            const result = await signIn("credentials", {
-                identifier: data.email,
-                password: data.password,
-                role: data.role,
-                redirect: false,
-            });
+            const response = await handleAdminLogin(data);
+            const user = response.data;
 
-            if (result?.error) {
-                toast.error("Login failed", { description: result.error ?? "Unknown error!" });
-                return;
-            }
-
-            const updatedSession = await getSession();
-
-            if (!updatedSession) {
-                toast.error("Session not found.");
-                return;
-            }
-
-            if (!updatedSession.accessToken) {
-                toast.error("Access token not found in session.");
-                return;
-            }
-
-            const loginResponse = await handleAdminLoginTokenAndSetCookies(updatedSession.accessToken, updatedSession.user);
-
-            if (!loginResponse.success) {
-                toast.error("Failed to set authentication cookies", {
-                    description: loginResponse.message,
+            if (!response.success || !user) {
+                toast.error("Login failed", {
+                    description: response.message,
                 });
                 return;
             }
 
-            const { user } = updatedSession;
-
-            if (user.isVerified) {
-                toast.success("Login Successful", {
-                    description: `Logged in as ${user.role}`
-                });
-                if (user.role === "admin") {
-                    startTransition(() => router.replace("/admin/dashboard"));
+            if (user.isVerified || user.role === "admin") {
+                if (user.role !== "admin") {
+                    toast.error("Role error!", {
+                        description: response.message || "Incorrect role from response!",
+                    });
                     return;
                 }
+
+                toast.success("Login Successful", {
+                    description: response.message,
+                });
+                startTransition(() => router.replace("/admin/dashboard"));
                 return;
             }
             else {
-                toast.warning('Account Not Verified', {
-                    description: `Do you want to verify your account?`,
+                toast.warning("Account Not Verified", {
+                    description: "Do you want to verify your account?",
                     action: {
                         label: "Yes",
                         onClick: () => {
@@ -182,7 +160,7 @@ const AdminLogin = () => {
                         >
                             <FieldGroup>
                                 <Controller
-                                    name="email"
+                                    name="identifier"
                                     control={loginForm.control}
                                     render={({ field, fieldState }) => (
                                         <Field data-invalid={fieldState.invalid}>

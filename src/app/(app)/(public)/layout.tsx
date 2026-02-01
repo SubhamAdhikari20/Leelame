@@ -10,26 +10,25 @@ import Footer from "@/components/footer.tsx";
 const AppLayout = async ({ children }: { children: React.ReactNode }) => {
     const response = await getServerSession();
 
-    if (!response.success) {
-        throw new Error(response.message ?? "Unknown");
-    }
+    let currentUser;
+    if (response.success) {
+        const token = response.token;
+        const user = response.data;
+        if (!token || !user || !user._id) {
+            redirect("/login");
+        }
 
-    const token = response.token;
-    const user = response.data;
-    if (!token || !user || !user._id) {
-        redirect("/login");
-    }
+        const result = await handleGetCurrentBuyerUser(user._id);
+        if (!result.success) {
+            throw new Error(`Error fetching user data: ${result.message ?? "Unknown"}`);
+        }
 
-    const result = await handleGetCurrentBuyerUser(user._id);
-    if (!result.success) {
-        throw new Error(`Error fetching user data: ${result.message ?? "Unknown"}`);
-    }
+        if (!result.data) {
+            notFound();
+        }
 
-    if (!result.data) {
-        notFound();
+        currentUser = result.data;
     }
-
-    const currentUser = result.data;
 
     return (
         <>

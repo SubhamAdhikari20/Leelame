@@ -13,7 +13,7 @@ const roleValidation = z
     }).optional();
 
 export const AdminLoginSchema = z.object({
-    email: emailValidation,
+    identifier: emailValidation,
     password: passwordValidation,
     role: roleValidation
 });

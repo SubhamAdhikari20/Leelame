@@ -21,13 +21,11 @@ import {
     NotificationIconButton,
 } from "@knocklabs/react";
 import PortalWrapper from "@/components/wrappers/portal-wrapper.tsx";
-import { useSession } from "next-auth/react";
+import type { CurrentUserProps } from "@/types/current-user.type.ts";
 
 
-const SiteHeader: React.FC = () => {
+const SiteHeader = ({ currentUser }: CurrentUserProps) => {
     const { crumbs } = useBreadcrumbContext();
-    const { data: session } = useSession();
-    const currentUser = session?.user;
     const { theme, toggleTheme } = useTheme();
     const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
 
@@ -79,7 +77,7 @@ const SiteHeader: React.FC = () => {
                 </nav>
 
                 <div className="ml-auto flex items-center gap-3">
-                    {currentUser && (
+                    {/* {currentUser && (
                         <>
                             <NotificationIconButton
                                 ref={notifButtonRef}
@@ -95,7 +93,7 @@ const SiteHeader: React.FC = () => {
                                 </PortalWrapper>
                             )}
                         </>
-                    )}
+                    )} */}
 
                     {/* Light/Dark Mode Button*/}
                     <Button

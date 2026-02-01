@@ -5,6 +5,7 @@ import type { AxiosErrorType } from "@/lib/api/axios.ts";
 import type { BuyerApiResponseType } from "@/types/api-response.type.ts";
 import type { BuyerSignUpSchemaType } from "@/schemas/auth/buyer/sign-up.schema.ts";
 import type { VerifyAccountRegistrationSchemaType } from "@/schemas/auth/buyer/verify-account-registration.schema.ts";
+import type { BuyerLoginSchemaType } from "@/schemas/auth/buyer/login.schema.ts";
 import type { ForgotPasswordSchemaType } from "@/schemas/auth/buyer/forgot-password.schema.ts";
 import type { VerifyAccountResetPasswordSchemaType } from "@/schemas/auth/buyer/verify-account-reset-password.schema.ts";
 import type { ResetPasswordSchemaType } from "@/schemas/auth/buyer/reset-password.schema.ts";
@@ -67,6 +68,18 @@ export const buyerVerifyAccountRegistration = async (username: string, verifyAcc
     catch (error: Error | any) {
         const axiosError = error as AxiosErrorType;
         throw new Error(axiosError.response?.data.message || "Account registration verification failed");
+    }
+};
+
+// Login Axios
+export const buyerLogin = async (loginData: BuyerLoginSchemaType) => {
+    try {
+        const response = await axios.post<BuyerApiResponseType>(API.AUTH.BUYER.LOGIN, loginData);
+        return response.data;
+    }
+    catch (error: Error | any) {
+        const axiosError = error as AxiosErrorType;
+        throw new Error(axiosError.response?.data.message || "Login failed");
     }
 };
 

@@ -1,13 +1,14 @@
 // src/lib/actions/auth/admin-auth.action.ts
 "use server";
-import { adminForgotPassword, adminResetPassword, adminSendAccountRegistrationEmail, adminSignUp, adminVerifyAccountRegistration, adminVerifyAccountResetPassword } from "@/lib/api/auth/admin-auth.api.ts";
+import { adminForgotPassword, adminLogin, adminResetPassword, adminSendAccountRegistrationEmail, adminSignUp, adminVerifyAccountRegistration, adminVerifyAccountResetPassword } from "@/lib/api/auth/admin-auth.api.ts";
 import type { AdminForgotPasswordSchemaType } from "@/schemas/auth/admin/forgot-password.schema.ts";
 import type { AdminSignUpSchemaType } from "@/schemas/auth/admin/sign-up.schema.ts";
 import type { AdminVerifyAccountRegistrationSchemaType } from "@/schemas/auth/admin/verify-account-registration.schema.ts";
 import type { AdminVerifyAccountResetPasswordSchemaType } from "@/schemas/auth/admin/verify-account-reset-password.schema.ts";
 import type { AdminResetPasswordSchemaType } from "@/schemas/auth/admin/reset-password.schema.ts";
 import type { UserData } from "@/lib/cookie.ts";
-import { setAuthToken, setUserData } from "@/lib/cookie.ts";
+import { clearAuthCookies, setAuthToken, setUserData } from "@/lib/cookie.ts";
+import { AdminLoginSchemaType } from "@/schemas/auth/admin/login.schema";
 
 
 // Sign Up Handler
@@ -59,9 +60,9 @@ export const handleAdminSendAccountRegistrationEmail = async (email: string) => 
 };
 
 // Verify Account Registration Handler
-export const handleAdminVerifyAccountRegistration = async (username: string, verifyAccountRegistrationData: AdminVerifyAccountRegistrationSchemaType) => {
+export const handleAdminVerifyAccountRegistration = async (email: string, verifyAccountRegistrationData: AdminVerifyAccountRegistrationSchemaType) => {
     try {
-        const result = await adminVerifyAccountRegistration(username, verifyAccountRegistrationData);
+        const result = await adminVerifyAccountRegistration(email, verifyAccountRegistrationData);
         if (!result.success) {
             return {
                 success: false,
@@ -78,6 +79,48 @@ export const handleAdminVerifyAccountRegistration = async (username: string, ver
         return {
             success: false,
             message: error.message || "An unexpected error occurred during account registration verification."
+        };
+    }
+};
+
+// Login handler
+export const handleAdminLogin = async (loginData: AdminLoginSchemaType) => {
+    try {
+        const result = await adminLogin(loginData);
+        const user = result.user;
+
+        if (!result.success || !user) {
+            return {
+                success: false,
+                message: result.message || "Failed to login user."
+            };
+        }
+
+        if (!result.token) {
+            return {
+                success: false,
+                message: result.message || "Access token not found."
+            };
+        }
+
+        const tokenResponse = await handleAdminLoginTokenAndSetCookies(result.token, user);
+        if (!tokenResponse.success) {
+            return {
+                success: false,
+                message: result.message || "Failed to set authentication cookies"
+            };
+        }
+
+        return {
+            success: true,
+            message: result.message || "User logged in successfully.",
+            data: result.user
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred during login."
         };
     }
 };

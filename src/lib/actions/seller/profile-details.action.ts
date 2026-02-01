@@ -1,7 +1,7 @@
 // src/lib/actions/seller/profile-details.action.ts
 "use server";
 import { deleteSellerAccount, updateSellerProfileDetails, getCurrentSellerUser } from "@/lib/api/seller/profile-details.api.ts";
-import { UpdateProfileDetailsSchemaType } from "@/schemas/seller/update-profile-details.schema.ts";
+import type { UpdateProfileDetailsSchemaType } from "@/schemas/seller/update-profile-details.schema.ts";
 
 
 // Get Current Seller User Handler

@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 
 
-type UserRole = "buyer" | "seller" | "admin";
+type UserRole = "buyer" | "seller" | "admin" | string;
 
 export type UserData = {
     _id: string;

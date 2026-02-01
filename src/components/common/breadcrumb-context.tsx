@@ -2,8 +2,13 @@
 "use client";
 import React from "react";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+import type { CurrentUser } from "@/types/current-user.type.ts";
 
+
+type BreadcrumbProviderProps = {
+    children: React.ReactNode;
+    currentUser?: CurrentUser | null;
+};
 
 export type Crumb = { label: string; href?: string };
 type BreadcrumbContextValue = {
@@ -44,11 +49,10 @@ const prettifySegment = (seg: string) => {
         .join(" ");
 };
 
-export const BreadcrumbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// export const BreadcrumbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    export const BreadcrumbProvider = ({ children, currentUser }: BreadcrumbProviderProps) => {
     const pathname = usePathname();
-    const { data: session } = useSession();
-    const currentUser = session?.user;
-    const sessionRole = currentUser?.role?.toLowerCase();
+    const currentUserRole = currentUser?.role.toLowerCase();
     const [override, setOverride] = React.useState<Crumb[] | null>(null);
 
     const role = React.useMemo(() => {
@@ -61,8 +65,8 @@ export const BreadcrumbProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 }
             }
         }
-        return sessionRole || "seller";
-    }, [pathname, sessionRole]);
+        return currentUserRole || "seller";
+    }, [pathname, currentUserRole]);
 
     // compute default crumbs from current pathname
     const defaultCrumbs = React.useMemo(() => {

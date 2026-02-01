@@ -7,6 +7,7 @@ import type { SellerSignUpSchemaType } from "@/schemas/auth/seller/sign-up.schem
 import type { SellerVerifyAccountRegistrationSchemaType } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
 import type { SellerForgotPasswordSchemaType } from "@/schemas/auth/seller/forgot-password.schema.ts";
 import type { SellerResetPasswordSchemaType } from "@/schemas/auth/seller/reset-password.schema.ts";
+import type { SellerLoginSchemaType } from "@/schemas/auth/seller/login.schema.ts";
 
 
 // Sign Up Axios
@@ -43,6 +44,18 @@ export const sellerVerifyAccountRegistration = async (email: string, verifyAccou
     catch (error: Error | any) {
         const axiosError = error as AxiosErrorType;
         throw new Error(axiosError.response?.data.message || "Account registration verification failed");
+    }
+};
+
+// Login Axios
+export const sellerLogin = async (loginData: SellerLoginSchemaType) => {
+    try {
+        const response = await axios.post<SellerApiResponseType>(API.AUTH.SELLER.LOGIN, loginData);
+        return response.data;
+    }
+    catch (error: Error | any) {
+        const axiosError = error as AxiosErrorType;
+        throw new Error(axiosError.response?.data.message || "Login failed");
     }
 };
 

@@ -17,7 +17,6 @@ export const getCurrentSellerUser = async (userId: string) => {
     }
 }
 
-
 // Update Profile Details Axios
 export const updateSellerProfileDetails = async (userId: string, sellerProfileData: UpdateProfileDetailsSchemaType) => {
     try {

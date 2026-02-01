@@ -1,7 +1,7 @@
 // src/app/(app)/admin/layout.tsx
 import React from "react";
 import { getServerSession } from "@/lib/get-server-session.ts";
-import { handleGetCurrentSellerUser } from "@/lib/actions/seller/profile-details.action.ts";
+import { handleGetCurrentAdminUser } from "@/lib/actions/admin/profile-details.action.ts";
 import { notFound, redirect } from "next/navigation";
 import AdminSidebar from "@/components/admin/sidebar.tsx";
 import { SidebarProvider } from "@/components/ui/sidebar.tsx";
@@ -20,10 +20,10 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
     const token = response.token;
     const user = response.data;
     if (!token || !user || !user._id) {
-        redirect("/login");
+        redirect("/admin/login");
     }
 
-    const result = await handleGetCurrentSellerUser(user._id);
+    const result = await handleGetCurrentAdminUser(user._id);
     if (!result.success) {
         throw new Error(`Error fetching user data: ${result.message ?? "Unknown"}`);
     }
@@ -36,10 +36,10 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
 
     return (
         <SidebarProvider>
-            <BreadcrumbProvider>
-                <AdminSidebar />
+            <BreadcrumbProvider currentUser={currentUser}>
+                <AdminSidebar currentUser={currentUser} />
                 <div className="min-h-screen flex-1">
-                    <SiteHeader />
+                    <SiteHeader currentUser={currentUser} />
                     <main className="min-h-[90vh] bg-gray-100 dark:bg-background text-gray-900 dark:text-foreground transition-colors duration-300">
                         {children}
                     </main>

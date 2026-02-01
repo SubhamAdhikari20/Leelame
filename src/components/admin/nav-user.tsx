@@ -40,8 +40,8 @@ import {
 } from "@/components/ui/alert-dialog.tsx";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
 import { CurrentUserProps } from "@/types/current-user.type.ts";
+import { handleAdminLogout } from "@/lib/actions/admin/profile-details.action.ts";
 
 
 const NavUser = ({ currentUser }: CurrentUserProps) => {
@@ -49,9 +49,17 @@ const NavUser = ({ currentUser }: CurrentUserProps) => {
     const { isMobile } = useSidebar();
 
     const handleLogout = async () => {
-        await signOut({ redirect: false });
+        const logoutResponse = await handleAdminLogout();
+        if (!logoutResponse.success) {
+            toast.error("Failed to logout: ", {
+                description: logoutResponse.message,
+            });
+            return;
+        }
         router.replace("/admin/login");
-        toast.success("Logout Successful.");
+        toast.success("Logout Successful.", {
+            description: logoutResponse.message
+        });
     };
 
     return (
@@ -129,7 +137,7 @@ const NavUser = ({ currentUser }: CurrentUserProps) => {
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => router.push("/admin/settings/account")}>
                                 <IconUserCircle />
                                 Account
                             </DropdownMenuItem>

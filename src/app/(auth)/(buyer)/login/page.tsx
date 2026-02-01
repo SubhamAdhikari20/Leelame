@@ -25,8 +25,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc"
 import { useGoogleLogin } from "@react-oauth/google";
-import { getSession, signIn } from "next-auth/react";
-import { handleBuyerLoginTokenAndSetCookies, handleBuyerLoginWithGoogle, handleBuyerSendAccountRegistrationEmail } from "@/lib/actions/auth/buyer-auth.action.ts";
+import { handleBuyerLogin, handleBuyerLoginWithGoogle, handleBuyerSendAccountRegistrationEmail } from "@/lib/actions/auth/buyer-auth.action.ts";
 import { BuyerLoginSchema } from "@/schemas/auth/buyer/login.schema.ts";
 import type { BuyerLoginSchemaType } from "@/schemas/auth/buyer/login.schema.ts";
 
@@ -54,77 +53,28 @@ const Login = () => {
     const onSubmit = async (data: BuyerLoginSchemaType) => {
         setIsSubmitting(true);
         try {
-            const result = await signIn("credentials", {
-                identifier: data.identifier,
-                password: data.password,
-                role: data.role,
-                redirect: false,
-            });
+            const response = await handleBuyerLogin(data);
+            const user = response.data;
 
-            if (result?.error) {
-                toast.error("Login failed", { description: result.error ?? "Unknown error!" });
-                return;
-
-                // switch (result.error) {
-                //     case "MISSING_CREDENTIALS":
-                //         toast.error("Login Failed", { description: "Please enter both username or email and password." });
-                //         break;
-                //     case "BUYER_NOT_FOUND":
-                //         toast.error("Login Failed", { description: "Invalid username or email." });
-                //         break;
-                //     case "INVALID_PASSWORD":
-                //         toast.error("Login Failed", { description: "Invalid password. Please enter correct password." });
-                //         break;
-                //     default:
-                //         toast.error("Login failed", { description: result.error });
-                // }
-                // return;
-
-                // if ((result.error == "CredentialsSignIn") || (result.error == "CredentialsSignin")) {
-                //     toast.error("Login Failed", {
-                //         description: "Incorrect username or password"
-                //     });
-                // }
-                // else {
-                //     toast.error("Error", {
-                //         description: result.error
-                //     });
-                //     console.error(result.error);
-                // }
-                // return;
-            }
-
-            const updatedSession = await getSession();
-
-            if (!updatedSession) {
-                toast.error("Session not found.");
-                return;
-            }
-
-            if (!updatedSession.accessToken) {
-                toast.error("Access token not found in session.");
-                return;
-            }
-
-            const loginResponse = await handleBuyerLoginTokenAndSetCookies(updatedSession.accessToken, updatedSession.user);
-
-            if (!loginResponse.success) {
-                toast.error("Failed to set authentication cookies", {
-                    description: loginResponse.message,
+            if (!response.success || !user) {
+                toast.error("Login failed", {
+                    description: response.message,
                 });
                 return;
             }
 
-            const { user } = updatedSession;
-
-            if (user.isVerified) {
-                toast.success("Login Successful", {
-                    description: `Logged in as ${user.role}`
-                });
-                if (user.role === "buyer") {
-                    startTransition(() => router.replace(`/${user.username}`));
+            if (user.isVerified || user.role === "buyer") {
+                if (user.role !== "buyer") {
+                    toast.error("Role error!", {
+                        description: response.message || "Incorrect role from response!",
+                    });
                     return;
                 }
+
+                toast.success("Login Successful", {
+                    description: response.message,
+                });
+                startTransition(() => router.replace(`/${user.username}`));
                 return;
             }
             else {

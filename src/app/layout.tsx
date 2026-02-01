@@ -3,13 +3,13 @@ import React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { getServerSession } from "next-auth";
-import { authOptions } from "./api/auth/[...nextauth]/options.ts";
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import AuthProvider from "./context/auth-provider.tsx";
-import KnockClientWrapper from '@/components/wrappers/knock-client-wrapper.tsx';
 import { ThemeProvider } from "./context/theme-provider.tsx";
 import ThemedToaster from "@/components/themed-toaster.tsx";
+import AuthProvider from "./context/auth-provider.tsx";
+// import { getServerSession } from "next-auth";
+// import { authOptions } from "./api/auth/[...nextauth]/options.ts";
+// import KnockClientWrapper from '@/components/wrappers/knock-client-wrapper.tsx';
 
 
 const geistSans = Geist({
@@ -32,7 +32,7 @@ const RootLayout = async ({
 }: Readonly<{
     children: React.ReactNode;
 }>) => {
-    const session = await getServerSession(authOptions);
+    // const session = await getServerSession(authOptions);
 
     const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (!googleClientId) {
@@ -46,17 +46,17 @@ const RootLayout = async ({
             >
                 <ThemeProvider>
                     <ThemedToaster />
-                    <AuthProvider session={session}>
+                    <AuthProvider>
                         <GoogleOAuthProvider clientId={googleClientId ?? ""}>
-                            <KnockClientWrapper>
-                                {children}
-                            </KnockClientWrapper>
+                            {/* <KnockClientWrapper> */}
+                            {children}
+                            {/* </KnockClientWrapper> */}
                         </GoogleOAuthProvider>
                     </AuthProvider>
                 </ThemeProvider>
             </body>
         </html>
     );
-}
+};
 
 export default RootLayout;

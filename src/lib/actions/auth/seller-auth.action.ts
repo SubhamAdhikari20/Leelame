@@ -1,8 +1,9 @@
 // src/lib/actions/auth/seller-auth.action.ts
 "use server";
-import { sellerForgotPassword, sellerResetPassword, sellerSendAccountRegistrationEmail, sellerSignUp, sellerVerifyAccountRegistration } from "@/lib/api/auth/seller-auth.api.ts";
+import { sellerForgotPassword, sellerLogin, sellerResetPassword, sellerSendAccountRegistrationEmail, sellerSignUp, sellerVerifyAccountRegistration } from "@/lib/api/auth/seller-auth.api.ts";
 import type { SellerSignUpSchemaType } from "@/schemas/auth/seller/sign-up.schema.ts";
 import type { SellerVerifyAccountRegistrationSchemaType } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
+import type { SellerLoginSchemaType } from "@/schemas/auth/seller/login.schema.ts";
 import type { SellerForgotPasswordSchemaType } from "@/schemas/auth/seller/forgot-password.schema.ts";
 import type { SellerResetPasswordSchemaType } from "@/schemas/auth/seller/reset-password.schema.ts";
 import { setAuthToken, setUserData, clearAuthCookies } from "@/lib/cookie.ts"
@@ -28,24 +29,6 @@ export const handleSellerSignUp = async (signUpData: SellerSignUpSchemaType) => 
         return {
             success: false,
             message: error.message || "An unexpected error occurred during sign up."
-        };
-    }
-};
-
-// Login Token and Set Cookies Handler
-export const handleSellerLoginTokenAndSetCookies = async (token: string, userData: any) => {
-    try {
-        await setAuthToken(token);
-        await setUserData(userData);
-        return {
-            success: true,
-            message: "Authentication cookies set successfully."
-        };
-    }
-    catch (error: Error | any) {
-        return {
-            success: false,
-            message: error.message || "An unexpected error occurred while setting authentication cookies."
         };
     }
 };
@@ -111,6 +94,66 @@ export const handleSellerVerifyAccountRegistration = async (email: string, verif
         return {
             success: false,
             message: error.message || "An unexpected error occurred during account registration verification."
+        };
+    }
+};
+
+// Login Token and Set Cookies Handler
+export const handleSellerLoginTokenAndSetCookies = async (token: string, userData: any) => {
+    try {
+        await setAuthToken(token);
+        await setUserData(userData);
+        return {
+            success: true,
+            message: "Authentication cookies set successfully."
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred while setting authentication cookies."
+        };
+    }
+};
+
+// Login handler
+export const handleSellerLogin = async (loginData: SellerLoginSchemaType) => {
+    try {
+        const result = await sellerLogin(loginData);
+        const user = result.user;
+
+        if (!result.success || !user) {
+            return {
+                success: false,
+                message: result.message || "Failed to login user."
+            };
+        }
+
+        if (!result.token) {
+            return {
+                success: false,
+                message: result.message || "Access token not found."
+            };
+        }
+
+        const tokenResponse = await handleSellerLoginTokenAndSetCookies(result.token, user);
+        if (!tokenResponse.success) {
+            return {
+                success: false,
+                message: result.message || "Failed to set authentication cookies"
+            };
+        }
+
+        return {
+            success: true,
+            message: result.message || "User logged in successfully.",
+            data: result.user
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred during login."
         };
     }
 };

@@ -5,6 +5,7 @@ import type { AxiosErrorType } from "@/lib/api/axios.ts";
 import type { AdminApiResponseType } from "@/types/api-response.type.ts";
 import type { AdminSignUpSchemaType } from "@/schemas/auth/admin/sign-up.schema.ts";
 import type { AdminVerifyAccountRegistrationSchemaType } from "@/schemas/auth/admin/verify-account-registration.schema.ts";
+import type { AdminLoginSchemaType } from "@/schemas/auth/admin/login.schema.ts";
 import type { AdminForgotPasswordSchemaType } from "@/schemas/auth/admin/forgot-password.schema.ts";
 import type { AdminVerifyAccountResetPasswordSchemaType } from "@/schemas/auth/admin/verify-account-reset-password.schema.ts";
 import type { AdminResetPasswordSchemaType } from "@/schemas/auth/admin/reset-password.schema.ts";
@@ -35,14 +36,26 @@ export const adminSendAccountRegistrationEmail = async (email: string) => {
 };
 
 // Verify Account Registration Axios
-export const adminVerifyAccountRegistration = async (username: string, verifyAccountRegistrationData: AdminVerifyAccountRegistrationSchemaType) => {
+export const adminVerifyAccountRegistration = async (email: string, verifyAccountRegistrationData: AdminVerifyAccountRegistrationSchemaType) => {
     try {
-        const response = await axios.put<AdminApiResponseType>(API.AUTH.ADMIN.VERIFY_ACCOUNT_REGISTRATION, { username, ...verifyAccountRegistrationData });
+        const response = await axios.put<AdminApiResponseType>(API.AUTH.ADMIN.VERIFY_ACCOUNT_REGISTRATION, { email, ...verifyAccountRegistrationData });
         return response.data;
     }
     catch (error: Error | any) {
         const axiosError = error as AxiosErrorType;
         throw new Error(axiosError.response?.data.message || "Account registration verification failed");
+    }
+};
+
+// Login Axios
+export const adminLogin = async (loginData: AdminLoginSchemaType) => {
+    try {
+        const response = await axios.post<AdminApiResponseType>(API.AUTH.ADMIN.LOGIN, loginData);
+        return response.data;
+    }
+    catch (error: Error | any) {
+        const axiosError = error as AxiosErrorType;
+        throw new Error(axiosError.response?.data.message || "Login failed");
     }
 };
 
