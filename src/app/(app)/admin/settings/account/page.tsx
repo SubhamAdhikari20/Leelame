@@ -4,6 +4,7 @@ import { getServerSession } from "@/lib/get-server-session.ts";
 import { handleGetCurrentAdminUser } from "@/lib/actions/admin/profile-details.action.ts";
 import { notFound, redirect } from "next/navigation";
 import AdminProfile from "@/components/admin/admin-profile.tsx";
+import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 
 
 const AdminProfilePage = async () => {
@@ -28,7 +29,8 @@ const AdminProfilePage = async () => {
         notFound();
     }
 
-    const currentUser = result.data;
+    // const currentUser = result.data;
+    const currentUser = { ...result.data, profilePictureUrl: normalizeHttpUrl(result.data.profilePictureUrl) };
 
     return (
         <>

@@ -1,7 +1,7 @@
 // src/lib/api/admin/manage-seller.api.ts
 import axios, { AxiosErrorType } from "@/lib/api/axios.ts";
 import { API } from "@/lib/api/endpoints.ts";
-import type { AllSellerApiResposeType, SellerApiResponseType } from "@/types/api-response.type.ts";
+import type { AllSellerApiResposeType, SellerApiResponseType, UploadImageAdminApiResponseType } from "@/types/api-response.type.ts";
 import type { CreateSellerAccountSchemaType, UpdateSellerAccountSchemaType } from "@/schemas/admin/manage-seller-account.schema.ts";
 
 
@@ -32,14 +32,6 @@ export const createSellerAccountByAdmin = async (createSellerAccountData: Create
             });
             return response.data;
         }
-        // if (formData) {
-        //     response = await axios.post<SellerApiResponseType>(API.AUTH.ADMIN.CREATE_SELLER_ACCOUNT, { ...createSellerAccountData, ...formData }, {
-        //         headers: {
-        //             "Content-Type": "multipart/form-data"
-        //         },
-        //     });
-        //     return response.data;
-        // }
         response = await axios.post<SellerApiResponseType>(API.AUTH.ADMIN.CREATE_SELLER_ACCOUNT, createSellerAccountData);
         return response.data;
     }
@@ -50,6 +42,17 @@ export const createSellerAccountByAdmin = async (createSellerAccountData: Create
     }
 };
 
+// Get Seller By Id User By Admin Axios
+export const getSellerById = async (sellerId: string) => {
+    try {
+        const response = await axios.get<SellerApiResponseType>(`${API.AUTH.ADMIN.GET_SELLER_BY_ID}/${sellerId}`);
+        return response.data;
+    }
+    catch (error: Error | any) {
+        const axiosError = error as AxiosErrorType;
+        throw new Error(axiosError.response?.data.message || "Failed to fetch seller by id in admin workspace!");
+    }
+};
 
 // Update Seller Profile Details By Admin Axios
 export const updateSellerProfileDetailsByAdmin = async (sellerId: string, sellerProfileData: UpdateSellerAccountSchemaType) => {
@@ -62,6 +65,23 @@ export const updateSellerProfileDetailsByAdmin = async (sellerId: string, seller
         throw new Error(axiosError.response?.data.message || "Failed to update seller profile details in admin workspace!");
     }
 };
+
+// Upload Seller Profile Picture By Admin Axios
+export const uploadSellerProfilePictureByAdmin = async (sellerId: string, formData: FormData) => {
+    try {
+        const response = await axios.put<UploadImageAdminApiResponseType>(`${API.AUTH.ADMIN.UPLOAD_SELLER_PROFILE_PICTURE}/${sellerId}`, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data"
+            },
+        });
+        return response.data;
+    }
+    catch (error: Error | any) {
+        const axiosError = error as AxiosErrorType;
+        throw new Error(axiosError.response?.data.message || "Failed to upload admin profile picture!");
+    }
+};
+
 
 // Delete Seller Account By Admin Axios
 export const deleteSellerAccountByAdmin = async (sellerId: string) => {

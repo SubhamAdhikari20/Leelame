@@ -9,3 +9,9 @@ export type ListSellerPropsType = {
     currentUser?: CurrentUserType | null;
     sellers?: z.infer<typeof SellerApiResponse>[] | null;
 };
+
+// Update Seller Account Details in Admin Workspace
+export type UpdateSellerProfileDetailsPropsType = {
+    currentUser?: CurrentUserType | null;
+    seller?: z.infer<typeof SellerApiResponse> | null;
+};

@@ -1,6 +1,6 @@
 // src/lib/actions/admin/manage-seller.action.ts
 "use server";
-import { createSellerAccountByAdmin, deleteSellerAccountByAdmin, getAllSellers, updateSellerProfileDetailsByAdmin } from "@/lib/api/admin/manage-seller.api.ts";
+import { createSellerAccountByAdmin, deleteSellerAccountByAdmin, getAllSellers, getSellerById, updateSellerProfileDetailsByAdmin, uploadSellerProfilePictureByAdmin } from "@/lib/api/admin/manage-seller.api.ts";
 import type { CreateSellerAccountSchemaType, UpdateSellerAccountSchemaType } from "@/schemas/admin/manage-seller-account.schema.ts";
 
 
@@ -52,6 +52,30 @@ export const handleCreateSellerAccountByAdmin = async (createSellerAccountData: 
     }
 };
 
+// Get Seller By Id User By Admin Handler
+export const handleGetSellerById = async (sellerId: string) => {
+    try {
+        const result = await getSellerById(sellerId);
+        if (!result.success) {
+            return {
+                success: false,
+                message: result.message || "Failed to fetch the seller in admin workspace!"
+            };
+        }
+        return {
+            success: true,
+            message: result.message || "Seller fetched successfully.",
+            data: result.user
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred while fetching the seller in admin workspace!"
+        };
+    }
+};
+
 // Update Seller Profile Details By Admin Handler
 export const handleUpdateSellerProfileDetailsByAdmin = async (sellerId: string, sellerProfileData: UpdateSellerAccountSchemaType) => {
     try {
@@ -76,10 +100,36 @@ export const handleUpdateSellerProfileDetailsByAdmin = async (sellerId: string, 
     }
 };
 
-// Delete Seller Account By Admin Handler
-export const handleDeleteSellerAccountByAdmin = async (seller: string) => {
+// Upload Seller Profile Picture By Admin Handler
+export const handleUploadSellerProfilePictureByAdmin = async (sellerId: string, formData: FormData) => {
     try {
-        const result = await deleteSellerAccountByAdmin(seller);
+        const result = await uploadSellerProfilePictureByAdmin(sellerId, formData);
+        if (!result.success) {
+            return {
+                success: false,
+                message: result.message || "Failed to upload seller profile picture by admin!"
+            };
+        }
+        return {
+            success: true,
+            message: result.message || "Seller profile picture uploaded successfully.",
+            data: result.data
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred during seller profile picture upload."
+        };
+    }
+};
+
+
+
+// Delete Seller Account By Admin Handler
+export const handleDeleteSellerAccountByAdmin = async (sellerId: string) => {
+    try {
+        const result = await deleteSellerAccountByAdmin(sellerId);
         if (!result.success) {
             return {
                 success: false,

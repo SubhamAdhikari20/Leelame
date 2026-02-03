@@ -1,69 +1,55 @@
-// src/components/admin/admin-profile.tsx
+// src/components/admin/update-seller.tsx
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button.tsx";
 import {
     Field,
     FieldError,
     FieldGroup,
     FieldLabel
 } from "@/components/ui/field.tsx";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog.tsx";
+import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
-import { toast } from "sonner";
-import { Loader2, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
+import { toast } from "sonner";
+import { Loader2, User2 } from "lucide-react";
+import { UpdateSellerAccountSchema, type UpdateSellerAccountSchemaType } from "@/schemas/admin/manage-seller-account.schema.ts";
+import { handleUpdateSellerProfileDetailsByAdmin, handleUploadSellerProfilePictureByAdmin } from "@/lib/actions/admin/manage-seller.action.ts";
+import type { UpdateSellerProfileDetailsPropsType } from "@/types/admin-props.type.ts";
 import Image from "next/image";
-import { useForm, Controller } from "react-hook-form";
-import { handleDeleteAdminAccount, handleUpdateAdminProfileDetails, handleUploadAdminProfilePicture } from "@/lib/actions/admin/profile-details.action.ts";
-import { UpdateAdminProfileDetailsSchema, type UpdateAdminProfileDetailsSchemaType } from "@/schemas/admin/update-profile-details.schema.ts";
-import type { CurrentUserPropsType } from "@/types/current-user.type.ts";
 
 
-const AdminProfile = ({ currentUser }: CurrentUserPropsType) => {
+const UpdateSeller = ({ currentUser, seller }: UpdateSellerProfileDetailsPropsType) => {
     const [preview, setPreview] = useState("");
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-    const adminProfileDetailsForm = useForm<UpdateAdminProfileDetailsSchemaType>({
-        resolver: zodResolver(UpdateAdminProfileDetailsSchema),
+    const updateSellerAccountForm = useForm<UpdateSellerAccountSchemaType>({
+        resolver: zodResolver(UpdateSellerAccountSchema),
         defaultValues: {
-            fullName: currentUser?.fullName || "",
-            email: currentUser?.email || "",
-            contact: currentUser?.contact || "",
+            fullName: seller?.fullName || "",
+            email: seller?.email || "",
+            contact: seller?.contact || "",
         }
     });
 
-    const onImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-            setSelectedFile(file);
-        }
-    };
+    useEffect(() => {
+        updateSellerAccountForm.reset({
+            fullName: seller?.fullName || "",
+            email: seller?.email || "",
+            contact: seller?.contact || "",
+        });
 
-    const onSubmit = async (data: UpdateAdminProfileDetailsSchemaType) => {
+        setPreview("");
+    }, [seller, updateSellerAccountForm]);
+
+    const onSubmit = async (data: UpdateSellerAccountSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await handleUpdateAdminProfileDetails(currentUser!._id, data);
+            const response = await handleUpdateSellerProfileDetailsByAdmin(seller!._id, data);
             if (!response.success) {
                 toast.error("Failed", {
                     description: response.message
@@ -76,43 +62,13 @@ const AdminProfile = ({ currentUser }: CurrentUserPropsType) => {
             });
         }
         catch (error: Error | any) {
-            console.error("Error updating user details: ", error);
-            toast.error("Error updating user details", {
+            console.error("Error updating seller account details by admin: ", error);
+            toast.error("Error updating seller account details by admin", {
                 description: error.message
             });
         }
         finally {
             setIsSubmitting(false);
-        }
-    };
-
-    const handleClear = () => {
-        adminProfileDetailsForm.reset({
-            fullName: "",
-            email: "",
-            contact: "",
-        });
-    };
-
-    // Handle delete
-    const handleDelete = async (userId: string) => {
-        try {
-            const response = await handleDeleteAdminAccount(userId);
-            if (!response.success) {
-                toast.error("Failed", {
-                    description: response.message,
-                });
-            }
-
-            toast.success("Successful", {
-                description: response.message,
-            });
-        }
-        catch (error: Error | any) {
-            console.error("Error deleting user account: ", error);
-            toast.error("Error deleting user account", {
-                description: error.message
-            });
         }
     };
 
@@ -125,10 +81,10 @@ const AdminProfile = ({ currentUser }: CurrentUserPropsType) => {
         setIsUploadingImage(true);
         try {
             const formData = new FormData();
-            formData.append("profile-picture-admin", selectedFile, selectedFile.name);
-            formData.append("folder", "profile-pictures/admins");
+            formData.append("profile-picture-seller", selectedFile, selectedFile.name);
+            formData.append("folder", "profile-pictures/sellers");
 
-            const response = await handleUploadAdminProfilePicture(currentUser!._id, formData);
+            const response = await handleUploadSellerProfilePictureByAdmin(seller!._id, formData);
             if (!response.success) {
                 toast.error("Failed", {
                     description: response.message,
@@ -153,25 +109,41 @@ const AdminProfile = ({ currentUser }: CurrentUserPropsType) => {
         }
     };
 
+    const handleClear = () => {
+        updateSellerAccountForm.reset({
+            fullName: "",
+            email: "",
+            contact: "",
+        });
+    };
+
+    const onImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+            setSelectedFile(file);
+        }
+    };
+
     return (
         <section className="w-full xl:max-w-7xl p-5">
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-5">My Profile</h1>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-5">Create Seller</h1>
             <div className="flex flex-col xl:flex-row xl:justify-evenly gap-4 justify-center">
                 <div className="flex flex-col justify-center items-center gap-4 xl:min-w-[310px]">
                     <Avatar className="h-30 w-30 lg:h-45 lg:w-45 border-2 border-gray-900 dark:border-gray-100">
-                        {preview || (currentUser && currentUser.profilePictureUrl) ? (
-                            // <AvatarImage
-                            //     src={preview ? preview : (currentUser?.profilePictureUrl || undefined)}
-                            //     alt={currentUser?.fullName || undefined}
-                            // />
+                        {preview || (seller && seller.profilePictureUrl) ? (
                             <Image
                                 fill
-                                src={preview ? preview : currentUser?.profilePictureUrl!}
-                                alt={currentUser?.fullName || "Admin"}
+                                src={preview ? preview : seller?.profilePictureUrl!}
+                                alt={seller?.fullName || "Admin"}
                             />
                         ) : (
                             <AvatarFallback className="text-6xl font-semibold text-gray-700 dark:text-gray-100">
-                                {(currentUser?.fullName || "NaN")
+                                {(seller?.fullName || "NaN")
                                     .split(" ")
                                     .map((n) => n[0])
                                     .join("")
@@ -186,7 +158,7 @@ const AdminProfile = ({ currentUser }: CurrentUserPropsType) => {
                             <Button
                                 type="button"
                                 className="bg-gray-400 dark:bg-gray-300 hover:bg-gray-500 dark:hover:bg-gray-200"
-                                disabled={isUploadingImage}
+                                disabled={isSubmitting}
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 Change Profile Picture
@@ -198,7 +170,7 @@ const AdminProfile = ({ currentUser }: CurrentUserPropsType) => {
                                 accept="image/*"
                                 onChange={onImageChange}
                                 className="hidden"
-                                disabled={isUploadingImage}
+                                disabled={isSubmitting}
                             />
 
                             {(preview && selectedFile) && (
@@ -206,10 +178,11 @@ const AdminProfile = ({ currentUser }: CurrentUserPropsType) => {
                                     type="button"
                                     variant="destructive"
                                     size="sm"
-                                    disabled={isUploadingImage}
+                                    disabled={isSubmitting}
                                     onClick={() => {
                                         setSelectedFile(null);
-                                        setPreview(currentUser?.profilePictureUrl || "");
+                                        setPreview("");
+                                        // setPreview(seller?.profilePictureUrl || "");
                                     }}
                                     className="dark:bg-red-600 hover:bg-red-700 dark:hover:bg-red-700"
                                 >
@@ -237,43 +210,18 @@ const AdminProfile = ({ currentUser }: CurrentUserPropsType) => {
                             ) : <>Select Image to Upload</>}
                         </Button>
                     </div>
-
-                    <div className="mt-auto xl:w-full xl:flex xl:items-center xl:justify-center">
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button type="button" variant="destructive" className="hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700">
-                                    <Trash2 className="h-4 w-4 mr-2" /> Delete Account
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        This action cannot be undone. This will permanently delete the user account
-                                        <strong> "{currentUser?.fullName}"</strong> and remove their data from the system.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction className="bg-red-600 hover:bg-red-700 dark:text-gray-100" onClick={() => handleDelete(currentUser!._id)}>
-                                        Delete
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    </div>
                 </div>
 
                 <div className="w-full flex-1 max-w-2xl xl:max-w-xl space-y-8 bg-white dark:bg-gray-900 border dark:border-gray-700 p-8 rounded-lg shadow-lg">
                     <form
-                        id="update-user-details-form"
-                        onSubmit={adminProfileDetailsForm.handleSubmit(onSubmit)}
-                        className="space-y-6"
+                        id="create-seller-account-by-admin-form"
+                        onSubmit={updateSellerAccountForm.handleSubmit(onSubmit)}
+                        className="space-y-10"
                     >
                         <FieldGroup>
                             <Controller
                                 name="fullName"
-                                control={adminProfileDetailsForm.control}
+                                control={updateSellerAccountForm.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor={field.name}>
@@ -295,7 +243,7 @@ const AdminProfile = ({ currentUser }: CurrentUserPropsType) => {
 
                             <Controller
                                 name="email"
-                                control={adminProfileDetailsForm.control}
+                                control={updateSellerAccountForm.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor={field.name}>
@@ -317,7 +265,7 @@ const AdminProfile = ({ currentUser }: CurrentUserPropsType) => {
 
                             <Controller
                                 name="contact"
-                                control={adminProfileDetailsForm.control}
+                                control={updateSellerAccountForm.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor={field.name}>
@@ -351,7 +299,7 @@ const AdminProfile = ({ currentUser }: CurrentUserPropsType) => {
                                     </>
                                 ) : (
                                     <>
-                                        Update Details
+                                        Submit
                                     </>
                                 )}
                             </Button>
@@ -371,4 +319,4 @@ const AdminProfile = ({ currentUser }: CurrentUserPropsType) => {
     );
 };
 
-export default AdminProfile;
+export default UpdateSeller;

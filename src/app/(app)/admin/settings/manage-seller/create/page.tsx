@@ -3,7 +3,7 @@ import React from "react";
 import { getServerSession } from "@/lib/get-server-session.ts";
 import { handleGetCurrentAdminUser } from "@/lib/actions/admin/profile-details.action.ts";
 import { notFound, redirect } from "next/navigation";
-import CreateSeller from "@/components/admin/create-seller";
+import CreateSeller from "@/components/admin/create-seller.tsx";
 
 
 const AdminCreateSellerPage = async () => {

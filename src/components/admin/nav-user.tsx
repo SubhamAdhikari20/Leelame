@@ -38,6 +38,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog.tsx";
+import Image from "next/image";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import type { CurrentUserPropsType } from "@/types/current-user.type.ts";
@@ -51,7 +52,7 @@ const NavUser = ({ currentUser }: CurrentUserPropsType) => {
     const handleLogout = async () => {
         const logoutResponse = await handleAdminLogout();
         if (!logoutResponse.success) {
-            toast.error("Failed to logout: ", {
+            toast.error("Failed to logout", {
                 description: logoutResponse.message,
             });
             return;
@@ -73,16 +74,20 @@ const NavUser = ({ currentUser }: CurrentUserPropsType) => {
                         >
                             <Avatar className="h-8 w-8 border border-gray-600 dark:border-gray-100">
                                 {currentUser && currentUser.profilePictureUrl ? (
-                                    <AvatarImage
+                                    // <AvatarImage
+                                    //     src={currentUser.profilePictureUrl}
+                                    //     alt={currentUser.fullName || "Admin"}
+                                    // />
+                                    <Image
+                                        fill
                                         src={currentUser.profilePictureUrl}
-                                        alt={currentUser.fullName ?? "Profile Picture Preview"}
+                                        alt={currentUser.fullName || "Seller"}
                                     />
                                 ) : (
                                     <AvatarFallback>
                                         {(
-                                            (currentUser && currentUser.fullName) ??
-                                            (currentUser && currentUser.username) ??
-                                            "U"
+                                            (currentUser && currentUser.fullName) ||
+                                            "NaN"
                                         )
                                             .split(" ")
                                             .map((n) => n[0])
@@ -108,16 +113,20 @@ const NavUser = ({ currentUser }: CurrentUserPropsType) => {
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <Avatar className="h-8 w-8 border border-gray-600 dark:border-gray-100">
                                     {currentUser && currentUser.profilePictureUrl ? (
-                                        <AvatarImage
+                                        // <AvatarImage
+                                        //     src={currentUser.profilePictureUrl}
+                                        //     alt={currentUser.fullName ?? "Profile Picture Preview"}
+                                        // />
+                                        <Image
+                                            fill
                                             src={currentUser.profilePictureUrl}
-                                            alt={currentUser.fullName ?? "Profile Picture Preview"}
+                                            alt={currentUser.fullName || "Seller"}
                                         />
                                     ) : (
                                         <AvatarFallback>
                                             {(
-                                                (currentUser && currentUser.fullName) ??
-                                                (currentUser && currentUser.username) ??
-                                                "U"
+                                                (currentUser && currentUser.fullName) ||
+                                                "NaN"
                                             )
                                                 .split(" ")
                                                 .map((n) => n[0])
@@ -169,7 +178,7 @@ const NavUser = ({ currentUser }: CurrentUserPropsType) => {
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                     <AlertDialogAction
-                                        className="bg-green-600 hover:bg-green-700 text-white"
+                                        className="bg-green-600! hover:bg-green-700! text-white"
                                         onClick={() => {
                                             handleLogout();
                                         }}

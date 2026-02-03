@@ -8,6 +8,7 @@ import { SidebarProvider } from "@/components/ui/sidebar.tsx";
 import { BreadcrumbProvider } from "@/components/common/breadcrumb-context.tsx";
 import SiteHeader from "@/components/common/site-header.tsx";
 import SiteFooter from "@/components/common/site-footer.tsx";
+import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 
 
 const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
@@ -32,7 +33,9 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
         notFound();
     }
 
-    const currentUser = result.data;
+    // const currentUser = result.data;
+    const currentUser = { ...result.data, profilePictureUrl: normalizeHttpUrl(result.data.profilePictureUrl) };
+    console.log(currentUser.profilePictureUrl);
 
     return (
         <SidebarProvider>

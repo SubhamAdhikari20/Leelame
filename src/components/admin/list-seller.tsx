@@ -21,16 +21,40 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog.tsx";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
+import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button.tsx";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Edit, Loader2, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { ListSellerPropsType } from "@/types/admin-props.type.ts";
-import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
+import { handleDeleteSellerAccountByAdmin } from "@/lib/actions/admin/manage-seller.action.ts";
 
 
 const ListSeller = ({ currentUser, sellers }: ListSellerPropsType) => {
     const router = useRouter();
+
+    // Handle delete˝
+    const handleDeleteSellerAccount = async (sellerId: string) => {
+        try {
+            const response = await handleDeleteSellerAccountByAdmin(sellerId);
+            if (!response.success) {
+                toast.error("Failed", {
+                    description: response.message,
+                });
+            }
+
+            toast.success("Successful", {
+                description: response.message,
+            });
+        }
+        catch (error: Error | any) {
+            console.error("Error deleting user account: ", error);
+            toast.error("Error deleting user account", {
+                description: error.message
+            });
+        }
+    };
+
     return (
         <section className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-6">
@@ -56,7 +80,7 @@ const ListSeller = ({ currentUser, sellers }: ListSellerPropsType) => {
                                 <TableHead className="text-white font-semibold text-[16px]">Name</TableHead>
                                 <TableHead className="text-white font-semibold text-[16px]">Email</TableHead>
                                 <TableHead className="text-white font-semibold text-[16px]">Contact</TableHead>
-                                <TableHead className="text-center text-white font-semibold text-[16px]">Actions</TableHead>
+                                <TableHead className="text-white font-semibold text-[16px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -66,14 +90,19 @@ const ListSeller = ({ currentUser, sellers }: ListSellerPropsType) => {
                                     <TableCell>
                                         <Avatar className="h-10 w-10 border border-gray-600 dark:border-gray-100">
                                             {seller.profilePictureUrl ? (
-                                                <AvatarImage
-                                                    src={seller.profilePictureUrl || undefined}
-                                                    // src={normalizeHttpUrl(seller.profilePictureUrl) || undefined}
-                                                    alt={seller.fullName || undefined}
+                                                // <AvatarImage
+                                                //     src={seller.profilePictureUrl || undefined}
+                                                //     alt={seller.fullName || undefined}
+                                                // />
+                                                <Image
+                                                    fill
+                                                    src={seller.profilePictureUrl}
+                                                    alt={seller.fullName || "Seller"}
                                                 />
+
                                             ) : (
                                                 <AvatarFallback>
-                                                    {(seller?.fullName || "NA")
+                                                    {(seller?.fullName || "NaN")
                                                         .split(" ")
                                                         .map((n) => n[0])
                                                         .join("")
@@ -86,12 +115,20 @@ const ListSeller = ({ currentUser, sellers }: ListSellerPropsType) => {
                                     <TableCell>{seller.fullName}</TableCell>
                                     <TableCell>{seller.email}</TableCell>
                                     <TableCell>{seller.contact}</TableCell>
-                                    <TableCell className="text-center">
+                                    <TableCell className="text-center flex gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="hover:bg-green-600 hover:text-white border-green-500 text-green-600 dark:text-white"
+                                            onClick={() => router.push(`/admin/settings/manage-seller/update/${seller._id}`)}
+                                        >
+                                            <Edit className="h-4 w-4" />
+                                        </Button>
+
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <Button variant="destructive" size="sm">
+                                                <Button size="sm" className="bg-red-600 hover:bg-red-700 dark:text-gray-100">
                                                     <Trash2 className="h-4 w-4" />
-                                                    <span className="sr-only md:not-sr-only md:ml-2">Delete</span>
                                                 </Button>
                                             </AlertDialogTrigger>
                                             <AlertDialogContent>
@@ -104,8 +141,8 @@ const ListSeller = ({ currentUser, sellers }: ListSellerPropsType) => {
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
                                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction >
-                                                        Confirm Delete
+                                                    <AlertDialogAction className="bg-red-600 hover:bg-red-700 dark:text-gray-100" onClick={() => handleDeleteSellerAccount(seller._id)}>
+                                                        Delete
                                                     </AlertDialogAction>
                                                 </AlertDialogFooter>
                                             </AlertDialogContent>

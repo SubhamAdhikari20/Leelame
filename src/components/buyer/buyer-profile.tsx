@@ -184,7 +184,8 @@ const BuyerProfile = ({ currentUser }: CurrentUserPropsType) => {
         setIsUploadingImage(true);
         try {
             const formData = new FormData();
-            formData.append("profilePicture", selectedFile);
+            formData.append("profile-picture-buyer", selectedFile, selectedFile.name);
+            formData.append("folder", "profile-pictures/buyers");
 
             const response = await handleUploadBuyerProfilePicture(currentUser!._id, formData);
             if (!response.success) {

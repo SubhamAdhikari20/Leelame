@@ -1,6 +1,6 @@
 // src/lib/actions/admin/profile-details.action.ts
 "use server";
-import { deleteAdminAccount, updateAdminProfileDetails, getCurrentAdminUser, adminLogout } from "@/lib/api/admin/profile-details.api.ts";
+import { deleteAdminAccount, updateAdminProfileDetails, getCurrentAdminUser, adminLogout, uploadAdminProfilePicture } from "@/lib/api/admin/profile-details.api.ts";
 import { clearAuthCookies } from "@/lib/cookie.ts";
 import type { UpdateAdminProfileDetailsSchemaType } from "@/schemas/admin/update-profile-details.schema.ts";
 
@@ -30,7 +30,7 @@ export const handleGetCurrentAdminUser = async (userId: string) => {
 };
 
 // Update Profile Details Handler
-export const handleAdminProfileDetails = async (userId: string, adminProfileData: UpdateAdminProfileDetailsSchemaType) => {
+export const handleUpdateAdminProfileDetails = async (userId: string, adminProfileData: UpdateAdminProfileDetailsSchemaType) => {
     try {
         const result = await updateAdminProfileDetails(userId, adminProfileData);
         if (!result.success) {
@@ -52,6 +52,31 @@ export const handleAdminProfileDetails = async (userId: string, adminProfileData
         };
     }
 };
+
+// Upload Admin Profile Picture Handler
+export const handleUploadAdminProfilePicture = async (userId: string, formData: FormData) => {
+    try {
+        const result = await uploadAdminProfilePicture(userId, formData);
+        if (!result.success) {
+            return {
+                success: false,
+                message: result.message || "Failed to upload admin profile picture!"
+            };
+        }
+        return {
+            success: true,
+            message: result.message || "Admin profile picture uploaded successfully.",
+            data: result.data
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred during admin profile picture upload."
+        };
+    }
+};
+
 
 // Delete Admin Account Handler
 export const handleDeleteAdminAccount = async (userId: string) => {

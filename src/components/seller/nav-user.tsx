@@ -39,26 +39,25 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog.tsx";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
 import { toast } from "sonner";
-import { CurrentUserProps } from "@/types/current-user.type.ts";
+import type { CurrentUserPropsType } from "@/types/current-user.type.ts";
 import { handleSellerLogout } from "@/lib/actions/auth/seller-auth.action.ts";
 
 
-const NavUser = ({ currentUser }: CurrentUserProps) => {
+const NavUser = ({ currentUser }: CurrentUserPropsType) => {
     const router = useRouter();
     const { isMobile } = useSidebar();
 
     const handleLogout = async () => {
         const logoutResponse = await handleSellerLogout();
         if (!logoutResponse.success) {
-            toast.error("Failed to logout.", {
+            toast.error("Failed to logout", {
                 description: logoutResponse.message,
             });
             return;
         }
-        await signOut({ redirect: false });
         router.replace("/become-seller");
         toast.success("Logout Successful.", {
             description: logoutResponse.message
@@ -111,9 +110,14 @@ const NavUser = ({ currentUser }: CurrentUserProps) => {
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <Avatar className="h-8 w-8 rounded-lg">
                                     {currentUser && currentUser.profilePictureUrl ? (
-                                        <AvatarImage
+                                        // <AvatarImage
+                                        //     src={currentUser.profilePictureUrl}
+                                        //     alt={currentUser.fullName ?? "Profile Picture Preview"}
+                                        // />
+                                        <Image
+                                            fill
                                             src={currentUser.profilePictureUrl}
-                                            alt={currentUser.fullName ?? "Profile Picture Preview"}
+                                            alt={currentUser.fullName || "Seller"}
                                         />
                                     ) : (
                                         <AvatarFallback>
@@ -171,7 +175,7 @@ const NavUser = ({ currentUser }: CurrentUserProps) => {
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                     <AlertDialogAction
-                                        className="bg-green-600 hover:bg-green-700 text-white"
+                                        className="bg-green-600! hover:bg-green-700! text-white"
                                         onClick={() => {
                                             handleLogout();
                                         }}
