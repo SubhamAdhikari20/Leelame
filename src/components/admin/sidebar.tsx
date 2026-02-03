@@ -26,7 +26,7 @@ import NavUser from "@/components/admin/nav-user.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import { IconInnerShadowTop } from "@tabler/icons-react";
 import Link from "next/link";
-import { CurrentUserProps } from "@/types/current-user.type";
+import type { CurrentUserPropsType } from "@/types/current-user.type";
 
 
 // Menu items
@@ -63,11 +63,11 @@ const items2 = [
         title: "Settings",
         // url: "/settings",
         icon: Settings,
-        isActive: true,
+        isActive: false,
         items: [
             {
                 title: "Seller Management",
-                url: "/admin/settings/manage-seller",
+                url: "/admin/settings/manage-seller/list",
             },
             {
                 title: "Starred",
@@ -81,7 +81,7 @@ const items2 = [
     },
 ];
 
-const AdminSidebar = ({ currentUser, ...props }: CurrentUserProps & React.ComponentProps<typeof Sidebar>) => {
+const AdminSidebar = ({ currentUser, ...props }: CurrentUserPropsType & React.ComponentProps<typeof Sidebar>) => {
     return (
         <div>
             <Sidebar collapsible="icon" {...props}>

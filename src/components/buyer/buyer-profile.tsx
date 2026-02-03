@@ -29,14 +29,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDebounceCallback } from "usehooks-ts";
 import axios, { AxiosError } from "axios";
-import { UpdateProfileDetailsSchema } from "@/schemas/buyer/update-profile-details.schema.ts";
-import { handleGetCurrentBuyerUser, handleUploadBuyerProfilePicture } from "@/lib/actions/buyer/profile-details.action.ts";
-import type { UpdateProfileDetailsSchemaType } from "@/schemas/buyer/update-profile-details.schema.ts";
-import type { CurrentUser, CurrentUserProps } from "@/types/current-user.type.ts";
+import { UpdateProfileDetailsSchema, type UpdateProfileDetailsSchemaType } from "@/schemas/buyer/update-profile-details.schema.ts";
+import type { CurrentUserType, CurrentUserPropsType } from "@/types/current-user.type.ts";
 import type { BuyerApiResponseType } from "@/types/api-response.type.ts";
+import { handleGetCurrentBuyerUser, handleUploadBuyerProfilePicture } from "@/lib/actions/buyer/profile-details.action.ts";
 
 
-const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
+const BuyerProfile = ({ currentUser }: CurrentUserPropsType) => {
     const router = useRouter();
 
     const [preview, setPreview] = useState("");
@@ -59,7 +58,7 @@ const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
                 });
                 return;
             }
-            currentUser = result.data as CurrentUser;
+            currentUser = result.data as CurrentUserType;
             // console.log("User data:", res.data.user);
         }
         catch (error: Error | any) {
@@ -185,7 +184,7 @@ const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
         setIsUploadingImage(true);
         try {
             const formData = new FormData();
-            formData.append("profile-picture", selectedFile);
+            formData.append("profilePicture", selectedFile);
 
             const response = await handleUploadBuyerProfilePicture(currentUser!._id, formData);
             if (!response.success) {
@@ -210,7 +209,7 @@ const BuyerProfile = ({ currentUser }: CurrentUserProps) => {
         finally {
             setIsUploadingImage(false);
         }
-    }
+    };
 
     return (
         <div className="w-full xl:max-w-7xl bg-[#d3ecdc] dark:bg-gray-900 border rounded-xl shadow-lg p-5">

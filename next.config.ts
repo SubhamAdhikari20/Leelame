@@ -11,14 +11,14 @@ const nextConfig: NextConfig = {
     dangerouslyAllowLocalIP: true,
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '5050',
-        pathname: '/uploads/**',
+        protocol: "http",
+        hostname: "localhost",
+        port: "5050",
+        pathname: "/uploads/**",
       }, // other external image sources
       {
-        protocol: 'https',
-        hostname: 'unsplash.com',
+        protocol: "https",
+        hostname: "unsplash.com",
       }
     ]
   }

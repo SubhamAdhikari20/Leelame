@@ -41,7 +41,11 @@ export const API = {
             GET_CURRENT_ADMIN_USER: "/api/users/admin",
             UPDATE_PROFILE_DETAILS: "/api/users/admin/update-profile-details",
             DELETE_ACCOUNT: "/api/users/admin/delete-account",
-            UPLOAD_PROFILE_PICTURE: "/api/users/admin/upload-profile-picture"
+            UPLOAD_PROFILE_PICTURE: "/api/users/admin/upload-profile-picture",
+            GET_ALL_SELLERS: "/api/users/admin/get-all-sellers",
+            CREATE_SELLER_ACCOUNT: "/api/users/admin/create-seller-account",
+            UPDATE_SELLER_DETAILS: "/api/users/admin/UPDATE-seller-details",
+            DELETE_SELLER_ACCOUNT: "/api/users/admin/delete-seller-account",
         }
     }
 };

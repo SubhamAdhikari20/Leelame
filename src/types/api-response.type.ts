@@ -3,7 +3,7 @@ import { z } from "zod";
 
 
 // ---------------------------------- Buyer Response ---------------------------------
-const BuyerApiResponse = z.object({
+export const BuyerApiResponse = z.object({
     _id: z.string(),
     email: z.email(),
     baseUserId: z.string(),
@@ -26,7 +26,7 @@ export type BuyerApiResponseType = {
     user?: z.infer<typeof BuyerApiResponse> | null;
 };
 
-const UploadImageBuyerApiResponse = z.object({
+export const UploadImageBuyerApiResponse = z.object({
     imageUrl: z.url()
 });
 
@@ -38,7 +38,7 @@ export type UploadImageBuyerApiResponseType = {
 
 
 // ---------------------------------- Seller Response ---------------------------------
-const SellerApiResponse = z.object({
+export const SellerApiResponse = z.object({
     _id: z.string(),
     email: z.email(),
     role: z.string(),
@@ -60,7 +60,7 @@ export type SellerApiResponseType = {
     user?: z.infer<typeof SellerApiResponse> | null;
 };
 
-const UploadImageSellerApiResponse = z.object({
+export const UploadImageSellerApiResponse = z.object({
     imageUrl: z.url()
 });
 
@@ -72,7 +72,7 @@ export type UploadImageSellerApiResponseType = {
 
 
 // ---------------------------------- Admin Response ---------------------------------
-const AdminApiResponse = z.object({
+export const AdminApiResponse = z.object({
     _id: z.string(),
     email: z.email(),
     role: z.string(),
@@ -93,7 +93,7 @@ export type AdminApiResponseType = {
     user?: z.infer<typeof AdminApiResponse> | null;
 };
 
-const UploadImageAdminApiResponse = z.object({
+export const UploadImageAdminApiResponse = z.object({
     imageUrl: z.url()
 });
 
@@ -101,4 +101,10 @@ export type UploadImageAdminApiResponseType = {
     success: boolean;
     message: string;
     data?: z.infer<typeof UploadImageAdminApiResponse> | null;
+};
+
+export type AllSellerApiResposeType = {
+    success: boolean;
+    message: string;
+    users?: z.infer<typeof SellerApiResponse>[] | null;
 };

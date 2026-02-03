@@ -2,7 +2,7 @@
 
 type UserRole = "buyer" | "seller" | "admin";
 
-export type CurrentUser = {
+export type CurrentUserType = {
     _id: string;
     email: string;
     role: UserRole | string;
@@ -11,19 +11,19 @@ export type CurrentUser = {
     fullName?: string | null;
     username?: string | null;
     contact?: string | null;
+    profilePictureUrl?: string | null;
     bio?: string | null;
     isPermanentlyBanned?: boolean | null;
-    profilePictureUrl?: string | null;
     createdAt?: Date | null;
     updatedAt?: Date | null;
 }
 
-export type CurrentUserProps = {
-    currentUser?: CurrentUser | null;
+export type CurrentUserPropsType = {
+    currentUser?: CurrentUserType | null;
 };
 
 export type CurrentUserResponseType = {
     success: boolean;
     message: string;
-    user?: CurrentUser | null;
+    user?: CurrentUserType | null;
 };

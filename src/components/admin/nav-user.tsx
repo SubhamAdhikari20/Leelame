@@ -40,11 +40,11 @@ import {
 } from "@/components/ui/alert-dialog.tsx";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { CurrentUserProps } from "@/types/current-user.type.ts";
+import type { CurrentUserPropsType } from "@/types/current-user.type.ts";
 import { handleAdminLogout } from "@/lib/actions/admin/profile-details.action.ts";
 
 
-const NavUser = ({ currentUser }: CurrentUserProps) => {
+const NavUser = ({ currentUser }: CurrentUserPropsType) => {
     const router = useRouter();
     const { isMobile } = useSidebar();
 
@@ -71,7 +71,7 @@ const NavUser = ({ currentUser }: CurrentUserProps) => {
                             size="lg"
                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer mt-auto px-3 py-2"
                         >
-                            <Avatar className="h-8 w-8 rounded-lg">
+                            <Avatar className="h-8 w-8 border border-gray-600 dark:border-gray-100">
                                 {currentUser && currentUser.profilePictureUrl ? (
                                     <AvatarImage
                                         src={currentUser.profilePictureUrl}
@@ -106,27 +106,25 @@ const NavUser = ({ currentUser }: CurrentUserProps) => {
                     >
                         <DropdownMenuLabel className="p-0 font-normal">
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                                <Avatar className="h-8 w-8 rounded-lg">
-                                    <Avatar className="h-8 w-8 rounded-lg">
-                                        {currentUser && currentUser.profilePictureUrl ? (
-                                            <AvatarImage
-                                                src={currentUser.profilePictureUrl}
-                                                alt={currentUser.fullName ?? "Profile Picture Preview"}
-                                            />
-                                        ) : (
-                                            <AvatarFallback>
-                                                {(
-                                                    (currentUser && currentUser.fullName) ??
-                                                    (currentUser && currentUser.username) ??
-                                                    "U"
-                                                )
-                                                    .split(" ")
-                                                    .map((n) => n[0])
-                                                    .join("")
-                                                    .toUpperCase()}
-                                            </AvatarFallback>
-                                        )}
-                                    </Avatar>
+                                <Avatar className="h-8 w-8 border border-gray-600 dark:border-gray-100">
+                                    {currentUser && currentUser.profilePictureUrl ? (
+                                        <AvatarImage
+                                            src={currentUser.profilePictureUrl}
+                                            alt={currentUser.fullName ?? "Profile Picture Preview"}
+                                        />
+                                    ) : (
+                                        <AvatarFallback>
+                                            {(
+                                                (currentUser && currentUser.fullName) ??
+                                                (currentUser && currentUser.username) ??
+                                                "U"
+                                            )
+                                                .split(" ")
+                                                .map((n) => n[0])
+                                                .join("")
+                                                .toUpperCase()}
+                                        </AvatarFallback>
+                                    )}
                                 </Avatar>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
                                     <span className="truncate font-medium">{currentUser

@@ -1,7 +1,7 @@
 // src/lib/actions/admin/profile-details.action.ts
 "use server";
 import { deleteAdminAccount, updateAdminProfileDetails, getCurrentAdminUser, adminLogout } from "@/lib/api/admin/profile-details.api.ts";
-import { clearAuthCookies } from "@/lib/cookie";
+import { clearAuthCookies } from "@/lib/cookie.ts";
 import type { UpdateAdminProfileDetailsSchemaType } from "@/schemas/admin/update-profile-details.schema.ts";
 
 

@@ -1,8 +1,8 @@
 // src/lib/api/admin/profile-details.api.ts
 import axios, { AxiosErrorType } from "@/lib/api/axios.ts";
 import { API } from "@/lib/api/endpoints.ts";
-import { AdminApiResponseType } from "@/types/api-response.type.ts";
-import { UpdateAdminProfileDetailsSchemaType } from "@/schemas/admin/update-profile-details.schema.ts";
+import type { AdminApiResponseType } from "@/types/api-response.type.ts";
+import type { UpdateAdminProfileDetailsSchemaType } from "@/schemas/admin/update-profile-details.schema.ts";
 
 
 // Get Current Admin User Axios
@@ -15,7 +15,7 @@ export const getCurrentAdminUser = async (userId: string) => {
         const axiosError = error as AxiosErrorType;
         throw new Error(axiosError.response?.data.message || "Failed to fetch current admin user!");
     }
-}
+};
 
 // Update Profile Details Axios
 export const updateAdminProfileDetails = async (userId: string, adminProfileData: UpdateAdminProfileDetailsSchemaType) => {

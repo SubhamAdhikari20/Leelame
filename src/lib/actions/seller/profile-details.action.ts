@@ -29,7 +29,7 @@ export const handleGetCurrentSellerUser = async (userId: string) => {
 };
 
 // Update Profile Details Handler
-export const handleSellerProfileDetails = async (userId: string, sellerProfileData: UpdateProfileDetailsSchemaType) => {
+export const handleUpdateSellerProfileDetails = async (userId: string, sellerProfileData: UpdateProfileDetailsSchemaType) => {
     try {
         const result = await updateSellerProfileDetails(userId, sellerProfileData);
         if (!result.success) {

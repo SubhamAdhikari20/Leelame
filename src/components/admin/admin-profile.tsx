@@ -26,13 +26,13 @@ import { Loader2, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
 import { useForm, Controller } from "react-hook-form";
 import { handleDeleteAdminAccount, handleAdminProfileDetails } from "@/lib/actions/admin/profile-details.action.ts";
-import { UpdateAdminProfileDetailsSchema, UpdateAdminProfileDetailsSchemaType } from "@/schemas/admin/update-profile-details.schema.ts";
+import { UpdateAdminProfileDetailsSchema, type UpdateAdminProfileDetailsSchemaType } from "@/schemas/admin/update-profile-details.schema.ts";
 import axios from "axios";
 import type { BuyerApiResponseType } from "@/types/api-response.type.ts";
-import type { CurrentUserProps } from "@/types/current-user.type.ts";
+import type { CurrentUserPropsType } from "@/types/current-user.type.ts";
 
 
-const AdminProfile = ({ currentUser }: CurrentUserProps) => {
+const AdminProfile = ({ currentUser }: CurrentUserPropsType) => {
     const [preview, setPreview] = useState("");
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
