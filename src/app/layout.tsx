@@ -7,8 +7,6 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ThemeProvider } from "./context/theme-provider.tsx";
 import ThemedToaster from "@/components/themed-toaster.tsx";
 import AuthProvider from "./context/auth-provider.tsx";
-// import { getServerSession } from "next-auth";
-// import { authOptions } from "./api/auth/[...nextauth]/options.ts";
 // import KnockClientWrapper from '@/components/wrappers/knock-client-wrapper.tsx';
 
 
@@ -32,8 +30,6 @@ const RootLayout = async ({
 }: Readonly<{
     children: React.ReactNode;
 }>) => {
-    // const session = await getServerSession(authOptions);
-
     const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (!googleClientId) {
         console.error("Missing NEXT_PUBLIC_GOOGLE_CLIENT_ID in environment variables.");

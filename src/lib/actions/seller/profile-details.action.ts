@@ -1,6 +1,6 @@
 // src/lib/actions/seller/profile-details.action.ts
 "use server";
-import { deleteSellerAccount, updateSellerProfileDetails, getCurrentSellerUser } from "@/lib/api/seller/profile-details.api.ts";
+import { deleteSellerAccount, updateSellerProfileDetails, getCurrentSellerUser, uploadSellerProfilePicture } from "@/lib/api/seller/profile-details.api.ts";
 import type { UpdateProfileDetailsSchemaType } from "@/schemas/seller/update-profile-details.schema.ts";
 
 
@@ -48,6 +48,30 @@ export const handleUpdateSellerProfileDetails = async (userId: string, sellerPro
         return {
             success: false,
             message: error.message || "An unexpected error occurred during seller profile update."
+        };
+    }
+};
+
+// Upload Seller Profile Picture Handler
+export const handleUploadSellerProfilePicture = async (userId: string, formData: FormData) => {
+    try {
+        const result = await uploadSellerProfilePicture(userId, formData);
+        if (!result.success) {
+            return {
+                success: false,
+                message: result.message || "Failed to upload seller profile picture!"
+            };
+        }
+        return {
+            success: true,
+            message: result.message || "Seller profile picture uploaded successfully.",
+            data: result.data
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred during seller profile picture upload."
         };
     }
 };

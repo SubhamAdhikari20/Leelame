@@ -25,14 +25,13 @@ import { toast } from "sonner";
 import { Loader2, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
 import { useForm, Controller } from "react-hook-form";
-import { handleDeleteSellerAccount, handleSellerProfileDetails } from "@/lib/actions/seller/profile-details.action.ts";
+import { handleDeleteSellerAccount, handleUpdateSellerProfileDetails, handleUploadSellerProfilePicture } from "@/lib/actions/seller/profile-details.action.ts";
 import { UpdateProfileDetailsSchema, UpdateProfileDetailsSchemaType } from "@/schemas/seller/update-profile-details.schema.ts";
-import axios from "axios";
-import type { BuyerApiResponseType } from "@/types/api-response.type.ts";
-import type { CurrentUserProps } from "@/types/current-user.type.ts";
+import type { CurrentUserPropsType } from "@/types/current-user.type.ts";
+import Image from "next/image";
 
 
-const SellerProfile = ({ currentUser }: CurrentUserProps) => {
+const SellerProfile = ({ currentUser }: CurrentUserPropsType) => {
     const [preview, setPreview] = useState("");
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -65,7 +64,7 @@ const SellerProfile = ({ currentUser }: CurrentUserProps) => {
     const onSubmit = async (data: UpdateProfileDetailsSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await handleSellerProfileDetails(currentUser?._id.toString() ?? "", data);
+            const response = await handleUpdateSellerProfileDetails(currentUser?._id.toString() ?? "", data);
             if (!response.success) {
                 toast.error("Failed", {
                     description: response.message
@@ -127,20 +126,21 @@ const SellerProfile = ({ currentUser }: CurrentUserProps) => {
 
         try {
             const formData = new FormData();
-            formData.append("profilePicture", selectedFile);
+            formData.append("profile-picture-seller", selectedFile, selectedFile.name);
+            formData.append("folder", "profile-pictures/sellers");
 
-            const response = await axios.put<BuyerApiResponseType>("",);
-            if (!response.data.success) {
+            const response = await handleUploadSellerProfilePicture(currentUser!._id, formData);
+            if (!response.success) {
                 toast.error("Failed", {
-                    description: response.data.message,
+                    description: response.message,
                 });
                 return;
             }
 
             toast.success("Successful", {
-                description: response.data.message,
+                description: response.message,
             });
-            setPreview("");
+            // setPreview("");
             setSelectedFile(null);
         }
         catch (error: Error | any) {
@@ -160,18 +160,22 @@ const SellerProfile = ({ currentUser }: CurrentUserProps) => {
             <div className="flex flex-col xl:flex-row xl:justify-evenly gap-4 justify-center">
                 <div className="flex flex-col justify-center items-center gap-4 xl:min-w-[310px]">
                     <Avatar className="h-30 w-30 lg:h-45 lg:w-45 border-2 border-gray-900 dark:border-gray-100">
-                        <AvatarImage
-                            src={preview ? preview : (currentUser?.profilePictureUrl || undefined)}
-                            alt={currentUser?.fullName || currentUser?.username || "Seller"}
-                        />
-                        <AvatarFallback className="text-6xl font-semibold text-gray-700 dark:text-gray-100">
-                            {(currentUser?.fullName || currentUser?.username || "O")
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")
-                                .slice(0, 2)
-                                .toUpperCase()}
-                        </AvatarFallback>
+                        {preview || (currentUser && currentUser.profilePictureUrl) ? (
+                            <Image
+                                fill
+                                src={preview ? preview : currentUser?.profilePictureUrl!}
+                                alt={currentUser?.fullName || "Admin"}
+                            />
+                        ) : (
+                            <AvatarFallback className="text-6xl font-semibold text-gray-700 dark:text-gray-100">
+                                {(currentUser?.fullName || "NaN")
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")
+                                    .slice(0, 2)
+                                    .toUpperCase()}
+                            </AvatarFallback>
+                        )}
                     </Avatar>
 
                     <div className="flex flex-col items-center space-y-2">

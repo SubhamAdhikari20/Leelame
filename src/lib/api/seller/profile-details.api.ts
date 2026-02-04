@@ -1,8 +1,8 @@
 // src/lib/api/seller/profile-details.api.ts
 import axios, { AxiosErrorType } from "@/lib/api/axios.ts";
 import { API } from "@/lib/api/endpoints.ts";
-import { SellerApiResponseType } from "@/types/api-response.type.ts";
-import { UpdateProfileDetailsSchemaType } from "@/schemas/seller/update-profile-details.schema.ts";
+import type { SellerApiResponseType, UploadImageSellerApiResponseType } from "@/types/api-response.type.ts";
+import type { UpdateProfileDetailsSchemaType } from "@/schemas/seller/update-profile-details.schema.ts";
 
 
 // Get Current Seller User Axios
@@ -29,6 +29,22 @@ export const updateSellerProfileDetails = async (userId: string, sellerProfileDa
     }
 };
 
+// Upload Seller Profile Picture Axios
+export const uploadSellerProfilePicture = async (userId: string, formData: FormData) => {
+    try {
+        const response = await axios.put<UploadImageSellerApiResponseType>(`${API.AUTH.SELLER.UPLOAD_PROFILE_PICTURE}/${userId}`, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data"
+            },
+        });
+        return response.data;
+    }
+    catch (error: Error | any) {
+        const axiosError = error as AxiosErrorType;
+        throw new Error(axiosError.response?.data.message || "Failed to upload seller profile picture!");
+    }
+};
+
 // Delete Seller Account Axios
 export const deleteSellerAccount = async (userId: string) => {
     try {
@@ -38,17 +54,5 @@ export const deleteSellerAccount = async (userId: string) => {
     catch (error: Error | any) {
         const axiosError = error as AxiosErrorType;
         throw new Error(axiosError.response?.data.message || "Failed to delete seller account!");
-    }
-};
-
-// Upload Seller Profile Picture Axios
-export const uploadSellerProfilePicture = async (formData: FormData) => {
-    try {
-        const response = await axios.put<SellerApiResponseType>(API.AUTH.SELLER.UPLOAD_PROFILE_PICTURE, formData);
-        return response.data;
-    }
-    catch (error: Error | any) {
-        const axiosError = error as AxiosErrorType;
-        throw new Error(axiosError.response?.data.message || "Failed to upload seller profile picture!");
     }
 };

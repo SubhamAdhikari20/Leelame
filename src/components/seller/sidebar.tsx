@@ -18,7 +18,7 @@ import NavUser from "@/components/seller/nav-user.tsx";
 import Link from "next/link";
 import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
 import { IconInnerShadowTop } from "@tabler/icons-react";
-import { CurrentUserProps } from "@/types/current-user.type";
+import { CurrentUserPropsType } from "@/types/current-user.type";
 
 
 // Menu items
@@ -51,7 +51,7 @@ const items = [
 ];
 
 
-const SellerSidebar = ({ currentUser, ...props }: CurrentUserProps & React.ComponentProps<typeof Sidebar>) => {
+const SellerSidebar = ({ currentUser, ...props }: CurrentUserPropsType & React.ComponentProps<typeof Sidebar>) => {
     return (
         <div>
             <Sidebar collapsible="icon" {...props}>

@@ -139,7 +139,7 @@ const AdminProfile = ({ currentUser }: CurrentUserPropsType) => {
             toast.success("Successful", {
                 description: response.message,
             });
-            setPreview("");
+            // setPreview("");
             setSelectedFile(null);
         }
         catch (error: Error | any) {

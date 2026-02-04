@@ -1,9 +1,10 @@
 // src/app/context/auth-provider.tsx
-"use client"
+"use client";
 import React from "react";;
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { clearAuthCookies, getAuthToken, getUserData } from "@/lib/cookie";
 import { useRouter } from "next/navigation";
+
 
 interface AuthContextProps {
     isAuthenticated: boolean;

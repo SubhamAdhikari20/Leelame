@@ -81,7 +81,7 @@ const NavUser = ({ currentUser }: CurrentUserPropsType) => {
                                     <Image
                                         fill
                                         src={currentUser.profilePictureUrl}
-                                        alt={currentUser.fullName || "Seller"}
+                                        alt={currentUser.fullName || "Admin"}
                                     />
                                 ) : (
                                     <AvatarFallback>

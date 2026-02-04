@@ -4,6 +4,7 @@ import { getServerSession } from "@/lib/get-server-session.ts";
 import { handleGetCurrentSellerUser } from "@/lib/actions/seller/profile-details.action.ts";
 import { notFound, redirect } from "next/navigation";
 import SellerProfile from "@/components/seller/seller-profile.tsx";
+import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 
 
 const SellerProfilePage = async () => {
@@ -28,7 +29,7 @@ const SellerProfilePage = async () => {
         notFound();
     }
 
-    const currentUser = result.data;
+   const currentUser = { ...result.data, profilePictureUrl: normalizeHttpUrl(result.data.profilePictureUrl) };
 
     return (
         <>

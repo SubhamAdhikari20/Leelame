@@ -73,18 +73,18 @@ const NavUser = ({ currentUser }: CurrentUserPropsType) => {
                             size="lg"
                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer mt-auto px-3 py-2"
                         >
-                            <Avatar className="h-8 w-8 rounded-lg">
+                            <Avatar className="h-8 w-8 border border-gray-600 dark:border-gray-100">
                                 {currentUser && currentUser.profilePictureUrl ? (
-                                    <AvatarImage
+                                    <Image
+                                        fill
                                         src={currentUser.profilePictureUrl}
-                                        alt={currentUser.fullName ?? "Profile Picture Preview"}
+                                        alt={currentUser.fullName || "Seller"}
                                     />
                                 ) : (
                                     <AvatarFallback>
                                         {(
-                                            (currentUser && currentUser.fullName) ??
-                                            (currentUser && currentUser.username) ??
-                                            "U"
+                                            (currentUser && currentUser.fullName) ||
+                                            "NaN"
                                         )
                                             .split(" ")
                                             .map((n) => n[0])
@@ -108,12 +108,8 @@ const NavUser = ({ currentUser }: CurrentUserPropsType) => {
                     >
                         <DropdownMenuLabel className="p-0 font-normal">
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                                <Avatar className="h-8 w-8 rounded-lg">
+                                <Avatar className="h-8 w-8 border border-gray-600 dark:border-gray-100">
                                     {currentUser && currentUser.profilePictureUrl ? (
-                                        // <AvatarImage
-                                        //     src={currentUser.profilePictureUrl}
-                                        //     alt={currentUser.fullName ?? "Profile Picture Preview"}
-                                        // />
                                         <Image
                                             fill
                                             src={currentUser.profilePictureUrl}

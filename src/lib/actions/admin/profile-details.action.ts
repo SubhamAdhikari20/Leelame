@@ -77,7 +77,6 @@ export const handleUploadAdminProfilePicture = async (userId: string, formData: 
     }
 };
 
-
 // Delete Admin Account Handler
 export const handleDeleteAdminAccount = async (userId: string) => {
     try {

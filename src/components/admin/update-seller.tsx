@@ -44,6 +44,7 @@ const UpdateSeller = ({ currentUser, seller }: UpdateSellerProfileDetailsPropsTy
         });
 
         setPreview("");
+        setSelectedFile(null);
     }, [seller, updateSellerAccountForm]);
 
     const onSubmit = async (data: UpdateSellerAccountSchemaType) => {
@@ -95,7 +96,7 @@ const UpdateSeller = ({ currentUser, seller }: UpdateSellerProfileDetailsPropsTy
             toast.success("Successful", {
                 description: response.message,
             });
-            setPreview("");
+            // setPreview("");
             setSelectedFile(null);
         }
         catch (error: Error | any) {
