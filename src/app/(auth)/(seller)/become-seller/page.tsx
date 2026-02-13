@@ -36,17 +36,12 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs.t
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { SellerSignUpSchema } from "@/schemas/auth/seller/sign-up.schema.ts";
-import { SellerLoginSchema } from "@/schemas/auth/seller/login.schema.ts";
-import { SellerVerifyAccountRegistrationSchema } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
-import { SellerForgotPasswordSchema } from "@/schemas/auth/seller/forgot-password.schema.ts";
-import { SellerResetPasswordSchema } from "@/schemas/auth/seller/reset-password.schema.ts";
+import { SellerSignUpSchema, type SellerSignUpSchemaType } from "@/schemas/auth/seller/sign-up.schema.ts";
+import { SellerLoginSchema, type SellerLoginSchemaType } from "@/schemas/auth/seller/login.schema.ts";
+import { SellerVerifyAccountRegistrationSchema, type SellerVerifyAccountRegistrationSchemaType } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
+import { SellerForgotPasswordSchema, type SellerForgotPasswordSchemaType } from "@/schemas/auth/seller/forgot-password.schema.ts";
+import { SellerResetPasswordSchema, type SellerResetPasswordSchemaType } from "@/schemas/auth/seller/reset-password.schema.ts";
 import { handleSellerForgotPassword, handleSellerLogin, handleSellerResetPassword, handleSellerSendAccountRegistrationEmail, handleSellerSignUp, handleSellerVerifyAccountRegistration } from "@/lib/actions/auth/seller-auth.action.ts";
-import type { SellerSignUpSchemaType } from "@/schemas/auth/seller/sign-up.schema.ts";
-import type { SellerLoginSchemaType } from "@/schemas/auth/seller/login.schema.ts";
-import type { SellerVerifyAccountRegistrationSchemaType } from "@/schemas/auth/seller/verify-account-registration.schema.ts";
-import type { SellerForgotPasswordSchemaType } from "@/schemas/auth/seller/forgot-password.schema.ts";
-import type { SellerResetPasswordSchemaType } from "@/schemas/auth/seller/reset-password.schema.ts";
 
 
 const VALID_TABS = new Set([
@@ -70,7 +65,7 @@ const clearPersisted = () => {
 const BecomeSeller = () => {
     const router = useRouter();
 
-    const [tab, setTab] = useState<string>("sign-up");
+    const [tab, setTab] = useState<string>("login");
     const [email, setEmail] = useState<string>("");
     const [isMounted, setIsMounted] = useState(false);
 
@@ -432,118 +427,12 @@ const BecomeSeller = () => {
                     {/* Right form section */}
                     <CardContent className="flex flex-col justify-center p-8">
                         {/* Sign Up and Login */}
-                        {(tab === "sign-up" || tab === "login") && (
+                        {(tab === "login" || tab === "sign-up") && (
                             <Tabs value={tab} onValueChange={setTabSafe}>
                                 <TabsList className="grid grid-cols-2 mb-6 w-full">
-                                    <TabsTrigger value="sign-up">Sign up</TabsTrigger>
                                     <TabsTrigger value="login">Login</TabsTrigger>
+                                    <TabsTrigger value="sign-up">Sign up</TabsTrigger>
                                 </TabsList>
-
-                                {/* Sign Up */}
-                                <TabsContent value="sign-up">
-                                    <CardHeader className="p-0 mb-4">
-                                        <CardTitle>Sign up as a Leelame Seller</CardTitle>
-                                        <CardDescription>
-                                            Already have an account?{" "}
-                                            <button
-                                                onClick={() => setTabSafe("login")}
-                                                className="text-green-500 hover:underline cursor-pointer"
-                                            >
-                                                Log in
-                                            </button>
-                                        </CardDescription>
-                                    </CardHeader>
-
-                                    <form
-                                        id="sign-up-form"
-                                        onSubmit={signUpForm.handleSubmit(handleSignUp)}
-                                        className="space-y-6"
-                                    >
-                                        <FieldGroup>
-                                            <Controller
-                                                name="fullName"
-                                                control={signUpForm.control}
-                                                render={({ field, fieldState }) => (
-                                                    <Field data-invalid={fieldState.invalid}>
-                                                        <FieldLabel htmlFor={field.name}>
-                                                            Full Name
-                                                        </FieldLabel>
-                                                        <Input
-                                                            {...field}
-                                                            id={field.name}
-                                                            aria-invalid={fieldState.invalid}
-                                                            placeholder="Full Name"
-                                                        // autoComplete="off"
-                                                        />
-                                                        {fieldState.invalid && (
-                                                            <FieldError errors={[fieldState.error]} />
-                                                        )}
-                                                    </Field>
-                                                )}
-                                            />
-
-                                            <Controller
-                                                name="contact"
-                                                control={signUpForm.control}
-                                                render={({ field, fieldState }) => (
-                                                    <Field data-invalid={fieldState.invalid}>
-                                                        <FieldLabel htmlFor={field.name}>
-                                                            Mobile Number
-                                                        </FieldLabel>
-                                                        <Input
-                                                            {...field}
-                                                            id={field.name}
-                                                            aria-invalid={fieldState.invalid}
-                                                            placeholder="Mobile Number"
-                                                        // autoComplete="off"
-                                                        />
-                                                        {fieldState.invalid && (
-                                                            <FieldError errors={[fieldState.error]} />
-                                                        )}
-                                                    </Field>
-                                                )}
-                                            />
-
-                                            <Controller
-                                                name="email"
-                                                control={signUpForm.control}
-                                                render={({ field, fieldState }) => (
-                                                    <Field data-invalid={fieldState.invalid}>
-                                                        <FieldLabel htmlFor={field.name}>
-                                                            Email
-                                                        </FieldLabel>
-                                                        <Input
-                                                            {...field}
-                                                            id={field.name}
-                                                            aria-invalid={fieldState.invalid}
-                                                            placeholder="Email"
-                                                        // autoComplete="off"
-                                                        />
-                                                        {fieldState.invalid && (
-                                                            <FieldError errors={[fieldState.error]} />
-                                                        )}
-                                                    </Field>
-                                                )}
-                                            />
-                                        </FieldGroup>
-                                        <div className="flex justify-center">
-                                            <Button
-                                                type="submit"
-                                                disabled={isSubmitting}
-                                                className="w-full font-semibold bg-green-600 hover:bg-green-700 text-white"
-                                            >
-                                                {isSubmitting ? (
-                                                    <>
-                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                        Please wait...
-                                                    </>
-                                                ) : (
-                                                    "Sign up"
-                                                )}
-                                            </Button>
-                                        </div>
-                                    </form>
-                                </TabsContent>
 
                                 {/* Login */}
                                 <TabsContent value="login">
@@ -641,7 +530,7 @@ const BecomeSeller = () => {
                                             <Button
                                                 type="submit"
                                                 disabled={isSubmitting}
-                                                className="w-full font-semibold bg-green-600 hover:bg-green-700 text-white"
+                                                className="w-full font-semibold bg-green-600 hover:bg-green-500 text-white"
                                             >
                                                 {isSubmitting ? (
                                                     <>
@@ -650,6 +539,112 @@ const BecomeSeller = () => {
                                                     </>
                                                 ) : (
                                                     "Login"
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </TabsContent>
+
+                                {/* Sign Up */}
+                                <TabsContent value="sign-up">
+                                    <CardHeader className="p-0 mb-4">
+                                        <CardTitle>Sign up as a Leelame Seller</CardTitle>
+                                        <CardDescription>
+                                            Already have an account?{" "}
+                                            <button
+                                                onClick={() => setTabSafe("login")}
+                                                className="text-green-500 hover:underline cursor-pointer"
+                                            >
+                                                Log in
+                                            </button>
+                                        </CardDescription>
+                                    </CardHeader>
+
+                                    <form
+                                        id="sign-up-form"
+                                        onSubmit={signUpForm.handleSubmit(handleSignUp)}
+                                        className="space-y-6"
+                                    >
+                                        <FieldGroup>
+                                            <Controller
+                                                name="fullName"
+                                                control={signUpForm.control}
+                                                render={({ field, fieldState }) => (
+                                                    <Field data-invalid={fieldState.invalid}>
+                                                        <FieldLabel htmlFor={field.name}>
+                                                            Full Name
+                                                        </FieldLabel>
+                                                        <Input
+                                                            {...field}
+                                                            id={field.name}
+                                                            aria-invalid={fieldState.invalid}
+                                                            placeholder="Full Name"
+                                                        // autoComplete="off"
+                                                        />
+                                                        {fieldState.invalid && (
+                                                            <FieldError errors={[fieldState.error]} />
+                                                        )}
+                                                    </Field>
+                                                )}
+                                            />
+
+                                            <Controller
+                                                name="contact"
+                                                control={signUpForm.control}
+                                                render={({ field, fieldState }) => (
+                                                    <Field data-invalid={fieldState.invalid}>
+                                                        <FieldLabel htmlFor={field.name}>
+                                                            Mobile Number
+                                                        </FieldLabel>
+                                                        <Input
+                                                            {...field}
+                                                            id={field.name}
+                                                            aria-invalid={fieldState.invalid}
+                                                            placeholder="Mobile Number"
+                                                        // autoComplete="off"
+                                                        />
+                                                        {fieldState.invalid && (
+                                                            <FieldError errors={[fieldState.error]} />
+                                                        )}
+                                                    </Field>
+                                                )}
+                                            />
+
+                                            <Controller
+                                                name="email"
+                                                control={signUpForm.control}
+                                                render={({ field, fieldState }) => (
+                                                    <Field data-invalid={fieldState.invalid}>
+                                                        <FieldLabel htmlFor={field.name}>
+                                                            Email
+                                                        </FieldLabel>
+                                                        <Input
+                                                            {...field}
+                                                            id={field.name}
+                                                            aria-invalid={fieldState.invalid}
+                                                            placeholder="Email"
+                                                        // autoComplete="off"
+                                                        />
+                                                        {fieldState.invalid && (
+                                                            <FieldError errors={[fieldState.error]} />
+                                                        )}
+                                                    </Field>
+                                                )}
+                                            />
+                                        </FieldGroup>
+                                        <div className="flex justify-center">
+                                            <Button
+                                                type="submit"
+                                                disabled={isSubmitting}
+                                                className="w-full font-semibold bg-green-600 hover:bg-green-500 text-white"
+                                            >
+                                                {isSubmitting ? (
+                                                    <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Please wait...
+                                                    </>
+                                                ) : (
+                                                    "Sign up"
                                                 )}
                                             </Button>
                                         </div>
@@ -793,7 +788,7 @@ const BecomeSeller = () => {
                                     <div className="flex items-center justify-evenly gap-2">
                                         <Button
                                             type="submit"
-                                            className="flex-1 w-full font-semibold bg-green-600 hover:bg-green-700 text-white"
+                                            className="flex-1 w-full font-semibold bg-green-600 hover:bg-green-500 text-white"
                                             disabled={isSubmitting}
                                         >
                                             {isSubmitting ? (
@@ -860,7 +855,7 @@ const BecomeSeller = () => {
                                         <Button
                                             type="submit"
                                             disabled={isSubmitting}
-                                            className="w-full font-semibold bg-green-600 hover:bg-green-700 text-white"
+                                            className="w-full font-semibold bg-green-600 hover:bg-green-500 text-white"
                                         >
                                             {isSubmitting ? (
                                                 <>
@@ -1018,7 +1013,7 @@ const BecomeSeller = () => {
 
                                     <Button
                                         type="submit"
-                                        className="flex-1 w-full font-semibold bg-green-600 hover:bg-green-700 text-white"
+                                        className="flex-1 w-full font-semibold bg-green-600 hover:bg-green-500 text-white"
                                         disabled={isSubmitting}
                                     >
                                         {isSubmitting ? (

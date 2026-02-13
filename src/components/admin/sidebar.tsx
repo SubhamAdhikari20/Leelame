@@ -26,62 +26,59 @@ import NavUser from "@/components/admin/nav-user.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import { IconInnerShadowTop } from "@tabler/icons-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { CurrentUserPropsType } from "@/types/current-user.type";
 
 
-// Menu items
-const items = [
-    {
-        title: "Home",
-        url: "/",
-        icon: Home,
-    },
-    {
-        title: "Inbox",
-        url: "/inbox",
-        icon: Inbox,
-    },
-    {
-        title: "Calendar",
-        url: "/calendar",
-        icon: Calendar,
-    },
-    {
-        title: "Search",
-        url: "/search",
-        icon: Search,
-    },
-    // {
-    //     title: "Settings",
-    //     url: "/settings",
-    //     icon: Settings,
-    // },
-
-];
-const items2 = [
-    {
-        title: "Settings",
-        // url: "/settings",
-        icon: Settings,
-        isActive: false,
-        items: [
-            {
-                title: "Seller Management",
-                url: "/admin/settings/manage-seller/list",
-            },
-            {
-                title: "Starred",
-                url: "#",
-            },
-            {
-                title: "Account Settings",
-                url: "#",
-            },
-        ],
-    },
-];
-
 const AdminSidebar = ({ currentUser, ...props }: CurrentUserPropsType & React.ComponentProps<typeof Sidebar>) => {
+    const currentPath = usePathname();
+
+    // Menu items
+    const items = [
+        {
+            title: "Home",
+            path: "/admin/dashboard",
+            icon: Home,
+        },
+        {
+            title: "Inbox",
+            path: "/inbox",
+            icon: Inbox,
+        },
+        {
+            title: "Calendar",
+            path: "/calendar",
+            icon: Calendar,
+        },
+        {
+            title: "Search",
+            path: "/search",
+            icon: Search,
+        },
+    ];
+    const items2 = [
+        {
+            title: "Settings",
+            // path: "/settings",
+            icon: Settings,
+            isActive: false,
+            items: [
+                {
+                    title: "Seller Management",
+                    path: "/admin/settings/manage-seller/list",
+                },
+                {
+                    title: "Starred",
+                    path: "#",
+                },
+                {
+                    title: "Account Settings",
+                    path: "#",
+                },
+            ],
+        },
+    ];
+
     return (
         <div>
             <Sidebar collapsible="icon" {...props}>
@@ -104,48 +101,59 @@ const AdminSidebar = ({ currentUser, ...props }: CurrentUserPropsType & React.Co
                     <SidebarGroup>
                         <SidebarGroupContent>
                             <SidebarMenu>
-                                {items.map((item) => (
-                                    <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton asChild>
-                                            <Link href={item.url}>
-                                                <item.icon />
-                                                <span>{item.title}</span>
-                                            </Link>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                ))}
-
-                                {items2.map((item) => (
-                                    <Collapsible
-                                        key={item.title}
-                                        asChild
-                                        defaultOpen={item.isActive}
-                                        className="group/collapsible"
-                                    >
-                                        <SidebarMenuItem>
-                                            <CollapsibleTrigger asChild>
-                                                <SidebarMenuButton tooltip={item.title} className="cursor-pointer">
-                                                    {item.icon && <item.icon />}
+                                {items.map((item) => {
+                                    const isActive = currentPath === item.path;
+                                    return (
+                                        <SidebarMenuItem key={item.title}>
+                                            <SidebarMenuButton asChild className={`${isActive
+                                                && "bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 font-semibold"}`}>
+                                                <Link href={item.path}>
+                                                    <item.icon />
                                                     <span>{item.title}</span>
-                                                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                                                </SidebarMenuButton>
-                                            </CollapsibleTrigger>
-                                            <CollapsibleContent>
-                                                <SidebarMenuSub>
-                                                    {item.items?.map((subItem) => (
-                                                        <SidebarMenuSubItem key={subItem.title}>
-                                                            <SidebarMenuSubButton asChild>
-                                                                <a href={subItem.url}>
-                                                                    <span>{subItem.title}</span>
-                                                                </a>
-                                                            </SidebarMenuSubButton>
-                                                        </SidebarMenuSubItem>
-                                                    ))}
-                                                </SidebarMenuSub>
-                                            </CollapsibleContent>
+                                                </Link>
+                                            </SidebarMenuButton>
                                         </SidebarMenuItem>
-                                    </Collapsible>
-                                ))}
+                                    );
+                                })}
+
+                                {items2.map((item) => {
+                                    const isOpen = item.items.some((subItem) => currentPath === subItem.path);
+                                    return (
+                                        <Collapsible
+                                            key={item.title}
+                                            asChild
+                                            defaultOpen={isOpen}
+                                            className="group/collapsible"
+                                        >
+                                            <SidebarMenuItem>
+                                                <CollapsibleTrigger asChild>
+                                                    <SidebarMenuButton tooltip={item.title} className="cursor-pointer">
+                                                        {item.icon && <item.icon />}
+                                                        <span>{item.title}</span>
+                                                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                                    </SidebarMenuButton>
+                                                </CollapsibleTrigger>
+                                                <CollapsibleContent>
+                                                    <SidebarMenuSub>
+                                                        {item.items.map((subItem) => {
+                                                            const isActive = currentPath === subItem.path;
+                                                            return (
+                                                                <SidebarMenuSubItem key={subItem.title}>
+                                                                    <SidebarMenuSubButton asChild className={`${isActive
+                                                                        && "bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 font-semibold"}`}>
+                                                                        <Link href={subItem.path}>
+                                                                            <span>{subItem.title}</span>
+                                                                        </Link>
+                                                                    </SidebarMenuSubButton>
+                                                                </SidebarMenuSubItem>
+                                                            );
+                                                        })}
+                                                    </SidebarMenuSub>
+                                                </CollapsibleContent>
+                                            </SidebarMenuItem>
+                                        </Collapsible>
+                                    );
+                                })}
                             </SidebarMenu>
                         </SidebarGroupContent>
                     </SidebarGroup>

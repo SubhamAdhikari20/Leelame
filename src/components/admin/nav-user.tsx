@@ -74,10 +74,6 @@ const NavUser = ({ currentUser }: CurrentUserPropsType) => {
                         >
                             <Avatar className="h-8 w-8 border border-gray-600 dark:border-gray-100">
                                 {currentUser && currentUser.profilePictureUrl ? (
-                                    // <AvatarImage
-                                    //     src={currentUser.profilePictureUrl}
-                                    //     alt={currentUser.fullName || "Admin"}
-                                    // />
                                     <Image
                                         fill
                                         src={currentUser.profilePictureUrl}
@@ -113,10 +109,6 @@ const NavUser = ({ currentUser }: CurrentUserPropsType) => {
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <Avatar className="h-8 w-8 border border-gray-600 dark:border-gray-100">
                                     {currentUser && currentUser.profilePictureUrl ? (
-                                        // <AvatarImage
-                                        //     src={currentUser.profilePictureUrl}
-                                        //     alt={currentUser.fullName ?? "Profile Picture Preview"}
-                                        // />
                                         <Image
                                             fill
                                             src={currentUser.profilePictureUrl}
@@ -178,7 +170,7 @@ const NavUser = ({ currentUser }: CurrentUserPropsType) => {
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                     <AlertDialogAction
-                                        className="bg-green-600! hover:bg-green-700! text-white"
+                                        className="bg-green-600! hover:bg-green-500! text-white"
                                         onClick={() => {
                                             handleLogout();
                                         }}

@@ -35,12 +35,11 @@ import {
     AlertDialogTrigger,
 } from "../ui/alert-dialog.tsx";
 import { toast } from "sonner";
-import { signOut } from "next-auth/react";
 import { handleBuyerLogout } from "@/lib/actions/auth/buyer-auth.action.ts";
-import type { CurrentUserProps } from "@/types/current-user.type.ts";
+import type { CurrentUserPropsType } from "@/types/current-user.type.ts";
 
 
-const Sidebar = ({ currentUser }: CurrentUserProps) => {
+const Sidebar = ({ currentUser }: CurrentUserPropsType) => {
     const router = useRouter();
     const currentPath = usePathname();
 
@@ -60,7 +59,6 @@ const Sidebar = ({ currentUser }: CurrentUserProps) => {
             });
             return;
         }
-        await signOut({ redirect: false });
         router.replace("/login");
         toast.success("Logout Successful.", {
             description: logoutResponse.message
@@ -72,17 +70,17 @@ const Sidebar = ({ currentUser }: CurrentUserProps) => {
             {/* Profile Section */}
             <div className="flex flex-col items-center py-5 border-b dark:border-gray-700">
                 <Avatar className="w-16 h-16 border border-gray-900 dark:border-gray-100">
-                    {currentUser?.profilePictureUrl ? (
+                    {currentUser && currentUser.profilePictureUrl ? (
                         <AvatarImage
                             src={currentUser.profilePictureUrl}
-                            alt={currentUser.fullName ?? "Profile Picture Preview"}
+                            alt={currentUser.fullName || "Buyer"}
                         />
                     ) : (
                         <AvatarFallback>
                             {(
-                                currentUser?.fullName ??
-                                currentUser?.username ??
-                                "U"
+                                currentUser?.fullName ||
+                                currentUser?.username ||
+                                "NaN"
                             )
                                 .split(" ")
                                 .map((n) => n[0])
@@ -106,7 +104,7 @@ const Sidebar = ({ currentUser }: CurrentUserProps) => {
             <ScrollArea className="flex-1 mt-4">
                 <nav className="flex flex-col gap-2">
                     {menuItems.map((item, index) => {
-                        const isActive = currentPath.includes(item.path);
+                        const isActive = currentPath === item.path;
                         return (
                             <Link
                                 key={index}
@@ -163,7 +161,7 @@ const Sidebar = ({ currentUser }: CurrentUserProps) => {
                                 Cancel
                             </AlertDialogCancel>
                             <AlertDialogAction
-                                className="bg-green-600 hover:bg-green-700 text-white"
+                                className="bg-green-600! hover:bg-green-500! text-white"
                                 onClick={() => {
                                     handleLogout();
                                 }}

@@ -30,7 +30,7 @@ const AdminListSellerPage = async () => {
         notFound();
     }
 
-    const currentUser = getCurrentUserResult.data;
+    const currentUser = { ...getCurrentUserResult.data, profilePictureUrl: normalizeHttpUrl(getCurrentUserResult.data.profilePictureUrl) };
 
     const getAllSellersResult = await handleGetAllSellers();
     if (!getAllSellersResult.success) {
@@ -41,8 +41,6 @@ const AdminListSellerPage = async () => {
         ...seller,
         profilePictureUrl: normalizeHttpUrl(seller.profilePictureUrl),
     })) || [];
-
-    // console.log(sellers?.map((seller) => seller.profilePictureUrl));
 
     return (
         <>

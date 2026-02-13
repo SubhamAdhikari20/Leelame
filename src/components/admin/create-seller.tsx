@@ -31,18 +31,18 @@ const CreateSeller = ({ currentUser }: CurrentUserPropsType) => {
     const createSellerAccountForm = useForm<CreateSellerAccountSchemaType>({
         resolver: zodResolver(CreateSellerAccountSchema),
         defaultValues: {
-            // fullName: "Thomas Muller",
-            // email: "guideu0203@gmail.com",
-            // contact: "9864922261",
-            // password: "Thomas@123",
-            // confirmPassword: "Thomas@123",
-            // role: "seller"
-            fullName: "",
-            email: "",
-            contact: "",
-            password: "",
-            confirmPassword: "",
+            fullName: "Thomas Muller",
+            email: "guideu0203@gmail.com",
+            contact: "9864922260",
+            password: "Thomas@123",
+            confirmPassword: "Thomas@123",
             role: "seller"
+            // fullName: "",
+            // email: "",
+            // contact: "",
+            // password: "",
+            // confirmPassword: "",
+            // role: "seller"
         }
     });
 
@@ -134,7 +134,7 @@ const CreateSeller = ({ currentUser }: CurrentUserPropsType) => {
                         <div className="flex flex-row! items-center gap-2">
                             <Button
                                 type="button"
-                                className="bg-gray-400 dark:bg-gray-300 hover:bg-gray-500 dark:hover:bg-gray-200"
+                                className="bg-gray-500 hover:bg-gray-400 dark:bg-gray-300 dark:hover:bg-gray-200"
                                 disabled={isSubmitting}
                                 onClick={() => fileInputRef.current?.click()}
                             >
@@ -161,7 +161,7 @@ const CreateSeller = ({ currentUser }: CurrentUserPropsType) => {
                                     setSelectedFile(null);
                                     setPreview(currentUser?.profilePictureUrl || "");
                                 }}
-                                className="dark:bg-red-600 hover:bg-red-700 dark:hover:bg-red-700"
+                                className="hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-500"
                             >
                                 Remove
                             </Button>
@@ -327,7 +327,7 @@ const CreateSeller = ({ currentUser }: CurrentUserPropsType) => {
                             <Button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="flex-1 bg-orange-500 hover:bg-orange-600"
+                                className="flex-1 bg-orange-600 hover:bg-orange-500 text-white"
                             >
                                 {isSubmitting ? (
                                     <>

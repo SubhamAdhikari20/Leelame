@@ -58,14 +58,14 @@ const ListSeller = ({ currentUser, sellers }: ListSellerPropsType) => {
     return (
         <section className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-5">Manage Owners</h1>
+                <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-5">Manage Sellers</h1>
                 <Button variant="outline" className="hover:bg-green-600 hover:text-white border-green-500 text-green-600 dark:text-white" onClick={() => router.push("/admin/settings/manage-seller/create")}>
                     <Plus className="mr-1 h-4 w-4" />
                     Add Seller
                 </Button>
             </div>
             {!sellers || sellers.length === 0 ? (
-                <div className="rounded-md border p-8 text-center">
+                <div className="rounded-md border p-8 text-center shadow-md">
                     <p className="text-lg font-medium mb-4">No sellers found</p>
                     <p className="text-sm text-muted-foreground mb-6">There are no sellers in the system yet. Create one to get started.</p>
                     <Button onClick={() => router.push("/admin/settings/manage-seller/create")}>Create Seller</Button>
@@ -73,7 +73,7 @@ const ListSeller = ({ currentUser, sellers }: ListSellerPropsType) => {
             ) : (
                 <div className="overflow-x-auto rounded-md border shadow-sm">
                     <Table>
-                        <TableHeader>
+                        <TableHeader >
                             <TableRow className="bg-green-600 hover:bg-green-500">
                                 <TableHead className="text-white font-semibold text-[16px]">Id</TableHead>
                                 <TableHead className="text-white font-semibold text-[16px]">Profile</TableHead>
@@ -83,6 +83,7 @@ const ListSeller = ({ currentUser, sellers }: ListSellerPropsType) => {
                                 <TableHead className="text-white font-semibold text-[16px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
+                        
                         <TableBody>
                             {sellers.map((seller) => (
                                 <TableRow key={seller._id}>
@@ -90,10 +91,6 @@ const ListSeller = ({ currentUser, sellers }: ListSellerPropsType) => {
                                     <TableCell>
                                         <Avatar className="h-10 w-10 border border-gray-600 dark:border-gray-100">
                                             {seller.profilePictureUrl ? (
-                                                // <AvatarImage
-                                                //     src={seller.profilePictureUrl || undefined}
-                                                //     alt={seller.fullName || undefined}
-                                                // />
                                                 <Image
                                                     fill
                                                     src={seller.profilePictureUrl}
@@ -127,7 +124,12 @@ const ListSeller = ({ currentUser, sellers }: ListSellerPropsType) => {
 
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <Button size="sm" className="bg-red-600 hover:bg-red-700 dark:text-gray-100">
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="destructive"
+                                                    className="hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-500"
+                                                >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </AlertDialogTrigger>
@@ -141,7 +143,11 @@ const ListSeller = ({ currentUser, sellers }: ListSellerPropsType) => {
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
                                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction className="bg-red-600 hover:bg-red-700 dark:text-gray-100" onClick={() => handleDeleteSellerAccount(seller._id)}>
+                                                    <AlertDialogAction
+                                                        variant="destructive"
+                                                        className="hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-500"
+                                                        onClick={() => handleDeleteSellerAccount(seller._id)}
+                                                    >
                                                         Delete
                                                     </AlertDialogAction>
                                                 </AlertDialogFooter>

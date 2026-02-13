@@ -236,7 +236,7 @@ const BuyerProfile = ({ currentUser }: CurrentUserPropsType) => {
                         <div className="flex flex-row! items-center gap-2">
                             <Button
                                 type="button"
-                                className="bg-gray-400 dark:bg-gray-300 hover:bg-gray-500 dark:hover:bg-gray-200"
+                                className="bg-gray-500 hover:bg-gray-400 dark:bg-gray-300 dark:hover:bg-gray-200"
                                 disabled={isUploadingImage}
                                 onClick={() => fileInputRef.current?.click()}
                             >
@@ -262,7 +262,7 @@ const BuyerProfile = ({ currentUser }: CurrentUserPropsType) => {
                                         setSelectedFile(null);
                                         setPreview(currentUser?.profilePictureUrl || "");
                                     }}
-                                    className="dark:bg-red-600 hover:bg-red-700 dark:hover:bg-red-700"
+                                    className="hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-500"
                                 >
                                     Remove
                                 </Button>
@@ -292,7 +292,11 @@ const BuyerProfile = ({ currentUser }: CurrentUserPropsType) => {
                     <div className="mt-auto xl:w-full xl:flex xl:items-center xl:justify-center">
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button type="button" variant="destructive" className="hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700">
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    className="hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-500"
+                                >
                                     <Trash2 className="h-4 w-4 mr-2" /> Delete Account
                                 </Button>
                             </AlertDialogTrigger>
@@ -306,7 +310,11 @@ const BuyerProfile = ({ currentUser }: CurrentUserPropsType) => {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction className="bg-red-600 hover:bg-red-700 dark:text-gray-100" onClick={() => handleDelete(currentUser!._id)}>
+                                    <AlertDialogAction
+                                        variant="destructive"
+                                        className="hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-500"
+                                        onClick={() => handleDelete(currentUser!._id)}
+                                    >
                                         Delete
                                     </AlertDialogAction>
                                 </AlertDialogFooter>

@@ -171,7 +171,7 @@ const NavUser = ({ currentUser }: CurrentUserPropsType) => {
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                     <AlertDialogAction
-                                        className="bg-green-600! hover:bg-green-700! text-white"
+                                        className="bg-green-600! hover:bg-green-500! text-white"
                                         onClick={() => {
                                             handleLogout();
                                         }}

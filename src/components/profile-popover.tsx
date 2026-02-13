@@ -16,11 +16,11 @@ import {
     AlertDialogTrigger,
 } from "./ui/alert-dialog.tsx";
 import { Button } from "./ui/button.tsx";
-import type { CurrentUser } from "@/types/current-user.type.ts";
+import type { CurrentUserType } from "@/types/current-user.type.ts";
 
 
 interface ProfilePopoverProps {
-    currentUser: CurrentUser;
+    currentUser: CurrentUserType;
     logoutDialogOpen: boolean;
     setLogoutDialogOpen: (open: boolean) => void;
     setDesktopMenuOpen: (open: boolean) => void;
@@ -137,7 +137,7 @@ const ProfilePopover: React.FC<ProfilePopoverProps> = ({
                                 Cancel
                             </AlertDialogCancel>
                             <AlertDialogAction
-                                className="bg-green-600 hover:bg-green-700 text-white"
+                                className="bg-green-600! hover:bg-green-500! text-white"
                                 onClick={() => {
                                     handleLogout();
                                     setLogoutDialogOpen(

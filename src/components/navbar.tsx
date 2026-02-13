@@ -36,19 +36,16 @@ import ProfilePopover from "./profile-popover.tsx";
 import { toast } from "sonner";
 import { useTheme } from "@/app/context/theme-provider.tsx";
 import { signOut } from "next-auth/react";
-import { CurrentUserProps } from "@/types/current-user.type.ts";
+import { CurrentUserPropsType } from "@/types/current-user.type.ts";
 import { handleBuyerLogout } from "@/lib/actions/auth/buyer-auth.action.ts";
 
 
-const Navbar = ({ currentUser }: CurrentUserProps) => {
+const Navbar = ({ currentUser }: CurrentUserPropsType) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
-    // const [darkMode, setDarkMode] = useState(false);
-    // const [feedOpen, setFeedOpen] = useState(false);
-    // const [isFocused, setIsFocused] = useState(false);
 
     const router = useRouter();
     const currentPath = usePathname();
@@ -455,7 +452,7 @@ const Navbar = ({ currentUser }: CurrentUserProps) => {
                                             Cancel
                                         </AlertDialogCancel>
                                         <AlertDialogAction
-                                            className="bg-green-600 hover:bg-green-700 text-white"
+                                            className="bg-green-600! hover:bg-green-500! text-white"
                                             onClick={() => {
                                                 handleLogout();
                                             }}
