@@ -1,5 +1,6 @@
 // src/lib/api/endpoints.ts
 
+
 export const API = {
     AUTH: {
         BUYER: {
@@ -49,5 +50,12 @@ export const API = {
             UPLOAD_SELLER_PROFILE_PICTURE: "/api/users/admin/upload-seller-profile-picture",
             DELETE_SELLER_ACCOUNT: "/api/users/admin/delete-seller-account",
         }
+    },
+    CATEGORY: {
+        CREATE_CATEGORY: "/api/category/create-category",
+        UPDATE_CATEGORY: "/api/category/update-category",
+        DELETE_CATEGORY: "/api/category/delete-category",
+        GET_ALL_CATEGORIES: "/api/category/delete-category",
+        GET_CATEGORY_BY_ID: "/api/category",
     }
 };

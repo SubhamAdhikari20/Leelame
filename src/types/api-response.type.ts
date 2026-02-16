@@ -108,3 +108,29 @@ export type AllSellerApiResposeType = {
     message: string;
     users?: z.infer<typeof SellerApiResponse>[] | null;
 };
+
+// -------------------------------- Category Api Response -------------------------------
+// Category Api Response
+export const CategoryApiResponse = z.object({
+    _id: z.string(),
+    categoryName: z.string(),
+    description: z.string().nullish(),
+    categoryStatus: z.string(),
+    createdAt: z.date().nullish(),
+    updatedAt: z.date().nullish(),
+});
+
+export type CategoryApiResponseType = {
+    success: boolean;
+    message: string;
+    status?: number | null;
+    data?: z.infer<typeof CategoryApiResponse> | null;
+};
+
+// All the categories api response
+export type AllCategoriesApiResponseType = {
+    success: boolean;
+    message: string;
+    status?: number | null;
+    data?: z.infer<typeof CategoryApiResponse>[] | null;
+};
