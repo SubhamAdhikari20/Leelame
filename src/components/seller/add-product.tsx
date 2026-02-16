@@ -1,4 +1,4 @@
-// src/components/product/add-product.tsx
+// src/components/seller/add-product.tsx
 import React from "react";
 import { Button } from "@/components/ui/button.tsx";
 import type { CurrentUserPropsType } from "@/types/current-user.type.ts";

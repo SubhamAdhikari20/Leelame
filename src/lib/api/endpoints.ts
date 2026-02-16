@@ -53,9 +53,9 @@ export const API = {
     },
     CATEGORY: {
         CREATE_CATEGORY: "/api/category/create-category",
-        UPDATE_CATEGORY: "/api/category/update-category",
+        UPDATE_CATEGORY: "/api/category/update-category-details",
         DELETE_CATEGORY: "/api/category/delete-category",
-        GET_ALL_CATEGORIES: "/api/category/delete-category",
+        GET_ALL_CATEGORIES: "/api/category/get-all-categories",
         GET_CATEGORY_BY_ID: "/api/category",
     }
 };

@@ -115,7 +115,7 @@ export const CategoryApiResponse = z.object({
     _id: z.string(),
     categoryName: z.string(),
     description: z.string().nullish(),
-    categoryStatus: z.string(),
+    categoryStatus: z.enum(["active", "inactive"]),
     createdAt: z.date().nullish(),
     updatedAt: z.date().nullish(),
 });

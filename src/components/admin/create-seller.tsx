@@ -1,6 +1,6 @@
 // src/components/admin/create-seller.tsx
 "use client";
-import React, { useRef, useState } from "react";
+import React, { startTransition, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { Loader2, User2 } from "lucide-react";
 import type { CurrentUserPropsType } from "@/types/current-user.type.ts";
 import { CreateSellerAccountSchema, type CreateSellerAccountSchemaType } from "@/schemas/admin/manage-seller-account.schema.ts";
@@ -21,6 +22,8 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 
 const CreateSeller = ({ currentUser }: CurrentUserPropsType) => {
+    const router = useRouter();
+
     const [preview, setPreview] = useState("");
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -31,18 +34,18 @@ const CreateSeller = ({ currentUser }: CurrentUserPropsType) => {
     const createSellerAccountForm = useForm<CreateSellerAccountSchemaType>({
         resolver: zodResolver(CreateSellerAccountSchema),
         defaultValues: {
-            fullName: "Thomas Muller",
-            email: "guideu0203@gmail.com",
-            contact: "9864922260",
-            password: "Thomas@123",
-            confirmPassword: "Thomas@123",
-            role: "seller"
-            // fullName: "",
-            // email: "",
-            // contact: "",
-            // password: "",
-            // confirmPassword: "",
+            // fullName: "Thomas Muller",
+            // email: "guideu0203@gmail.com",
+            // contact: "9864922260",
+            // password: "Thomas@123",
+            // confirmPassword: "Thomas@123",
             // role: "seller"
+            fullName: "",
+            email: "",
+            contact: "",
+            password: "",
+            confirmPassword: "",
+            role: "seller"
         }
     });
 
@@ -74,6 +77,7 @@ const CreateSeller = ({ currentUser }: CurrentUserPropsType) => {
             handleClear();
             setPreview("");
             setSelectedFile(null);
+            startTransition(() => router.replace("/admin/settings/manage-seller/list"));
         }
         catch (error: Error | any) {
             console.error("Error creating seller account by admin: ", error);
