@@ -57,5 +57,12 @@ export const API = {
         DELETE_CATEGORY: "/api/category/delete-category",
         GET_ALL_CATEGORIES: "/api/category/get-all-categories",
         GET_CATEGORY_BY_ID: "/api/category",
+    },
+    PRODUCT: {
+        CREATE_PRODUCT: "/api/product/create-product",
+        UPDATE_PRODUCT: "/api/product/update-product-details",
+        DELETE_PRODUCT: "/api/product/delete-product",
+        GET_ALL_PRODUCTS: "/api/product/get-all-products",
+        GET_PRODUCT_BY_ID: "/api/product",
     }
 };

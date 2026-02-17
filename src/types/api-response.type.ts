@@ -134,3 +134,39 @@ export type AllCategoriesApiResponseType = {
     status?: number | null;
     data?: z.infer<typeof CategoryApiResponse>[] | null;
 };
+
+// -------------------------------- Product Api Response -------------------------------
+// Product Api Response
+export const ProductApiResponse = z.object({
+    _id: z.string(),
+    productName: z.string(),
+    description: z.string().nullish(),
+    categoryId: z.string(),
+    commission: z.number(),
+    startPrice: z.number(),
+    currentBidPrice: z.number(),
+    bidIntervalPrice: z.number(),
+    endDate: z.date(),
+    productImageUrls: z.array(z.string()),
+    isVerified: z.boolean(),
+    isSoldOut: z.boolean(),
+    sellerId: z.string(),
+    soldToBuyerId: z.string().nullish(),
+    createdAt: z.date().nullish(),
+    updatedAt: z.date().nullish(),
+});
+
+export type ProductApiResponseType = {
+    success: boolean;
+    message: string;
+    status?: number | null;
+    data?: z.infer<typeof ProductApiResponse> | null;
+};
+
+// All the categories api response
+export type AllProductsApiResponseType = {
+    success: boolean;
+    message: string;
+    status?: number | null;
+    data?: z.infer<typeof ProductApiResponse>[] | null;
+};
