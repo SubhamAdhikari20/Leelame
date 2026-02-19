@@ -8,7 +8,7 @@ import { handleGetCategoryById } from "@/lib/actions/category/category.action.ts
 import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 
 
-const ManageCategories = async ({ params }: { params: { categoryId: string } }) => {
+const UpdateCategoryPage = async ({ params }: { params: { categoryId: string } }) => {
     const { categoryId } = await params;
 
     const response = await getServerSession();
@@ -47,4 +47,4 @@ const ManageCategories = async ({ params }: { params: { categoryId: string } }) 
     );
 };
 
-export default ManageCategories;
+export default UpdateCategoryPage;

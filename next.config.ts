@@ -21,6 +21,11 @@ const nextConfig: NextConfig = {
         hostname: "unsplash.com",
       }
     ]
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "20mb",
+    },
   }
 };
 

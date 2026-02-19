@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input.tsx";
 import { Textarea } from "@/components/ui/textarea.tsx";
 import { Checkbox } from "@/components/ui/checkbox.tsx";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { handleUpdateCategory } from "@/lib/actions/category/category.action.ts";
 import { UpdateCategorySchema, type UpdateCategorySchemaType } from "@/schemas/category/update-category.schema.ts";
@@ -21,6 +22,8 @@ import type { UpdateCategoryDetailsPropsType } from "@/types/admin-props.type.ts
 
 
 const UpdateCategory = ({ currentUser, category }: UpdateCategoryDetailsPropsType) => {
+    const router = useRouter();
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const updateCategoryFrom = useForm<UpdateCategorySchemaType>({
         resolver: zodResolver(UpdateCategorySchema),
@@ -177,13 +180,21 @@ const UpdateCategory = ({ currentUser, category }: UpdateCategoryDetailsPropsTyp
                                     </>
                                 )}
                             </Button>
-                            <Button
+                            {/* <Button
                                 type="button"
                                 variant={"outline"}
                                 className="flex-1 text-cyan-600 border-cyan-600 hover:bg-cyan-50"
                                 onClick={handleClear}
                             >
                                 Clear
+                            </Button> */}
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="flex-1"
+                                onClick={() => router.back()}
+                            >
+                                Cancel
                             </Button>
                         </div>
                     </form>

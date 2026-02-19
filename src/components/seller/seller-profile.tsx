@@ -23,8 +23,9 @@ import {
 import { Input } from "@/components/ui/input.tsx";
 import { toast } from "sonner";
 import { Loader2, Trash2 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar.tsx";
 import { useForm, Controller } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { handleDeleteSellerAccount, handleUpdateSellerProfileDetails, handleUploadSellerProfilePicture } from "@/lib/actions/seller/profile-details.action.ts";
 import { UpdateProfileDetailsSchema, UpdateProfileDetailsSchemaType } from "@/schemas/seller/update-profile-details.schema.ts";
 import type { CurrentUserPropsType } from "@/types/current-user.type.ts";
@@ -32,6 +33,8 @@ import Image from "next/image";
 
 
 const SellerProfile = ({ currentUser }: CurrentUserPropsType) => {
+    const router = useRouter();
+
     const [preview, setPreview] = useState("");
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -140,8 +143,8 @@ const SellerProfile = ({ currentUser }: CurrentUserPropsType) => {
             toast.success("Successful", {
                 description: response.message,
             });
-            // setPreview("");
             setSelectedFile(null);
+            router.refresh();
         }
         catch (error: Error | any) {
             console.error("Image upload failed: ", error);

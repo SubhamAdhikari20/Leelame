@@ -4,6 +4,7 @@ import { getServerSession } from "@/lib/get-server-session.ts";
 import { notFound, redirect } from "next/navigation";
 import ListProducts from "@/components/seller/list-products.tsx";
 import { handleGetCurrentSellerUser } from "@/lib/actions/seller/profile-details.action.ts";
+import { handleGetAllProducts } from "@/lib/actions/product/product.action.ts";
 import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 
 
@@ -17,7 +18,7 @@ const SellerManageProducts = async () => {
     const token = response.token;
     const user = response.data;
     if (!token || !user || !user._id) {
-        redirect("/admin/login");
+        redirect("/become-seller");
     }
 
     const getCurrentUserResult = await handleGetCurrentSellerUser(user._id);
@@ -31,9 +32,19 @@ const SellerManageProducts = async () => {
 
     const currentUser = { ...getCurrentUserResult.data, profilePictureUrl: normalizeHttpUrl(getCurrentUserResult.data.profilePictureUrl) };
 
+    const getAllProductsResult = await handleGetAllProducts();
+    if (!getAllProductsResult.success) {
+        throw new Error(`Error fetching products data: ${getAllProductsResult.message}`);
+    }
+
+    const products = getAllProductsResult.data?.map((product) => ({
+        ...product,
+        productImageUrls: product.productImageUrls.map((productImageUrl) => normalizeHttpUrl(productImageUrl)).filter((url) => url !== null) as string[],
+    })) || [];
+
     return (
         <>
-            <ListProducts currentUser={currentUser} />
+            <ListProducts currentUser={currentUser} products={products}/>
         </>
     );
 };

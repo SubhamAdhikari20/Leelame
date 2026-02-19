@@ -116,8 +116,7 @@ const ListCategories = ({ currentUser, categories }: ListCategoriesPropsType) =>
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                                     <AlertDialogDescription>
-                                                        This action cannot be undone. This will permanently delete the category
-                                                        <strong> "{category.categoryName}"</strong> and remove its data from the system.
+                                                        This action cannot be undone. This will permanently delete the category <strong> "{category.categoryName}"</strong> and remove its data from the system.
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>

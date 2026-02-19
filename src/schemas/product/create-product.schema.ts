@@ -6,10 +6,10 @@ import { productNameValidation, productDescriptionValidation, productStartPriceV
 // Create Product Schema
 export const CreateProductSchema = z.object({
     productName: productNameValidation,
-    description: productDescriptionValidation.nullish(),
+    description: productDescriptionValidation,
     startPrice: productStartPriceValidation,
     bidIntervalPrice: productBidIntervalPriceValidation,
     endDate: z.date(),
-    categoryId: z.string()
+    categoryId: z.string().min(1, { message: "Select a category of the product" })
 });
 export type CreateProductSchemaType = z.infer<typeof CreateProductSchema>;

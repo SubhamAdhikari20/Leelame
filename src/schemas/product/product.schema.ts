@@ -21,12 +21,12 @@ export const productCommissionValidation = z
 
 export const productStartPriceValidation = z
     .number()
-    .min(0, { message: "Product Start Price must be a positive number" });
+    .min(1, { message: "Product Start Price must be a positive number greater than 0" });
 
 export const productCurrentBidPriceValidation = z
     .number()
-    .min(0, { message: "Product Current Bid Price must be a positive number" });
+    .min(1, { message: "Product Current Bid Price must be a positive number greater than 0" });
 
 export const productBidIntervalPriceValidation = z
     .number()
-    .min(0, { message: "Product Bid Interval Price must be a positive number" });
+    .min(1, { message: "Product Bid Interval Price must be a positive number greater than 0" });

@@ -10,6 +10,7 @@ export const UpdateProductSchema = z.object({
     startPrice: productStartPriceValidation,
     bidIntervalPrice: productBidIntervalPriceValidation,
     endDate: z.date(),
+    removedExisitingProductImageUrls: z.array(z.string()),
     categoryId: z.string()
 });
 export type UpdateProductSchemaType = z.infer<typeof UpdateProductSchema>;

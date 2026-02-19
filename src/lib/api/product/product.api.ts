@@ -11,9 +11,29 @@ export const createProduct = async (createProductSchema: CreateProductSchemaType
     try {
         let response;
         if (productImagesFromData) {
-            Object.entries(createProductSchema).forEach(([key, value]) => {
-                productImagesFromData.append(key, value as string);
-            });
+            productImagesFromData.append("productData", JSON.stringify(createProductSchema));
+            // Object.entries(createProductSchema).forEach(([key, value]) => {
+            //     // productImagesFromData.append(key, value as string);
+            // });
+            // Object.entries(createProductSchema).forEach(([key, value]) => {
+            //     if (value === undefined || value === null) {
+            //         return;
+            //     }
+
+            //     if (value instanceof Date) {
+            //         productImagesFromData.append(key, value.toISOString());
+            //         return;
+            //     }
+
+            //     if (typeof value === "object") {
+            //         // arrays/objects (e.g. tags) -> JSON string
+            //         productImagesFromData.append(key, JSON.stringify(value));
+            //         return;
+            //     }
+
+            //     // primitives (number | boolean | string)
+            //     productImagesFromData.append(key, String(value));
+            // });
             response = await axios.post<ProductApiResponseType>(API.PRODUCT.CREATE_PRODUCT, productImagesFromData, {
                 headers: {
                     "Content-Type": "multipart/form-data"
@@ -35,9 +55,11 @@ export const updateProduct = async (productId: string, updateProductSchema: Upda
     try {
         let response;
         if (productImagesFromData) {
-            Object.entries(updateProductSchema).forEach(([key, value]) => {
-                productImagesFromData.append(key, value as string);
-            });
+            productImagesFromData.append("productData", JSON.stringify(updateProductSchema));
+            // Object.entries(updateProductSchema).forEach(([key, value]) => {
+            //     productImagesFromData.append(key, JSON.stringify(value));
+            //     // productImagesFromData.append(key, value as string);
+            // });
             response = await axios.put<ProductApiResponseType>(`${API.PRODUCT.UPDATE_PRODUCT}/${productId}`, productImagesFromData, {
                 headers: {
                     "Content-Type": "multipart/form-data"
