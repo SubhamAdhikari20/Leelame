@@ -28,7 +28,8 @@ export const API = {
             GET_CURRENT_SELLER_USER: "/api/users/seller",
             UPDATE_PROFILE_DETAILS: "/api/users/seller/update-profile-details",
             DELETE_ACCOUNT: "/api/users/seller/delete-account",
-            UPLOAD_PROFILE_PICTURE: "/api/users/seller/upload-profile-picture"
+            UPLOAD_PROFILE_PICTURE: "/api/users/seller/upload-profile-picture",
+            GET_ALL_SELLERS: "/api/users/seller/get-all-sellers",
         },
         ADMIN: {
             SIGN_UP: "/api/users/admin/sign-up",
@@ -64,5 +65,5 @@ export const API = {
         DELETE_PRODUCT: "/api/product/delete-product",
         GET_ALL_PRODUCTS: "/api/product/get-all-products",
         GET_PRODUCT_BY_ID: "/api/product",
-    }
+    },
 };

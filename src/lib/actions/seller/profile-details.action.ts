@@ -1,6 +1,6 @@
 // src/lib/actions/seller/profile-details.action.ts
 "use server";
-import { deleteSellerAccount, updateSellerProfileDetails, getCurrentSellerUser, uploadSellerProfilePicture } from "@/lib/api/seller/profile-details.api.ts";
+import { deleteSellerAccount, updateSellerProfileDetails, getCurrentSellerUser, uploadSellerProfilePicture, getAllSellers } from "@/lib/api/seller/profile-details.api.ts";
 import type { UpdateProfileDetailsSchemaType } from "@/schemas/seller/update-profile-details.schema.ts";
 
 
@@ -95,6 +95,30 @@ export const handleDeleteSellerAccount = async (userId: string) => {
         return {
             success: false,
             message: error.message || "An unexpected error occurred during seller account deletion."
+        };
+    }
+};
+
+// Get All Sellers Handler
+export const handleGetAllSellers = async () => {
+    try {
+        const result = await getAllSellers();
+        if (!result.success) {
+            return {
+                success: false,
+                message: result.message || "Failed to fetch all the sellers!",
+            };
+        }
+        return {
+            success: true,
+            message: result.message || "All selles fetched successfully.",
+            data: result.users
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred while fetching all sellers!",
         };
     }
 };

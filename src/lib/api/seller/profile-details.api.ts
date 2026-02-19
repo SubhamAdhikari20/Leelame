@@ -1,7 +1,7 @@
 // src/lib/api/seller/profile-details.api.ts
 import axios, { AxiosErrorType } from "@/lib/api/axios.ts";
 import { API } from "@/lib/api/endpoints.ts";
-import type { SellerApiResponseType, UploadImageSellerApiResponseType } from "@/types/api-response.type.ts";
+import type { AllSellerApiResposeType, SellerApiResponseType, UploadImageSellerApiResponseType } from "@/types/api-response.type.ts";
 import type { UpdateProfileDetailsSchemaType } from "@/schemas/seller/update-profile-details.schema.ts";
 
 
@@ -54,5 +54,17 @@ export const deleteSellerAccount = async (userId: string) => {
     catch (error: Error | any) {
         const axiosError = error as AxiosErrorType;
         throw new Error(axiosError.response?.data.message || "Failed to delete seller account!");
+    }
+};
+
+// Get All Sellers Axios
+export const getAllSellers = async () => {
+    try {
+        const response = await axios.get<AllSellerApiResposeType>(API.AUTH.SELLER.GET_ALL_SELLERS);
+        return response.data;
+    }
+    catch (error: Error | any) {
+        const axiosError = error as AxiosErrorType;
+        throw new Error(axiosError.response?.data.message || "Failed to fetch sellers!");
     }
 };

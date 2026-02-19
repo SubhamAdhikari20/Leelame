@@ -37,7 +37,7 @@ import { handleDeleteProduct } from "@/lib/actions/product/product.action.ts";
 import type { ListProductsPropsType } from "@/types/seller-props.type.ts";
 
 
-const ListProducts = ({ currentUser, products }: ListProductsPropsType) => {
+const ListProducts = ({ currentUser, products, categories }: ListProductsPropsType) => {
     const router = useRouter();
 
     // Handle product delete

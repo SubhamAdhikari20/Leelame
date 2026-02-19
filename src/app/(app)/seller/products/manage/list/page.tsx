@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import ListProducts from "@/components/seller/list-products.tsx";
 import { handleGetCurrentSellerUser } from "@/lib/actions/seller/profile-details.action.ts";
 import { handleGetAllProducts } from "@/lib/actions/product/product.action.ts";
+import { handleGetAllCategories } from "@/lib/actions/category/category.action.ts";
 import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 
 
@@ -42,9 +43,16 @@ const SellerManageProducts = async () => {
         productImageUrls: product.productImageUrls.map((productImageUrl) => normalizeHttpUrl(productImageUrl)).filter((url) => url !== null) as string[],
     })) || [];
 
+    const getAllCategoriesResult = await handleGetAllCategories();
+    if (!getAllCategoriesResult.success) {
+        throw new Error(`Error fetching categories data: ${getAllCategoriesResult.message}`);
+    }
+
+    const categories = getAllCategoriesResult.data?.map((category) => (category)) || [];
+
     return (
         <>
-            <ListProducts currentUser={currentUser} products={products}/>
+            <ListProducts currentUser={currentUser} products={products} categories={categories} />
         </>
     );
 };
