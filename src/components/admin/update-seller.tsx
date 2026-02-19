@@ -11,16 +11,19 @@ import {
 } from "@/components/ui/field.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar.tsx";
 import { toast } from "sonner";
 import { Loader2, User2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { UpdateSellerAccountSchema, type UpdateSellerAccountSchemaType } from "@/schemas/admin/manage-seller-account.schema.ts";
 import { handleUpdateSellerProfileDetailsByAdmin, handleUploadSellerProfilePictureByAdmin } from "@/lib/actions/admin/manage-seller.action.ts";
 import type { UpdateSellerProfileDetailsPropsType } from "@/types/admin-props.type.ts";
-import Image from "next/image";
 
 
 const UpdateSeller = ({ currentUser, seller }: UpdateSellerProfileDetailsPropsType) => {
+    const router = useRouter();
+
     const [preview, setPreview] = useState("");
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -30,17 +33,17 @@ const UpdateSeller = ({ currentUser, seller }: UpdateSellerProfileDetailsPropsTy
     const updateSellerAccountForm = useForm<UpdateSellerAccountSchemaType>({
         resolver: zodResolver(UpdateSellerAccountSchema),
         defaultValues: {
-            fullName: seller?.fullName || "",
-            email: seller?.email || "",
-            contact: seller?.contact || "",
+            fullName: seller.fullName || "",
+            email: seller.email || "",
+            contact: seller.contact || "",
         }
     });
 
     useEffect(() => {
         updateSellerAccountForm.reset({
-            fullName: seller?.fullName || "",
-            email: seller?.email || "",
-            contact: seller?.contact || "",
+            fullName: seller.fullName || "",
+            email: seller.email || "",
+            contact: seller.contact || "",
         });
 
         setPreview("");
@@ -61,6 +64,7 @@ const UpdateSeller = ({ currentUser, seller }: UpdateSellerProfileDetailsPropsTy
             toast.success("Success", {
                 description: response.message
             });
+            router.refresh();
         }
         catch (error: Error | any) {
             console.error("Error updating seller account details by admin: ", error);
@@ -85,7 +89,7 @@ const UpdateSeller = ({ currentUser, seller }: UpdateSellerProfileDetailsPropsTy
             formData.append("profile-picture-seller", selectedFile, selectedFile.name);
             formData.append("folder", "profile-pictures/sellers");
 
-            const response = await handleUploadSellerProfilePictureByAdmin(seller!._id, formData);
+            const response = await handleUploadSellerProfilePictureByAdmin(seller._id, formData);
             if (!response.success) {
                 toast.error("Failed", {
                     description: response.message,
@@ -98,6 +102,7 @@ const UpdateSeller = ({ currentUser, seller }: UpdateSellerProfileDetailsPropsTy
             });
             // setPreview("");
             setSelectedFile(null);
+            router.refresh();
         }
         catch (error: Error | any) {
             console.error("Image upload failed: ", error);
@@ -139,12 +144,12 @@ const UpdateSeller = ({ currentUser, seller }: UpdateSellerProfileDetailsPropsTy
                         {preview || (seller && seller.profilePictureUrl) ? (
                             <Image
                                 fill
-                                src={preview ? preview : seller?.profilePictureUrl!}
-                                alt={seller?.fullName || "Admin"}
+                                src={preview ? preview : seller.profilePictureUrl!}
+                                alt={seller.fullName || "Admin"}
                             />
                         ) : (
                             <AvatarFallback className="text-6xl font-semibold text-gray-700 dark:text-gray-100">
-                                {(seller?.fullName || "NaN")
+                                {(seller.fullName || "NaN")
                                     .split(" ")
                                     .map((n) => n[0])
                                     .join("")

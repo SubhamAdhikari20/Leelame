@@ -66,4 +66,11 @@ export const API = {
         GET_ALL_PRODUCTS: "/api/product/get-all-products",
         GET_PRODUCT_BY_ID: "/api/product",
     },
+    PRODUCT_CONDITION: {
+        CREATE_PRODUCT_CONDITION: "/api/product-condition/create-product-condition",
+        UPDATE_PRODUCT_CONDITION: "/api/product-condition/update-product-condition-details",
+        DELETE_PRODUCT_CONDITION: "/api/product-condition/delete-product-condition",
+        GET_ALL_PRODUCT_CONDITIONS: "/api/product-condition/get-all-product-conditions",
+        GET_PRODUCT_CONDITION_BY_ID: "/api/product-condition",
+    },
 };

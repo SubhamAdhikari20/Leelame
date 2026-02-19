@@ -1,4 +1,4 @@
-// src/components/admin/update-category.tsx
+// src/components/admin/update-product-condition.tsx
 "use client";
 import React, { startTransition, useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -9,6 +9,14 @@ import {
     FieldGroup,
     FieldLabel
 } from "@/components/ui/field.tsx";
+import {
+    Combobox,
+    ComboboxContent,
+    ComboboxEmpty,
+    ComboboxInput,
+    ComboboxItem,
+    ComboboxList,
+} from "@/components/ui/combobox.tsx";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -23,41 +31,45 @@ import {
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Textarea } from "@/components/ui/textarea.tsx";
-import { Checkbox } from "@/components/ui/checkbox.tsx";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Loader2, Trash2 } from "lucide-react";
-import { handleDeleteCategory, handleUpdateCategory } from "@/lib/actions/category/category.action.ts";
-import { UpdateCategorySchema, type UpdateCategorySchemaType } from "@/schemas/category/update-category.schema.ts";
-import type { UpdateCategoryDetailsPropsType } from "@/types/admin-props.type.ts";
+import { handleDeleteProductCondition, handleUpdateProductCondition } from "@/lib/actions/product-condition/condition.action.ts";
+import { UpdateProductConditionSchema, type UpdateProductConditionSchemaType } from "@/schemas/product-condition/update-condition.schema.ts";
+import type { UpdateProductConditionDetailsPropsType } from "@/types/admin-props.type.ts";
 
 
-const UpdateCategory = ({ currentUser, category }: UpdateCategoryDetailsPropsType) => {
+const UpdateProductCondition = ({ currentUser, productCondition }: UpdateProductConditionDetailsPropsType) => {
     const router = useRouter();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const updateCategoryFrom = useForm<UpdateCategorySchemaType>({
-        resolver: zodResolver(UpdateCategorySchema),
+
+    const productConditionEnumValues = [
+        "NEW", "NEW_OTHER", "NEW_WITH_DEFECTS", "CERTIFIED_REFURBISHED", "EXCELLENT_REFURBISHED", "VERY_GOOD_REFURBISHED", "GOOD_REFURBISHED", "SELLER_REFURBISHED", "LIKE_NEW", "PRE_OWNED_EXCELLENT", "USED_EXCELLENT", "PRE_OWNED_FAIR", "USED_VERY_GOOD", "USED_GOOD", "USED_ACCEPTABLE", "FOR_PARTS_OR_NOT_WORKING"
+    ];
+
+    const updateProductConditionFrom = useForm<UpdateProductConditionSchemaType>({
+        resolver: zodResolver(UpdateProductConditionSchema),
         defaultValues: {
-            categoryName: category.categoryName || "",
-            description: category.description,
-            categoryStatus: category.categoryStatus || "inactive",
+            productConditionName: productCondition.productConditionName || "",
+            description: productCondition.description,
+            productConditionEnum: productCondition.productConditionEnum || "NEW",
         }
     });
 
     useEffect(() => {
-        updateCategoryFrom.reset({
-            categoryName: category.categoryName || "",
-            description: category.description,
-            categoryStatus: category.categoryStatus || "inactive",
+        updateProductConditionFrom.reset({
+            productConditionName: productCondition.productConditionName || "",
+            description: productCondition.description,
+            productConditionEnum: productCondition.productConditionEnum || "NEW",
         });
 
-    }, [category, updateCategoryFrom]);
+    }, [productCondition, updateProductConditionFrom]);
 
-    const onSubmit = async (data: UpdateCategorySchemaType) => {
+    const onSubmit = async (data: UpdateProductConditionSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await handleUpdateCategory(category._id, data);
+            const response = await handleUpdateProductCondition(productCondition._id, data);
             if (!response.success) {
                 toast.error("Failed", {
                     description: response.message
@@ -71,8 +83,8 @@ const UpdateCategory = ({ currentUser, category }: UpdateCategoryDetailsPropsTyp
             router.refresh();
         }
         catch (error: Error | any) {
-            console.error("Error updating category by admin: ", error);
-            toast.error("Error updating category by admin", {
+            console.error("Error updating product condition by admin: ", error);
+            toast.error("Error updating product condition by admin", {
                 description: error.message
             });
         }
@@ -81,9 +93,9 @@ const UpdateCategory = ({ currentUser, category }: UpdateCategoryDetailsPropsTyp
         }
     };
 
-    const handleDeleteCategoryById = async (categoryId: string) => {
+    const handleDeleteProductConditionById = async (conditionId: string) => {
         try {
-            const response = await handleDeleteCategory(categoryId);
+            const response = await handleDeleteProductCondition(conditionId);
             if (!response.success) {
                 toast.error("Failed", {
                     description: response.message,
@@ -96,18 +108,18 @@ const UpdateCategory = ({ currentUser, category }: UpdateCategoryDetailsPropsTyp
             startTransition(() => router.replace("/admin/product-conditions/manage/list"));
         }
         catch (error: Error | any) {
-            console.error("Error deleting category: ", error);
-            toast.error("Error deleting category", {
+            console.error("Error deleting product-condition: ", error);
+            toast.error("Error deleting product-condition", {
                 description: error.message
             });
         }
     };
 
     const handleClear = () => {
-        updateCategoryFrom.reset({
-            categoryName: "",
+        updateProductConditionFrom.reset({
+            productConditionName: "",
             description: null,
-            categoryStatus: "inactive"
+            productConditionEnum: "NEW"
         });
     };
 
@@ -115,7 +127,7 @@ const UpdateCategory = ({ currentUser, category }: UpdateCategoryDetailsPropsTyp
         <section className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-5">
-                    Update Category
+                    Update Product Condition
                 </h1>
 
                 <AlertDialog>
@@ -134,7 +146,7 @@ const UpdateCategory = ({ currentUser, category }: UpdateCategoryDetailsPropsTyp
                         <AlertDialogHeader>
                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the category <strong> "{category.categoryName}"</strong> and remove its data from the system.
+                                This action cannot be undone. This will permanently delete the product condition <strong> "{productCondition.productConditionName}"</strong> and remove its data from the system.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -142,7 +154,7 @@ const UpdateCategory = ({ currentUser, category }: UpdateCategoryDetailsPropsTyp
                             <AlertDialogAction
                                 variant="destructive"
                                 className="hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-500"
-                                onClick={() => handleDeleteCategoryById(category._id)}
+                                onClick={() => handleDeleteProductConditionById(productCondition._id)}
                             >
                                 Delete
                             </AlertDialogAction>
@@ -154,14 +166,14 @@ const UpdateCategory = ({ currentUser, category }: UpdateCategoryDetailsPropsTyp
             <div className="space-y-8 bg-white dark:bg-gray-900 border dark:border-gray-700 p-8 rounded-lg shadow-lg">
                 <div className="w-full max-w-2xl xl:max-w-xl">
                     <form
-                        id="create-category-form"
-                        onSubmit={updateCategoryFrom.handleSubmit(onSubmit)}
+                        id="create-productCondition-form"
+                        onSubmit={updateProductConditionFrom.handleSubmit(onSubmit)}
                         className="space-y-10"
                     >
                         <FieldGroup>
                             <Controller
-                                name="categoryName"
-                                control={updateCategoryFrom.control}
+                                name="productConditionName"
+                                control={updateProductConditionFrom.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor={field.name}>
@@ -182,7 +194,7 @@ const UpdateCategory = ({ currentUser, category }: UpdateCategoryDetailsPropsTyp
 
                             <Controller
                                 name="description"
-                                control={updateCategoryFrom.control}
+                                control={updateProductConditionFrom.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor={field.name}>
@@ -204,28 +216,33 @@ const UpdateCategory = ({ currentUser, category }: UpdateCategoryDetailsPropsTyp
                             />
 
                             <Controller
-                                name="categoryStatus"
-                                control={updateCategoryFrom.control}
+                                name="productConditionEnum"
+                                control={updateProductConditionFrom.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor={field.name}>
                                             Status
                                         </FieldLabel>
-                                        <div className="flex items-center gap-3">
-                                            <Checkbox
-                                                id="categoryStatus"
-                                                checked={field.value === "active"}
-                                                onCheckedChange={(checked) => {
-                                                    field.onChange(checked ? "active" : "inactive");
-                                                }}
-                                            />
-
-                                            <div className="space-y-1 leading-none">
-                                                <FieldLabel htmlFor={field.name}>
-                                                    {field.value === "active" ? "Active" : "Inactive"}
-                                                </FieldLabel>
-                                            </div>
-                                        </div>
+                                        <Combobox
+                                            items={productConditionEnumValues || []}
+                                            value={field.value}
+                                            onValueChange={(value) => field.onChange(value)}
+                                        >
+                                            <ComboboxInput placeholder="Select a category" />
+                                            <ComboboxContent>
+                                                <ComboboxEmpty>No items found.</ComboboxEmpty>
+                                                <ComboboxList>
+                                                    {(item) => (
+                                                        <ComboboxItem
+                                                            key={item}
+                                                            value={item}
+                                                        >
+                                                            {item}
+                                                        </ComboboxItem>
+                                                    )}
+                                                </ComboboxList>
+                                            </ComboboxContent>
+                                        </Combobox>
                                         {fieldState.invalid && (
                                             <FieldError errors={[fieldState.error]} />
                                         )}
@@ -276,4 +293,4 @@ const UpdateCategory = ({ currentUser, category }: UpdateCategoryDetailsPropsTyp
     );
 };
 
-export default UpdateCategory;
+export default UpdateProductCondition;

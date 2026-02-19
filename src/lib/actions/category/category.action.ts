@@ -12,7 +12,7 @@ export const handleCreateCategory = async (createCategorySchema: CreateCategoryS
         if (!result.success) {
             return {
                 success: false,
-                message: result.message || "Failed to create category."
+                message: result.message || "Failed to create category!"
             };
         }
         return {
@@ -24,7 +24,7 @@ export const handleCreateCategory = async (createCategorySchema: CreateCategoryS
     catch (error: Error | any) {
         return {
             success: false,
-            message: error.message || "An unexpected error occurred while creating category."
+            message: error.message || "An unexpected error occurred while creating category!"
         };
     }
 };
@@ -36,7 +36,7 @@ export const handleUpdateCategory = async (categoryId: string, updateCategorySch
         if (!result.success) {
             return {
                 success: false,
-                message: result.message || "Failed to update category."
+                message: result.message || "Failed to update category!"
             };
         }
         return {
@@ -48,7 +48,7 @@ export const handleUpdateCategory = async (categoryId: string, updateCategorySch
     catch (error: Error | any) {
         return {
             success: false,
-            message: error.message || "An unexpected error occurred while updating category."
+            message: error.message || "An unexpected error occurred while updating category!"
         };
     }
 };
@@ -60,7 +60,7 @@ export const handleDeleteCategory = async (categoryId: string) => {
         if (!result.success) {
             return {
                 success: false,
-                message: result.message || "Failed to delete category."
+                message: result.message || "Failed to delete category!"
             };
         }
         return {
@@ -71,7 +71,7 @@ export const handleDeleteCategory = async (categoryId: string) => {
     catch (error: Error | any) {
         return {
             success: false,
-            message: error.message || "An unexpected error occurred while deleting category."
+            message: error.message || "An unexpected error occurred while deleting category!"
         };
     }
 };
@@ -95,7 +95,7 @@ export const handleGetCategoryById = async (categoryId: string) => {
     catch (error: Error | any) {
         return {
             success: false,
-            message: error.message || "An unexpected error occurred while fetching category."
+            message: error.message || "An unexpected error occurred while fetching category!"
         };
     }
 };

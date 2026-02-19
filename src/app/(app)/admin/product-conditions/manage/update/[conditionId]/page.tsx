@@ -1,13 +1,16 @@
-// src/app/(app)/admin/categories/add/page.tsx
+// src/app/(app)/admin/product-conditions/manage/update/[conditionId]/page.tsx
 import React from "react";
 import { getServerSession } from "@/lib/get-server-session.ts";
 import { notFound, redirect } from "next/navigation";
-import AddCategory from "@/components/admin/add-category.tsx";
+import UpdateProductCondition from "@/components/admin/update-product-condition.tsx";
 import { handleGetCurrentAdminUser } from "@/lib/actions/admin/profile-details.action.ts";
+import { handleGetProductConditionById } from "@/lib/actions/product-condition/condition.action.ts";
 import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 
 
-const AddCategoryPage = async () => {
+const UpdateProductConditionPage = async ({ params }: { params: { conditionId: string } }) => {
+    const { conditionId } = await params;
+
     const response = await getServerSession();
     if (!response.success) {
         throw new Error(response.message ?? "Unknown");
@@ -30,11 +33,22 @@ const AddCategoryPage = async () => {
 
     const currentUser = { ...getCurrentUserResult.data, profilePictureUrl: normalizeHttpUrl(getCurrentUserResult.data.profilePictureUrl) };
 
+    const getProductConditionResult = await handleGetProductConditionById(conditionId);
+    if (!getProductConditionResult.success) {
+        throw new Error(`Error fetching product condition details: ${getProductConditionResult.message}`);
+    }
+
+    const productConditionData = getProductConditionResult.data;
+
+    if (!productConditionData) {
+        notFound();
+    }
+
     return (
         <>
-            <AddCategory currentUser={currentUser} />
+            <UpdateProductCondition currentUser={currentUser} productCondition={productConditionData} />
         </>
     );
 };
 
-export default AddCategoryPage;
+export default UpdateProductConditionPage;

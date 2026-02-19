@@ -10,9 +10,13 @@ export const categoryNameValidation = z
 
 export const categoryDescriptionValidation = z
     .string()
-    .min(5, { message: "Category Description must be atleast 5 characters long" })
     .max(500, { message: "Category Description must not exceed 500 characters" })
-    .regex(/^[a-zA-Z0-9 &.,!?]+$/, { message: "Category Description must contain only alphabets, numbers and basic punctuation" });
+    .regex(
+        /^[a-zA-Z0-9\s.,!?@#$%^&*()\-_+=\[\]{}|;:'"\\<>/`~]+$/i,
+        {
+            message: "Category Description can only contain letters, numbers, spaces, and common punctuation (brackets, quotes, hyphens, etc.)"
+        }
+    );
 
 export const categoryStatusValidation = z
     .enum(["active", "inactive"], { message: "Category Status must be either active or inactive" });

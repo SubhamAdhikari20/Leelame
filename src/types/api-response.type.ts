@@ -135,6 +135,32 @@ export type AllCategoriesApiResponseType = {
     data?: z.infer<typeof CategoryApiResponse>[] | null;
 };
 
+// -------------------------------- Product Condition Api Response -------------------------------
+// Product Category Api Response
+export const ProductConditionApiResponse = z.object({
+    _id: z.string(),
+    productConditionName: z.string(),
+    description: z.string().nullish(),
+    productConditionEnum: z.enum(["NEW", "NEW_OTHER", "NEW_WITH_DEFECTS", "CERTIFIED_REFURBISHED", "EXCELLENT_REFURBISHED", "VERY_GOOD_REFURBISHED", "GOOD_REFURBISHED", "SELLER_REFURBISHED", "LIKE_NEW", "PRE_OWNED_EXCELLENT", "USED_EXCELLENT", "PRE_OWNED_FAIR", "USED_VERY_GOOD", "USED_GOOD", "USED_ACCEPTABLE", "FOR_PARTS_OR_NOT_WORKING"]).default("NEW"),
+    createdAt: z.date().nullish(),
+    updatedAt: z.date().nullish(),
+});
+
+export type ProductConditionApiResponseType = {
+    success: boolean;
+    message: string;
+    status?: number | null;
+    data?: z.infer<typeof ProductConditionApiResponse> | null;
+};
+
+// All the product conditions api response
+export type AllProductConditionsApiResponseType = {
+    success: boolean;
+    message: string;
+    status?: number | null;
+    data?: z.infer<typeof ProductConditionApiResponse>[] | null;
+};
+
 // -------------------------------- Product Api Response -------------------------------
 // Product Api Response
 export const ProductApiResponse = z.object({

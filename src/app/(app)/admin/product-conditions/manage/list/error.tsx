@@ -1,4 +1,4 @@
-// src/app/(app)/admin/categories/manage/list/error.tsx
+// src/app/(app)/admin/product-conditions/manage/list/error.tsx
 "use client";
 import { Button } from "@/components/ui/button.tsx";
 import { useEffect } from "react";

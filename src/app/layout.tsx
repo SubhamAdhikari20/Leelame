@@ -3,7 +3,8 @@ import React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { GoogleOAuthProvider } from '@react-oauth/google';
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { TooltipProvider, } from "@/components/ui/tooltip.tsx";
 import { ThemeProvider } from "./context/theme-provider.tsx";
 import ThemedToaster from "@/components/themed-toaster.tsx";
 import AuthProvider from "./context/auth-provider.tsx";
@@ -45,7 +46,9 @@ const RootLayout = async ({
                     <AuthProvider>
                         <GoogleOAuthProvider clientId={googleClientId ?? ""}>
                             {/* <KnockClientWrapper> */}
-                            {children}
+                            <TooltipProvider>
+                                {children}
+                            </TooltipProvider>
                             {/* </KnockClientWrapper> */}
                         </GoogleOAuthProvider>
                     </AuthProvider>

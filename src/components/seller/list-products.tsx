@@ -56,8 +56,8 @@ const ListProducts = ({ currentUser, products, categories }: ListProductsPropsTy
             router.refresh();
         }
         catch (error: Error | any) {
-            console.error("Error deleting category: ", error);
-            toast.error("Error deleting category", {
+            console.error("Error deleting product: ", error);
+            toast.error("Error deleting product", {
                 description: error.message
             });
         }
@@ -75,11 +75,15 @@ const ListProducts = ({ currentUser, products, categories }: ListProductsPropsTy
             {!products || products.length === 0 ? (
                 <div className="rounded-md border p-8 text-center shadow-md">
                     <p className="text-lg font-medium mb-4">No products found</p>
-                    <p className="text-sm text-muted-foreground mb-6">There are no products in the system yet. Create one to get started.</p>
+                    <p className="text-sm text-muted-foreground mb-6">
+                        There are no products in the system yet. Create one to get started.
+                    </p>
                     <Button
                         className="bg-green-600 hover:bg-green-500 text-white"
                         onClick={() => router.push("/seller/products/add")}
-                    >New Product</Button>
+                    >
+                        New Product
+                    </Button>
                 </div>
             ) : (
                 <div className="overflow-x-auto rounded-md border shadow-sm">

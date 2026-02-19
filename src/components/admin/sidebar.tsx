@@ -73,6 +73,21 @@ const AdminSidebar = ({ currentUser, ...props }: CurrentUserPropsType & React.Co
             ],
         },
         {
+            title: "Product Conditions",
+            icon: ShoppingBag,
+            isActive: false,
+            items: [
+                {
+                    title: "Manage Conditions",
+                    path: "/admin/product-conditions/manage/list",
+                },
+                {
+                    title: "Add Conditions",
+                    path: "/admin/product-conditions/add",
+                },
+            ],
+        },
+        {
             title: "Settings",
             // path: "/settings",
             icon: Settings,

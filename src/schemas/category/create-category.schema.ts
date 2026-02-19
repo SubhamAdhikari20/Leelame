@@ -6,7 +6,7 @@ import { categoryNameValidation, categoryDescriptionValidation, categoryStatusVa
 // Create Category Schema
 export const CreateCategorySchema = z.object({
     categoryName: categoryNameValidation,
-    description: categoryDescriptionValidation,
+    description: categoryDescriptionValidation.nullish(),
     categoryStatus: categoryStatusValidation,
 });
 export type CreateCategorySchemaType = z.infer<typeof CreateCategorySchema>;

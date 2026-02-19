@@ -1,4 +1,4 @@
-// src/app/(app)/seller/settings/manage-seller/create/error.tsx
+// src/app/(app)/admin/categories/manage/update/[categoryId]/error.tsx
 "use client";
 import { Button } from "@/components/ui/button.tsx";
 import { useEffect } from "react";
@@ -8,12 +8,12 @@ const Error = ({
     error,
     reset,
 }: {
-    error: Error & { digest?: string }
-    reset: () => void
+    error: Error & { digest?: string };
+    reset: () => void;
 }) => {
     useEffect(() => {
-        console.error(error)
-    }, [error])
+        console.error(error);
+    }, [error]);
 
     return (
         <section className="min-h-[90vh] flex flex-col justify-center items-center px-4 py-12 sm:px-6 md:px-8 lg:px-12 xl:px-16">
@@ -27,7 +27,7 @@ const Error = ({
                 Try again
             </Button>
         </section>
-    )
+    );
 };
 
 export default Error;

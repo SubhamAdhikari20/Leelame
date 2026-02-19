@@ -1,13 +1,13 @@
-// src/app/(app)/admin/categories/add/page.tsx
+// src/app/(app)/admin/product-conditions/add/page.tsx
 import React from "react";
 import { getServerSession } from "@/lib/get-server-session.ts";
 import { notFound, redirect } from "next/navigation";
-import AddCategory from "@/components/admin/add-category.tsx";
+import AddProductCondition from "@/components/admin/add-product-condition.tsx";
 import { handleGetCurrentAdminUser } from "@/lib/actions/admin/profile-details.action.ts";
 import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 
 
-const AddCategoryPage = async () => {
+const AddProductConditionPage = async () => {
     const response = await getServerSession();
     if (!response.success) {
         throw new Error(response.message ?? "Unknown");
@@ -32,9 +32,9 @@ const AddCategoryPage = async () => {
 
     return (
         <>
-            <AddCategory currentUser={currentUser} />
+            <AddProductCondition currentUser={currentUser} />
         </>
     );
 };
 
-export default AddCategoryPage;
+export default AddProductConditionPage;

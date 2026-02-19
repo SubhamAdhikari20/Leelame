@@ -40,6 +40,10 @@ const UpdateCategoryPage = async ({ params }: { params: { categoryId: string } }
 
     const categoryData = getCategoryResult.data;
 
+    if (!categoryData) {
+        notFound();
+    }
+
     return (
         <>
             <UpdateCategory currentUser={currentUser} category={categoryData} />

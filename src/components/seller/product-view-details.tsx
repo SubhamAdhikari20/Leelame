@@ -75,8 +75,8 @@ const ProductViewDetails = ({ currentUser, product, categories }: ProductViewDet
             startTransition(() => router.replace("/seller/products/manage/list"));
         }
         catch (error: Error | any) {
-            console.error("Error deleting category: ", error);
-            toast.error("Error deleting category", {
+            console.error("Error deleting product: ", error);
+            toast.error("Error deleting product", {
                 description: error.message
             });
         }

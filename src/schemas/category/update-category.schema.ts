@@ -6,7 +6,7 @@ import { categoryNameValidation, categoryDescriptionValidation, categoryStatusVa
 // Update Category Schema
 export const UpdateCategorySchema = z.object({
     categoryName: categoryNameValidation,
-    description: categoryDescriptionValidation,
+    description: categoryDescriptionValidation.nullish(),
     categoryStatus: categoryStatusValidation,
 });
 export type UpdateCategorySchemaType = z.infer<typeof UpdateCategorySchema>;

@@ -1,4 +1,4 @@
-// src/components/admin/add-category.tsx
+// src/components/admin/add-product-condition.tsx
 "use client";
 import React, { startTransition, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -9,34 +9,46 @@ import {
     FieldGroup,
     FieldLabel
 } from "@/components/ui/field.tsx";
+import {
+    Combobox,
+    ComboboxContent,
+    ComboboxEmpty,
+    ComboboxInput,
+    ComboboxItem,
+    ComboboxList,
+} from "@/components/ui/combobox.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Textarea } from "@/components/ui/textarea.tsx";
-import { Checkbox } from "@/components/ui/checkbox.tsx";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { CreateCategorySchema, type CreateCategorySchemaType } from "@/schemas/category/create-category.schema.ts";
-import { handleCreateCategory } from "@/lib/actions/category/category.action.ts";
+import { CreateProductConditionSchema, type CreateProductConditionSchemaType } from "@/schemas/product-condition/create-condition.schema.ts";
+import { handleCreateProductCondition } from "@/lib/actions/product-condition/condition.action.ts";
 import type { CurrentUserPropsType } from "@/types/current-user.type.ts";
 
 
-const AddCategory = ({ currentUser }: CurrentUserPropsType) => {
+const AddProductCondition = ({ currentUser }: CurrentUserPropsType) => {
     const router = useRouter();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const createCategoryFrom = useForm<CreateCategorySchemaType>({
-        resolver: zodResolver(CreateCategorySchema),
+
+    const productConditionEnumValues = [
+        "NEW", "NEW_OTHER", "NEW_WITH_DEFECTS", "CERTIFIED_REFURBISHED", "EXCELLENT_REFURBISHED", "VERY_GOOD_REFURBISHED", "GOOD_REFURBISHED", "SELLER_REFURBISHED", "LIKE_NEW", "PRE_OWNED_EXCELLENT", "USED_EXCELLENT", "PRE_OWNED_FAIR", "USED_VERY_GOOD", "USED_GOOD", "USED_ACCEPTABLE", "FOR_PARTS_OR_NOT_WORKING"
+    ];
+
+    const createProductConditionFrom = useForm<CreateProductConditionSchemaType>({
+        resolver: zodResolver(CreateProductConditionSchema),
         defaultValues: {
-            categoryName: "",
-            categoryStatus: "inactive"
+            productConditionName: "",
+            productConditionEnum: "NEW"
         }
     });
 
-    const onSubmit = async (data: CreateCategorySchemaType) => {
+    const onSubmit = async (data: CreateProductConditionSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await handleCreateCategory(data);
+            const response = await handleCreateProductCondition(data);
             if (!response.success) {
                 toast.error("Failed", {
                     description: response.message
@@ -47,11 +59,11 @@ const AddCategory = ({ currentUser }: CurrentUserPropsType) => {
             toast.success("Success", {
                 description: response.message
             });
-            startTransition(() => router.replace("/admin/categories/manage/list"));
+            startTransition(() => router.replace("/admin/product-conditions/manage/list"));
         }
         catch (error: Error | any) {
-            console.error("Error creating category by admin: ", error);
-            toast.error("Error creating category by admin", {
+            console.error("Error creating product condition by admin: ", error);
+            toast.error("Error creating product condition by admin", {
                 description: error.message
             });
         }
@@ -62,29 +74,31 @@ const AddCategory = ({ currentUser }: CurrentUserPropsType) => {
 
     return (
         <section className="p-4 md:p-6">
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-5">Add Category</h1>
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-5">
+                Add Product Condition
+            </h1>
 
             <div className="space-y-8 bg-white dark:bg-gray-900 border dark:border-gray-700 p-8 rounded-lg shadow-lg">
                 <div className="w-full max-w-2xl xl:max-w-xl">
                     <form
-                        id="create-category-form"
-                        onSubmit={createCategoryFrom.handleSubmit(onSubmit)}
+                        id="create-productCondition-form"
+                        onSubmit={createProductConditionFrom.handleSubmit(onSubmit)}
                         className="space-y-10"
                     >
                         <FieldGroup>
                             <Controller
-                                name="categoryName"
-                                control={createCategoryFrom.control}
+                                name="productConditionName"
+                                control={createProductConditionFrom.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor={field.name}>
-                                            Name
+                                            Condition Name
                                         </FieldLabel>
                                         <Input
                                             {...field}
                                             id={field.name}
                                             aria-invalid={fieldState.invalid}
-                                            placeholder="Name"
+                                            placeholder="Condition Name"
                                         />
                                         {fieldState.invalid && (
                                             <FieldError errors={[fieldState.error]} />
@@ -95,7 +109,7 @@ const AddCategory = ({ currentUser }: CurrentUserPropsType) => {
 
                             <Controller
                                 name="description"
-                                control={createCategoryFrom.control}
+                                control={createProductConditionFrom.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor={field.name}>
@@ -117,28 +131,32 @@ const AddCategory = ({ currentUser }: CurrentUserPropsType) => {
                             />
 
                             <Controller
-                                name="categoryStatus"
-                                control={createCategoryFrom.control}
+                                name="productConditionEnum"
+                                control={createProductConditionFrom.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor={field.name}>
-                                            Status
+                                            Condition Enum
                                         </FieldLabel>
-                                        <div className="flex items-center gap-3">
-                                            <Checkbox
-                                                id="categoryStatus"
-                                                checked={field.value === "active"}
-                                                onCheckedChange={(checked) => {
-                                                    field.onChange(checked ? "active" : "inactive");
-                                                }}
-                                            />
-
-                                            <div className="space-y-1 leading-none">
-                                                <FieldLabel htmlFor={field.name}>
-                                                    {field.value === "active" ? "Active" : "Inactive"}
-                                                </FieldLabel>
-                                            </div>
-                                        </div>
+                                        <Combobox
+                                            items={productConditionEnumValues || []}
+                                            onValueChange={(value) => field.onChange(value)}
+                                        >
+                                            <ComboboxInput placeholder="Select a category" />
+                                            <ComboboxContent>
+                                                <ComboboxEmpty>No items found.</ComboboxEmpty>
+                                                <ComboboxList>
+                                                    {(item) => (
+                                                        <ComboboxItem
+                                                            key={item}
+                                                            value={item}
+                                                        >
+                                                            {item}
+                                                        </ComboboxItem>
+                                                    )}
+                                                </ComboboxList>
+                                            </ComboboxContent>
+                                        </Combobox>
                                         {fieldState.invalid && (
                                             <FieldError errors={[fieldState.error]} />
                                         )}
@@ -177,8 +195,8 @@ const AddCategory = ({ currentUser }: CurrentUserPropsType) => {
                 </div>
             </div>
 
-        </section>
+        </section >
     );
 };
 
-export default AddCategory;
+export default AddProductCondition;
