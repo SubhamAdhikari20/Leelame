@@ -36,7 +36,7 @@ import { handleCreateProduct } from "@/lib/actions/product/product.action.ts";
 import type { AddProductPropsType } from "@/types/seller-props.type.ts";
 
 
-const AddProduct = ({ currentUser, categories }: AddProductPropsType) => {
+const AddProduct = ({ currentUser, categories, productConditions }: AddProductPropsType) => {
     const router = useRouter();
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -50,11 +50,11 @@ const AddProduct = ({ currentUser, categories }: AddProductPropsType) => {
         resolver: zodResolver(CreateProductSchema),
         defaultValues: {
             productName: "",
-            description: "",
             startPrice: 0,
             bidIntervalPrice: 0,
             endDate: new Date(),
             categoryId: "",
+            conditionId: "",
         }
     });
 
@@ -210,6 +210,7 @@ const AddProduct = ({ currentUser, categories }: AddProductPropsType) => {
                                         <Textarea
                                             {...field}
                                             id={field.name}
+                                            value={field.value || undefined}
                                             aria-invalid={fieldState.invalid}
                                             placeholder="Type your description here"
                                             className="bg-white text-[#1A202C] dark:text-gray-100 placeholder:text-[#A0AEC0] min-h-50 max-h-75"
@@ -247,6 +248,44 @@ const AddProduct = ({ currentUser, categories }: AddProductPropsType) => {
                                                             value={item.categoryName}
                                                         >
                                                             {item.categoryName}
+                                                        </ComboboxItem>
+                                                    )}
+                                                </ComboboxList>
+                                            </ComboboxContent>
+                                        </Combobox>
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
+
+                            <Controller
+                                name="conditionId"
+                                control={createProductFrom.control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor={field.name}>
+                                            Condition
+                                        </FieldLabel>
+                                        <Combobox
+                                            items={productConditions || []}
+                                            // value={productConditions?.find(condition => condition._id === field.value)?.productConditionName || ""}
+                                            onValueChange={(value) => {
+                                                const selected = productConditions?.find(condition => condition.productConditionName === value);
+                                                field.onChange(selected?._id || "");
+                                            }}
+                                        >
+                                            <ComboboxInput placeholder="Select a condition" />
+                                            <ComboboxContent>
+                                                <ComboboxEmpty>No items found.</ComboboxEmpty>
+                                                <ComboboxList>
+                                                    {(item) => (
+                                                        <ComboboxItem
+                                                            key={item._id.toString()}
+                                                            value={item.productConditionName}
+                                                        >
+                                                            {item.productConditionName}
                                                         </ComboboxItem>
                                                     )}
                                                 </ComboboxList>

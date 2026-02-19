@@ -51,7 +51,6 @@ const UpdateCategory = ({ currentUser, category }: UpdateCategoryDetailsPropsTyp
             description: category.description,
             categoryStatus: category.categoryStatus || "inactive",
         });
-
     }, [category, updateCategoryFrom]);
 
     const onSubmit = async (data: UpdateCategorySchemaType) => {

@@ -27,6 +27,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog.tsx";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area.tsx";
 import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button.tsx";
@@ -37,7 +38,7 @@ import { handleDeleteProduct } from "@/lib/actions/product/product.action.ts";
 import type { ListProductsPropsType } from "@/types/seller-props.type.ts";
 
 
-const ListProducts = ({ currentUser, products, categories }: ListProductsPropsType) => {
+const ListProducts = ({ currentUser, products, categories, productConditions }: ListProductsPropsType) => {
     const router = useRouter();
 
     // Handle product delete
@@ -86,16 +87,19 @@ const ListProducts = ({ currentUser, products, categories }: ListProductsPropsTy
                     </Button>
                 </div>
             ) : (
+                // <ScrollArea className="w-full whitespace-nowrap">
                 <div className="overflow-x-auto rounded-md border shadow-sm">
                     <Table>
                         <TableHeader className="bg-green-600 hover:bg-green-500">
                             <TableRow>
                                 <TableHead className="text-white font-semibold text-[16px]"></TableHead>
                                 <TableHead className="text-white font-semibold text-[16px]">Name</TableHead>
+                                <TableHead className="text-white font-semibold text-[16px]">Category</TableHead>
+                                <TableHead className="text-white font-semibold text-[16px]">Condition</TableHead>
                                 <TableHead className="text-white font-semibold text-[16px]">Commission (%)</TableHead>
-                                <TableHead className="text-white font-semibold text-[16px]">Start Price</TableHead>
+                                {/* <TableHead className="text-white font-semibold text-[16px]">Start Price</TableHead> */}
                                 <TableHead className="text-white font-semibold text-[16px]">Current Bid Price</TableHead>
-                                <TableHead className="text-white font-semibold text-[16px]">Bid Interval Price</TableHead>
+                                {/* <TableHead className="text-white font-semibold text-[16px]">Bid Interval Price</TableHead> */}
                                 <TableHead className="text-white font-semibold text-[16px]">End Date</TableHead>
                                 <TableHead className="text-white font-semibold text-[16px]"></TableHead>
                             </TableRow>
@@ -125,10 +129,16 @@ const ListProducts = ({ currentUser, products, categories }: ListProductsPropsTy
                                         </div>
                                     </TableCell>
                                     <TableCell>{product.productName}</TableCell>
+                                    <TableCell>
+                                        {categories?.find(category => category._id === product.categoryId)?.categoryName}
+                                    </TableCell>
+                                    <TableCell>
+                                        {productConditions?.find(condition => condition._id === product.conditionId)?.productConditionName}
+                                    </TableCell>
                                     <TableCell>{product.commission}</TableCell>
-                                    <TableCell>{product.startPrice}</TableCell>
+                                    {/* <TableCell>{product.startPrice}</TableCell> */}
                                     <TableCell>{product.currentBidPrice}</TableCell>
-                                    <TableCell>{product.bidIntervalPrice}</TableCell>
+                                    {/* <TableCell>{product.bidIntervalPrice}</TableCell> */}
                                     <TableCell>{format(product.endDate, "PPp")}</TableCell>
                                     <TableCell className="text-center flex gap-2">
                                         <DropdownMenu>
@@ -186,6 +196,8 @@ const ListProducts = ({ currentUser, products, categories }: ListProductsPropsTy
                         </TableBody>
                     </Table>
                 </div>
+                //     <ScrollBar orientation="horizontal" />
+                // </ScrollArea>
             )}
         </section>
     );

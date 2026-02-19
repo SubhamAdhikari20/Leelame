@@ -1,6 +1,6 @@
 // src/components/seller/update-product.tsx
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -36,7 +36,7 @@ import { handleUpdateProduct } from "@/lib/actions/product/product.action.ts";
 import type { UpdateProductPropsType } from "@/types/seller-props.type.ts";
 
 
-const UpdateProduct = ({ currentUser, product, categories }: UpdateProductPropsType) => {
+const UpdateProduct = ({ currentUser, product, categories, productConditions }: UpdateProductPropsType) => {
     const router = useRouter();
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -49,15 +49,29 @@ const UpdateProduct = ({ currentUser, product, categories }: UpdateProductPropsT
     const updateProductFrom = useForm<UpdateProductSchemaType>({
         resolver: zodResolver(UpdateProductSchema),
         defaultValues: {
-            productName: product?.productName || "",
-            description: product?.description || "",
-            startPrice: product?.startPrice || 0,
+            productName: product.productName || "",
+            description: product.description,
+            startPrice: product.startPrice || 0,
             bidIntervalPrice: product?.bidIntervalPrice || 0,
-            endDate: product?.endDate ? new Date(product.endDate) : new Date(),
-            categoryId: product?.categoryId || "",
+            endDate: product.endDate ? new Date(product.endDate) : new Date(),
+            categoryId: product.categoryId || "",
+            conditionId: product.conditionId || "",
             removedExisitingProductImageUrls: []
         }
     });
+
+    useEffect(() => {
+        updateProductFrom.reset({
+            productName: product.productName || "",
+            description: product.description,
+            startPrice: product.startPrice || 0,
+            bidIntervalPrice: product.bidIntervalPrice || 0,
+            endDate: product.endDate ? new Date(product.endDate) : new Date(),
+            categoryId: product.categoryId || "",
+            conditionId: product.conditionId || "",
+            removedExisitingProductImageUrls: []
+        });
+    }, [product, updateProductFrom]);
 
     const onSubmit = async (data: UpdateProductSchemaType) => {
         setIsSubmitting(true);
@@ -277,6 +291,45 @@ const UpdateProduct = ({ currentUser, product, categories }: UpdateProductPropsT
                                             </ComboboxContent>
                                         </Combobox>
                                         {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                                    </Field>
+                                )}
+                            />
+
+                            {/* Condition Combobox */}
+                            <Controller
+                                name="conditionId"
+                                control={updateProductFrom.control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor={field.name}>
+                                            Condition
+                                        </FieldLabel>
+                                        <Combobox
+                                            items={productConditions || []}
+                                            value={productConditions?.find(condition => condition._id === field.value)?.productConditionName || ""}
+                                            onValueChange={(value) => {
+                                                const selected = productConditions?.find(condition => condition.productConditionName === value);
+                                                field.onChange(selected?._id || "");
+                                            }}
+                                        >
+                                            <ComboboxInput placeholder="Select a condition" />
+                                            <ComboboxContent>
+                                                <ComboboxEmpty>No items found.</ComboboxEmpty>
+                                                <ComboboxList>
+                                                    {(item) => (
+                                                        <ComboboxItem
+                                                            key={item._id.toString()}
+                                                            value={item.productConditionName}
+                                                        >
+                                                            {item.productConditionName}
+                                                        </ComboboxItem>
+                                                    )}
+                                                </ComboboxList>
+                                            </ComboboxContent>
+                                        </Combobox>
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
                                     </Field>
                                 )}
                             />

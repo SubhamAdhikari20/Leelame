@@ -41,8 +41,6 @@ import {
     DialogHeader,
     DialogTitle
 } from "@/components/ui/dialog.tsx";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar.tsx";
-import { Calendar } from "@/components/ui/calendar.tsx";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button.tsx";
 import { toast } from "sonner";
@@ -53,7 +51,7 @@ import { handleDeleteProduct } from "@/lib/actions/product/product.action.ts";
 import type { ProductViewDetailsPropsType } from "@/types/seller-props.type.ts";
 
 
-const ProductViewDetails = ({ currentUser, product, categories }: ProductViewDetailsPropsType) => {
+const ProductViewDetails = ({ currentUser, product, categories, productConditions }: ProductViewDetailsPropsType) => {
     const router = useRouter();
 
     const plugin = useRef(
@@ -185,8 +183,15 @@ const ProductViewDetails = ({ currentUser, product, categories }: ProductViewDet
                     <CardHeader className="pb-2">
                         <CardTitle className="text-lg md:text-xl">{product?.productName}</CardTitle>
                         {currentUser?._id === product?.sellerId &&
-                            <CardDescription className="text-muted-foreground text-[12px]">
-                                Listed by: {currentUser?.fullName}
+                            <CardDescription className="flex items-center justify-between text-muted-foreground text-[12px]">
+                                <span>
+                                    Listed by: {currentUser?.fullName}
+                                </span>
+                                {productConditions &&
+                                    <span>
+                                        Condition: {productConditions.find(condition => condition._id === product.conditionId)?.productConditionName}
+                                    </span>
+                                }
                             </CardDescription>
                         }
 
@@ -210,14 +215,16 @@ const ProductViewDetails = ({ currentUser, product, categories }: ProductViewDet
                     </CardHeader>
 
                     <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between pb-2 border-b dark:border-gray-800">
-                            <span className="text-[13px] md:text-[15px] text-gray-500 dark:text-gray-400">
-                                Category
-                            </span>
-                            <span className="text-sm md:text-[16px] text-gray-600 dark:text-gray-200">
-                                {categories?.find(category => category._id === product?.categoryId)?.categoryName}
-                            </span>
-                        </div>
+                        {categories &&
+                            <div className="flex items-center justify-between pb-2 border-b dark:border-gray-800">
+                                <span className="text-[13px] md:text-[15px] text-gray-500 dark:text-gray-400">
+                                    Category
+                                </span>
+                                <span className="text-sm md:text-[16px] text-gray-600 dark:text-gray-200">
+                                    {categories.find(category => category._id === product.categoryId)?.categoryName}
+                                </span>
+                            </div>
+                        }
 
                         <div className="flex items-center justify-between">
                             <div>

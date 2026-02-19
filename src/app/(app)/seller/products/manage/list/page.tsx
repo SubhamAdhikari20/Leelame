@@ -6,6 +6,7 @@ import ListProducts from "@/components/seller/list-products.tsx";
 import { handleGetCurrentSellerUser } from "@/lib/actions/seller/profile-details.action.ts";
 import { handleGetAllProducts } from "@/lib/actions/product/product.action.ts";
 import { handleGetAllCategories } from "@/lib/actions/category/category.action.ts";
+import { handleGetAllProductConditions } from "@/lib/actions/product-condition/condition.action.ts";
 import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 
 
@@ -50,9 +51,16 @@ const SellerManageProducts = async () => {
 
     const categories = getAllCategoriesResult.data?.map((category) => (category)) || [];
 
+    const getAllProductConditionsResult = await handleGetAllProductConditions();
+    if (!getAllProductConditionsResult.success) {
+        throw new Error(`Error fetching product conditions data: ${getAllProductConditionsResult.message}`);
+    }
+
+    const productConditions = getAllProductConditionsResult.data?.map((productCondition) => (productCondition)) || [];
+
     return (
         <>
-            <ListProducts currentUser={currentUser} products={products} categories={categories} />
+            <ListProducts currentUser={currentUser} products={products} categories={categories} productConditions={productConditions} />
         </>
     );
 };

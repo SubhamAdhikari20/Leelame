@@ -63,7 +63,6 @@ const UpdateProductCondition = ({ currentUser, productCondition }: UpdateProduct
             description: productCondition.description,
             productConditionEnum: productCondition.productConditionEnum || "NEW",
         });
-
     }, [productCondition, updateProductConditionFrom]);
 
     const onSubmit = async (data: UpdateProductConditionSchemaType) => {

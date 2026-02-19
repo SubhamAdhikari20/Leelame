@@ -6,7 +6,8 @@ export const categoryNameValidation = z
     .string()
     .min(2, { message: "Category Name must be atleast 2 characters long" })
     .max(50, { message: "Category Name must not exceed 50 characters" })
-    .regex(/^[a-zA-Z0-9 &]+$/, { message: "Category Name must contain only alphabets, numbers and spaces" });
+    .regex(/^[a-zA-Z0-9 &()\-_\[\]{}|/]+$/, { message: "Category Name must contain only alphabets, numbers, spaces, and common punctuation (brackets, slash, hyphens, etc." });
+// .regex(/^[a-zA-Z0-9 &]+$/, { message: "Category Name must contain only alphabets, numbers and spaces" });
 
 export const categoryDescriptionValidation = z
     .string()
