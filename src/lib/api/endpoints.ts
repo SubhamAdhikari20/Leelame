@@ -13,10 +13,11 @@ export const API = {
             FORGOT_PASSWORD: "/api/users/buyer/forgot-password",
             VERIFY_ACCOUNT_RESET_PASSWORD: "/api/users/buyer/verify-account/reset-password",
             RESET_PASSWORD: "/api/users/buyer/reset-password",
-            GET_CURRENT_BUYER_USER: "/api/users/buyer",
+            GET_CURRENT_BUYER_USER: "/api/users/buyer/get-current-buyer",
             UPDATE_PROFILE_DETAILS: "/api/users/buyer/update-profile-details",
+            UPLOAD_PROFILE_PICTURE: "/api/users/buyer/upload-profile-picture",
             DELETE_ACCOUNT: "/api/users/buyer/delete-account",
-            UPLOAD_PROFILE_PICTURE: "/api/users/buyer/upload-profile-picture"
+            GET_BUYER_BY_ID: "/api/users/buyer",
         },
         SELLER: {
             SIGN_UP: "/api/users/seller/sign-up",
@@ -25,10 +26,11 @@ export const API = {
             VERIFY_ACCOUNT_REGISTRATION: "/api/users/seller/verify-account-registration",
             FORGOT_PASSWORD: "/api/users/seller/forgot-password",
             RESET_PASSWORD: "/api/users/seller/reset-password",
-            GET_CURRENT_SELLER_USER: "/api/users/seller",
+            GET_CURRENT_SELLER_USER: "/api/users/seller/get-current-seller",
             UPDATE_PROFILE_DETAILS: "/api/users/seller/update-profile-details",
-            DELETE_ACCOUNT: "/api/users/seller/delete-account",
             UPLOAD_PROFILE_PICTURE: "/api/users/seller/upload-profile-picture",
+            DELETE_ACCOUNT: "/api/users/seller/delete-account",
+            GET_SELLER_BY_ID: "/api/users/seller",
             GET_ALL_SELLERS: "/api/users/seller/get-all-sellers",
         },
         ADMIN: {

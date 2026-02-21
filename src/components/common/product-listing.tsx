@@ -4,27 +4,27 @@ import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button.tsx";
 import ProductCard from "@/components/buyer/product-card.tsx";
 import BidDialog from "@/components/buyer/bid-dialog.tsx";
-import type { ProductListingPropsType } from "@/types/common-props.type.ts";
+import type { ProductListingPropsType, ProductPropsType } from "@/types/common-props.type.ts";
 
 
-const ProductListing = ({ currentUser, products, categories, sellers }: ProductListingPropsType) => {
+const ProductListing = ({ currentUser, products, categories, sellers, productConditions }: ProductListingPropsType) => {
+    const [selectedProduct, setSelectedProduct] = useState<ProductPropsType | null>(null);
+    const [dialogOpen, setDialogOpen] = useState(false);
+
     const pageSize = 8;
     const [page, setPage] = useState(1);
     const total = products?.length ?? 0;
     const totalPages = Math.ceil(total / pageSize);
 
-    const paged = useMemo(() => {
-        const start = (page - 1) * pageSize;
-        return products?.slice(start, start + pageSize);
-    }, [page, products]);
-
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    const [dialogOpen, setDialogOpen] = useState(false);
-
-    const openBidDialog = (product: any) => {
-        setSelectedProduct(product);
+    const openBidDialog = (productData: ProductPropsType) => {
+        setSelectedProduct(productData);
         setDialogOpen(true);
     };
+
+    // const paged = useMemo(() => {
+    //     const start = (page - 1) * pageSize;
+    //     return products?.slice(start, start + pageSize);
+    // }, [page, products]);
 
     // const handlePlaceBid = ({ productId, bidAmount, quantity }: { productId: string; bidAmount: number; quantity: number }) => {
     //     // hook this to your API: place bid -> update product.currentBid and bids count
@@ -56,21 +56,28 @@ const ProductListing = ({ currentUser, products, categories, sellers }: ProductL
                 </div>
             </header>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {products?.map((product) => {
-                    const seller = sellers?.find((seller) => seller._id === product.sellerId);
-                    const category = categories?.find((category) => category._id === product.categoryId);
+            {products &&
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {products.map((product) => {
+                        const seller = sellers?.find((seller) => seller._id === product.sellerId);
+                        const category = categories?.find((category) => category._id === product.categoryId);
+                        const condition = productConditions?.find((condition) => condition._id === product.conditionId);
 
-                    return seller && category ?
-                        <ProductCard
-                            key={product._id}
-                            product={product}
-                            category={category}
-                            seller={seller}
-                            onBid={() => openBidDialog(product)}
-                        /> : null;
-                })}
-            </div>
+                        return seller && category && condition ?
+                            <>
+                                <ProductCard
+                                    key={product._id}
+                                    product={product}
+                                    category={category}
+                                    seller={seller}
+                                    productCondition={condition}
+                                    onBid={() => openBidDialog({ product, seller, category, condition })}
+                                />
+                            </>
+                            : null;
+                    })}
+                </div>
+            }
 
             {/* Pagination */}
             {totalPages > 1 && (
@@ -84,12 +91,15 @@ const ProductListing = ({ currentUser, products, categories, sellers }: ProductL
             )}
 
             {/* Bid Dialog */}
-            <BidDialog
-                open={dialogOpen}
-                onOpenChange={(o) => setDialogOpen(o)}
-                product={selectedProduct}
-                onPlaceBid={handlePlaceBid}
-            />
+            {selectedProduct && (
+                <BidDialog
+                    open={dialogOpen}
+                    onOpenChange={(o) => setDialogOpen(o)}
+                    product={selectedProduct.product}
+                    seller={selectedProduct.seller}
+                    onPlaceBid={handlePlaceBid}
+                />
+            )}
         </section>
     );
 };

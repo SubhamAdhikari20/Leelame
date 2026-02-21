@@ -15,7 +15,7 @@ export const getCurrentBuyerUser = async (userId: string) => {
         const axiosError = error as AxiosErrorType;
         throw new Error(axiosError.response?.data.message || "Failed to fetch current buyer user!");
     }
-}
+};
 
 // Update Profile Details Axios
 export const updateBuyerProfileDetails = async (userId: string, buyerProfileData: UpdateProfileDetailsSchemaType) => {
@@ -54,5 +54,17 @@ export const deleteBuyerAccount = async (userId: string) => {
     catch (error: Error | any) {
         const axiosError = error as AxiosErrorType;
         throw new Error(axiosError.response?.data.message || "Failed to delete buyer account!");
+    }
+};
+
+// Get Buyer By ID Axios
+export const getBuyerById = async (buyerId: string) => {
+    try {
+        const response = await axios.get<BuyerApiResponseType>(`${API.AUTH.BUYER.GET_BUYER_BY_ID}/${buyerId}`);
+        return response.data;
+    }
+    catch (error: Error | any) {
+        const axiosError = error as AxiosErrorType;
+        throw new Error(axiosError.response?.data.message || "Failed to fetch current seller user!");
     }
 };

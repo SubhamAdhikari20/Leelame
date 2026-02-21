@@ -22,16 +22,11 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { bidSchema } from "@/schemas/bid.schema.ts";
 import * as z from "zod";
+import type { BidDialogBoxPublicPropsType } from "@/types/common-props.type.ts";
+import Image from "next/image";
 
 
-type BidDialogPropsType = {
-    open: any;
-    product: any;
-    onOpenChange: (bool: boolean) => void;
-    onPlaceBid: (data: any) => void;
-}
-
-const BidDialog = ({ open, onOpenChange, product, onPlaceBid }: BidDialogPropsType) => {
+const BidDialog = ({ product, seller, open, onOpenChange, onPlaceBid }: BidDialogBoxPublicPropsType) => {
     const [placing, setPlacing] = useState(false);
 
     const bidForm = useForm({
@@ -57,7 +52,7 @@ const BidDialog = ({ open, onOpenChange, product, onPlaceBid }: BidDialogPropsTy
 
         const bidAmount = Number(data.bidAmount);
         const quantity = Number(data.quantity);
-        const current = Number(product.currentBid) / 100;
+        const current = Number(product.currentBidPrice) / 100;
 
         if (bidAmount <= current) {
             return toast.error(`Your bid must be greater than current bid (₹${current.toFixed(2)})`);
@@ -97,72 +92,84 @@ const BidDialog = ({ open, onOpenChange, product, onPlaceBid }: BidDialogPropsTy
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-6 py-4 mb-2">
                     {/* Left: Product Description */}
                     <div className="space-y-4">
-                        <div className="w-full h-44 rounded-md overflow-hidden bg-gray-100">
-                            <img
-                                src={product?.image}
-                                alt={product?.title}
-                                className="w-full h-full object-cover"
-                            />
+                        <div className="relative w-full h-44 rounded-md overflow-hidden bg-gray-100">
+                            {product && product.productImageUrls && product.productImageUrls.length > 0 ? (
+                                <Image
+                                    src={product.productImageUrls[0]}
+                                    alt={product.productName || "Product"}
+                                    fill
+                                    className="object-cover"
+                                />
+                            ) : (
+                                <div>
+                                    {(product?.productName || "NaN")
+                                        .split(" ")
+                                        .map((n) => n[0])
+                                        .join("")
+                                        .slice(0, 2)
+                                        .toUpperCase()}
+                                </div>
+                            )}
                         </div>
 
                         <div>
-                            <h3 className="text-lg font-medium">{product?.title}</h3>
+                            <h3 className="text-lg font-medium">{product.productName}</h3>
                             <p className="text-sm text-muted-foreground mt-1">
                                 by{" "}
                                 <span className="font-medium">
-                                    {product?.seller?.name}
+                                    {seller.fullName}
                                 </span>
                             </p>
                             <p className="text-sm text-muted-foreground mt-2">
                                 Current bid:{" "}
                                 <span className="font-semibold">
-                                    {formatAmount(product?.currentBid)}
+                                    {formatAmount(product.currentBidPrice)}
                                 </span>
                             </p>
                         </div>
                     </div>
 
-                    {/* Right: Bid Form */}
                     <form
                         id="bid-form"
                         onSubmit={bidForm.handleSubmit(handlePlaceBid)}
-                        className="space-y-4"
                     >
-                        <FieldGroup>
-                            <Controller
-                                name="bidAmount"
-                                control={bidForm.control}
-                                render={({ field, fieldState }) => (
-                                    <Field data-invalid={fieldState.invalid}>
-                                        <FieldLabel htmlFor={field.name}>
-                                            Your bid (GBP)
-                                        </FieldLabel>
-                                        <Input
-                                            {...field}
-                                            id={field.name}
-                                            aria-invalid={fieldState.invalid}
-                                            placeholder={(
-                                                (product?.currentBid || 0) + 1
-                                            ).toFixed(2)}
-                                            type="number"
-                                            step="5"
-                                            min="0"
-                                        // autoComplete="off"
-                                        />
-                                        {fieldState.invalid && (
-                                            <FieldError errors={[fieldState.error]} />
+                        <div className="flex flex-col justify-between w-full h-full">
+                            <div className="space-y-4">
+                                <FieldGroup>
+                                    <Controller
+                                        name="bidAmount"
+                                        control={bidForm.control}
+                                        render={({ field, fieldState }) => (
+                                            <Field data-invalid={fieldState.invalid}>
+                                                <FieldLabel htmlFor={field.name}>
+                                                    Your bid (GBP)
+                                                </FieldLabel>
+                                                <Input
+                                                    {...field}
+                                                    id={field.name}
+                                                    aria-invalid={fieldState.invalid}
+                                                    placeholder={(
+                                                        (product.currentBidPrice || 0) + 1
+                                                    ).toFixed(2)}
+                                                    type="number"
+                                                    step="5"
+                                                    min="0"
+                                                // autoComplete="off"
+                                                />
+                                                {fieldState.invalid && (
+                                                    <FieldError errors={[fieldState.error]} />
+                                                )}
+                                            </Field>
                                         )}
-                                    </Field>
-                                )}
-                            />
+                                    />
 
-                            <Controller
+                                    {/* <Controller
                                 name="quantity"
                                 control={bidForm.control}
                                 render={({ field, fieldState }) => (
                                     <Field data-invalid={fieldState.invalid}>
                                         <FieldLabel htmlFor={field.name}>
-                                            Quantity ({product?.quantityAvailable ?? 1} available)
+                                            Quantity ({product.quantityAvailable ?? 1} available)
                                         </FieldLabel>
                                         <Input
                                             {...field}
@@ -170,7 +177,7 @@ const BidDialog = ({ open, onOpenChange, product, onPlaceBid }: BidDialogPropsTy
                                             aria-invalid={fieldState.invalid}
                                             type="number"
                                             min={1}
-                                            max={product?.quantityAvailable ?? 1}
+                                            max={product.quantityAvailable ?? 1}
                                             {...field}
                                         // autoComplete="off"
                                         />
@@ -179,54 +186,56 @@ const BidDialog = ({ open, onOpenChange, product, onPlaceBid }: BidDialogPropsTy
                                         )}
                                     </Field>
                                 )}
-                            />
-                        </FieldGroup>
-                        <div>
-                            {/* Summary */}
-                            <div className="mt-6 bg-gray-50 p-4 rounded">
-                                <div className="flex justify-between text-sm text-muted-foreground">
-                                    <div>Your bid</div>
-                                    <div>
-                                        {bidForm.watch("bidAmount")
-                                            ? `${formatAmount(bidForm.watch("bidAmount"))}`
-                                            : "—"}
-                                    </div>
-                                </div>
-                                <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                                    <div>Service fee (5%)</div>
-                                    <div>
-                                        {bidForm.watch("bidAmount")
-                                            ? `${(
-                                                formatAmount(bidForm.watch("bidAmount") * 0.05)
-                                            )}`
-                                            : "—"}
-                                    </div>
-                                </div>
-                                <div className="flex justify-between font-semibold mt-2">
-                                    <div>You will pay</div>
-                                    <div>
-                                        {bidForm.watch("bidAmount")
-                                            ? `${formatAmount(total + (bidForm.watch("bidAmount") * 0.5))}`
-                                            : "—"}
+                            /> */}
+                                </FieldGroup>
+
+                                <div>
+                                    <div className="bg-gray-50 p-4 rounded">
+                                        <div className="flex justify-between text-sm text-muted-foreground">
+                                            <div>Your bid</div>
+                                            <div>
+                                                {bidForm.watch("bidAmount")
+                                                    ? `${formatAmount(bidForm.watch("bidAmount"))}`
+                                                    : "—"}
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between text-sm text-muted-foreground mt-1">
+                                            <div>Service fee (5%)</div>
+                                            <div>
+                                                {bidForm.watch("bidAmount")
+                                                    ? `${(
+                                                        formatAmount(bidForm.watch("bidAmount") * 0.05)
+                                                    )}`
+                                                    : "—"}
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between font-semibold mt-2">
+                                            <div>You will pay</div>
+                                            <div>
+                                                {bidForm.watch("bidAmount")
+                                                    ? `${formatAmount(total + (bidForm.watch("bidAmount") * 0.5))}`
+                                                    : "—"}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <div className="w-full flex flex-row gap-3 md:col-span-2">
+                                <Button type="submit" className="flex-1" disabled={placing}>
+                                    {placing ? "Placing…" : "Place a bid"}
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    type="button"
+                                    onClick={() => onOpenChange(false)}
+                                    className="flex-1"
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="w-full flex flex-row gap-3 md:col-span-2">
-                            <Button type="submit" className="flex-1" disabled={placing}>
-                                {placing ? "Placing…" : "Place a bid"}
-                            </Button>
-                            <Button
-                                variant="outline"
-                                type="button"
-                                onClick={() => onOpenChange(false)}
-                                className="flex-1"
-                            >
-                                Cancel
-                            </Button>
-                        </div>
                     </form>
                 </div>
             </DialogContent>

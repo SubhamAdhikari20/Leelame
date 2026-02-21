@@ -8,27 +8,27 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from "../ui/card.tsx";
+} from "./../ui/card.tsx";
+import { Separator } from "./../ui/separator.tsx";
 import { Button } from "../ui/button.tsx";
 import { Avatar, AvatarFallback } from "./../ui/avatar.tsx";
 import { Badge } from "./../ui/badge.tsx";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart } from "lucide-react";
+import { Gavel, Heart } from "lucide-react";
 import { toast } from "sonner";
 import type { ProductCardPropsType } from "@/types/common-props.type.ts";
 
 
-const ProductCard = ({ product, category, seller, onBid, onToggleFavourite }: ProductCardPropsType) => {
+const ProductCard = ({ product, category, seller, productCondition, onBid, onToggleFavourite }: ProductCardPropsType) => {
     // Local favourite state (can connect to backend later)
     const [isFavourite, setIsFavourite] = useState(false);
 
     const handleFavourite = (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault(); // prevent Link navigation
+        e.preventDefault();
         const newStatus = !isFavourite;
         setIsFavourite(newStatus);
 
-        // Optional callback if parent handles persistence
         onToggleFavourite?.(product!, newStatus);
 
         toast.success(
@@ -52,8 +52,8 @@ const ProductCard = ({ product, category, seller, onBid, onToggleFavourite }: Pr
     };
 
     return (
-        <Card className="pt-0 gap-4 w-full max-w-md mx-auto overflow-hidden shadow hover:shadow-lg dark:shadow-[0_2px_3px_1px_rgba(255,255,255,0.1),0_2px_2px_-1px_rgba(255,255,255,0.06)] dark:hover:shadow-[0_10px_15px_2px_rgba(255,255,255,0.1),0_2px_8px_3px_rgba(255,255,255,0.1)] transition-shadow duration-200">
-            <Link href={`/product/${product?._id}`}>
+        <Card className="py-0 gap-4 w-full max-w-md mx-auto overflow-hidden shadow hover:shadow-lg dark:shadow-[0_2px_3px_1px_rgba(255,255,255,0.1),0_2px_2px_-1px_rgba(255,255,255,0.06)] dark:hover:shadow-[0_10px_15px_2px_rgba(255,255,255,0.1),0_2px_8px_3px_rgba(255,255,255,0.1)] transition-shadow duration-200">
+            <Link href={`/products/${product._id}`} className="contents">
                 <div className="relative h-55 w-full overflow-hidden border-b dark:border-gray-700">
                     {product && product.productImageUrls && product.productImageUrls.length > 0 ? (
                         <Image
@@ -83,27 +83,27 @@ const ProductCard = ({ product, category, seller, onBid, onToggleFavourite }: Pr
                         />
                     </button>
                 </div>
+
+                <CardHeader className="px-4">
+                    <CardTitle className="text-base font-semibold line-clamp-2">{product.productName}</CardTitle>
+                    <CardDescription className="flex gap-2 mt-1">
+                        <Badge variant="secondary">{category.categoryName}</Badge>
+                        <Badge variant="outline">{productCondition.productConditionName}</Badge>
+                    </CardDescription>
+                </CardHeader>
+
+                <CardContent className="px-4 pb-4 border-b">
+                    {/* <p className="text-sm text-muted-foreground mb-1">{location}</p> */}
+                    <p className="text-lg font-bold">{formatAmount(product.currentBidPrice)}</p>
+                    <p className="text-xs text-muted-foreground">10 bids • {timeRemaining()}</p>
+                </CardContent>
             </Link>
 
-            <CardHeader className="px-4">
-                <CardTitle className="text-base font-semibold line-clamp-2">{product?.productName}</CardTitle>
-                <CardDescription className="flex gap-2 mt-1">
-                    <Badge variant="secondary">{category?.categoryName}</Badge>
-                    <Badge variant="outline">Used</Badge>
-                </CardDescription>
-            </CardHeader>
+            {/* <Separator /> */}
 
-            <CardContent className="px-4">
-                {/* <p className="text-sm text-muted-foreground mb-1">{location}</p> */}
-                <p className="text-lg font-bold">{formatAmount(product?.currentBidPrice)}</p>
-                <p className="text-xs text-muted-foreground">10 bids • {timeRemaining()}</p>
-            </CardContent>
-
-            <CardFooter className="px-4 flex items-center justify-between mt-2">
+            <CardFooter className="px-4 pb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Avatar className="h-7 w-7">
-                        {/* <AvatarImage src={seller?.profilePictureUrl!} alt={seller?.fullName!} />
-                        <AvatarFallback>{seller?.fullName?.[0]}</AvatarFallback> */}
                         {seller.profilePictureUrl ? (
                             <Image
                                 fill
@@ -122,9 +122,14 @@ const ProductCard = ({ product, category, seller, onBid, onToggleFavourite }: Pr
                             </AvatarFallback>
                         )}
                     </Avatar>
-                    <span className="text-sm font-medium">{seller?.fullName}</span>
+                    <span className="text-xs font-medium">{seller.fullName}</span>
                 </div>
-                <Button size="sm" onClick={onBid}>
+                <Button
+                    type="button"
+                    size="sm"
+                    onClick={onBid}
+                >
+                    <Gavel className="mr-1 h-4 w-4" />
                     Bid Now
                 </Button>
             </CardFooter>

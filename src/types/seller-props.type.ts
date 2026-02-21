@@ -1,6 +1,6 @@
 // src/type/admin-props.type.ts
 import { z } from "zod";
-import { CategoryApiResponse, ProductApiResponse, ProductConditionApiResponse } from "./api-response.type.ts";
+import { CategoryApiResponse, ProductApiResponse, ProductConditionApiResponse, SellerApiResponse } from "./api-response.type.ts";
 import type { CurrentUserType } from "./current-user.type.ts";
 
 
@@ -31,6 +31,7 @@ export type UpdateProductPropsType = {
 export type ProductViewDetailsPropsType = {
     currentUser?: CurrentUserType | null;
     product: z.infer<typeof ProductApiResponse>;
+    // seller: z.infer<typeof SellerApiResponse>;
     categories?: z.infer<typeof CategoryApiResponse>[] | null;
     productConditions?: z.infer<typeof ProductConditionApiResponse>[] | null;
 };

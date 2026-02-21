@@ -1,6 +1,6 @@
 // src/lib/actions/buyer/profile-details.action.ts
 "use server";
-import { getCurrentBuyerUser, updateBuyerProfileDetails, deleteBuyerAccount, uploadBuyerProfilePicture } from "@/lib/api/buyer/profile-details.api.ts";
+import { getCurrentBuyerUser, updateBuyerProfileDetails, deleteBuyerAccount, uploadBuyerProfilePicture, getBuyerById } from "@/lib/api/buyer/profile-details.api.ts";
 import { UpdateProfileDetailsSchemaType } from "@/schemas/buyer/update-profile-details.schema.ts";
 
 
@@ -96,6 +96,30 @@ export const handleDeleteBuyerAccount = async (userId: string) => {
         return {
             success: false,
             message: error.message || "An unexpected error occurred during buyer account deletion."
+        };
+    }
+};
+
+// Get Buyer By ID Handler
+export const handleGetBuyerById = async (buyerId: string) => {
+    try {
+        const result = await getBuyerById(buyerId);
+        if (!result.success) {
+            return {
+                success: false,
+                message: result.message || "Failed to fetch buyer user!"
+            };
+        }
+        return {
+            success: true,
+            message: result.message || "Seller user fetched successfully.",
+            data: result.user
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred during seller user fetching."
         };
     }
 };
