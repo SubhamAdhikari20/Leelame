@@ -34,7 +34,7 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button.tsx";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Calendar1Icon, Edit, IndianRupeeIcon, Trash2 } from "lucide-react";
+import { Calendar1Icon, IndianRupeeIcon } from "lucide-react";
 import Image from "next/image";
 import { handleDeleteProduct } from "@/lib/actions/product/product.action.ts";
 import type { ProductViewDetailsPublicPropsType } from "@/types/common-props.type.ts";

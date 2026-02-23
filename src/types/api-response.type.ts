@@ -109,6 +109,7 @@ export type AllSellerApiResposeType = {
     users?: z.infer<typeof SellerApiResponse>[] | null;
 };
 
+
 // -------------------------------- Category Api Response -------------------------------
 // Category Api Response
 export const CategoryApiResponse = z.object({
@@ -135,8 +136,9 @@ export type AllCategoriesApiResponseType = {
     data?: z.infer<typeof CategoryApiResponse>[] | null;
 };
 
+
 // -------------------------------- Product Condition Api Response -------------------------------
-// Product Category Api Response
+// Product Condition Api Response
 export const ProductConditionApiResponse = z.object({
     _id: z.string(),
     productConditionName: z.string(),
@@ -160,6 +162,7 @@ export type AllProductConditionsApiResponseType = {
     status?: number | null;
     data?: z.infer<typeof ProductConditionApiResponse>[] | null;
 };
+
 
 // -------------------------------- Product Api Response -------------------------------
 // Product Api Response
@@ -196,4 +199,30 @@ export type AllProductsApiResponseType = {
     message: string;
     status?: number | null;
     data?: z.infer<typeof ProductApiResponse>[] | null;
+};
+
+
+// --------------------------------- Bid Api Response ---------------------------------
+// Bid Api Response
+export const BidApiResponse = z.object({
+    _id: z.string(),
+    productId: z.string(),
+    buyerId: z.string(),
+    bidAmount: z.number(),
+    createdAt: z.date().nullish(),
+    updatedAt: z.date().nullish(),
+});
+
+export type BidApiResponseType = {
+    success: boolean;
+    message: string;
+    status?: number | null;
+    data?: z.infer<typeof BidApiResponse> | null;
+};
+
+export type AllBidsApiResponseType = {
+    success: boolean;
+    message: string;
+    status?: number | null;
+    data?: z.infer<typeof BidApiResponse>[] | null;
 };

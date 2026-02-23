@@ -166,6 +166,19 @@ export async function proxy(req: NextRequest) {
     if (segments.length >= 2) {
         const [first, second] = segments;
 
+        if (authUserData.role === "buyer") {
+            if (authUserData.username !== first) {
+                return NextResponse.redirect(new URL(`/${authUserData.username}`, req.url));
+            }
+            return NextResponse.next();
+        }
+
+        // if (authUserData.username === first) {
+        //     // You can add more granular checks here if needed, 
+        //     // but this allows /Subham20/my-profile/...
+        //     return NextResponse.next();
+        // }
+
         if ((authUserData.role === "buyer") && (second === "buyer")) {
             if (authUserData.username !== first) {
                 return NextResponse.redirect(new URL(`/${authUserData.username}`, req.url));
@@ -179,15 +192,15 @@ export async function proxy(req: NextRequest) {
             if (authUserData.role !== second) {
                 // not the correct role; redirect to logged-in user's place
                 if (authUserData.role === "buyer") {
-                    // return NextResponse.redirect(new URL(`/${tokenUsername}`, req.url));
+                    // return NextResponse.redirect(new URL(`/${authUserData.username}`, req.url));
                     return NextResponse.rewrite(new URL("/not-found", req.url));
                 }
-                // return NextResponse.redirect(new URL(`/${token.role}/dashboard`, req.url));
+                // return NextResponse.redirect(new URL(`/${authUserData.role}/dashboard`, req.url));
                 return NextResponse.rewrite(new URL("/not-found", req.url));
             }
             if (authUserData.username !== first) {
                 // username mismatch
-                // return NextResponse.redirect(new URL(`/${token.role}/dashboard`, req.url));
+                // return NextResponse.redirect(new URL(`/${authUserData.role}/dashboard`, req.url));
                 return NextResponse.rewrite(new URL("/not-found", req.url));
             }
             return NextResponse.next();
@@ -197,10 +210,11 @@ export async function proxy(req: NextRequest) {
         if (first === "seller" || first === "admin") {
             if (authUserData.role !== first) {
                 if (authUserData.role === "buyer") {
-                    // return NextResponse.redirect(new URL(`/${tokenUsername}`, req.url));
+                    // return NextResponse.redirect(new URL(`/${authUserData.username}`, req.url));
                     return NextResponse.rewrite(new URL("/not-found", req.url));
                 }
                 return NextResponse.redirect(new URL(`/${authUserData.role}/dashboard`, req.url));
+                // return NextResponse.rewrite(new URL("/not-found", req.url));
             }
             return NextResponse.next();
         }

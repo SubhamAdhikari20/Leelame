@@ -33,6 +33,7 @@ export type ProductViewDetailsPublicPropsType = {
 };
 
 export type ProductPropsType = {
+    currentUser?: CurrentUserType | null;
     product: z.infer<typeof ProductApiResponse>;
     seller: z.infer<typeof SellerApiResponse>;
     category: z.infer<typeof CategoryApiResponse>;
@@ -47,5 +48,5 @@ export type BidDialogBoxPublicPropsType = {
     // category: z.infer<typeof CategoryApiResponse>;
     // condition: z.infer<typeof ProductConditionApiResponse>;
     onOpenChange: (bool: boolean) => void;
-    onPlaceBid: (data: any) => void;
+    // onPlaceBid: (data: any) => void;
 };

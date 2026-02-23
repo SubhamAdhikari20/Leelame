@@ -1,4 +1,4 @@
-// src/app/(app)/(buyer)/[username]/my-profile/settings/error.tsx
+// src/app/(app)/(buyer)/[username]/my-profile/dashboard/error.tsx
 "use client";
 import { Button } from "@/components/ui/button.tsx";
 import { useEffect } from "react";

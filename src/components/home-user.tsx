@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Quote } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
-import type { CurrentUserProps } from "@/types/current-user.type.ts";
+import type { CurrentUserPropsType } from "@/types/current-user.type.ts";
 
 
-const HomeUser = ({ currentUser }: CurrentUserProps) => {
+const HomeUser = ({ currentUser }: CurrentUserPropsType) => {
     const [phraseIndex, setPhraseIndex] = useState(0);
 
     // Hero Text Phrases

@@ -51,19 +51,6 @@ const SellerProfile = ({ currentUser }: CurrentUserPropsType) => {
         }
     });
 
-    const onImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreview(reader.result as string);
-            };
-            // const url = URL.createObjectURL(file);
-            reader.readAsDataURL(file);
-            setSelectedFile(file);
-        }
-    };
-
     const onSubmit = async (data: UpdateProfileDetailsSchemaType) => {
         setIsSubmitting(true);
         try {
@@ -78,6 +65,7 @@ const SellerProfile = ({ currentUser }: CurrentUserPropsType) => {
             toast.success("Success", {
                 description: response.message
             });
+            router.refresh();
         }
         catch (error: Error | any) {
             console.error("Error updating user details: ", error);
@@ -90,33 +78,16 @@ const SellerProfile = ({ currentUser }: CurrentUserPropsType) => {
         }
     };
 
-    const handleClear = () => {
-        sellerProfileDetailsForm.reset({
-            fullName: "",
-            email: "",
-            contact: "",
-        });
-    };
-
-    // Handle delete
-    const handleDelete = async (userId: string) => {
-        try {
-            const response = await handleDeleteSellerAccount(userId);
-            if (!response.success) {
-                toast.error("Failed", {
-                    description: response.message,
-                });
-            }
-
-            toast.success("Successful", {
-                description: response.message,
-            });
-        }
-        catch (error: Error | any) {
-            console.error("Error deleting user account: ", error);
-            toast.error("Error deleting user account", {
-                description: error.message
-            });
+    const onImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreview(reader.result as string);
+            };
+            // const url = URL.createObjectURL(file);
+            reader.readAsDataURL(file);
+            setSelectedFile(file);
         }
     };
 
@@ -157,6 +128,36 @@ const SellerProfile = ({ currentUser }: CurrentUserPropsType) => {
         }
     };
 
+    // Handle delete account
+    const handleDelete = async (userId: string) => {
+        try {
+            const response = await handleDeleteSellerAccount(userId);
+            if (!response.success) {
+                toast.error("Failed", {
+                    description: response.message,
+                });
+            }
+
+            toast.success("Successful", {
+                description: response.message,
+            });
+        }
+        catch (error: Error | any) {
+            console.error("Error deleting user account: ", error);
+            toast.error("Error deleting user account", {
+                description: error.message
+            });
+        }
+    };
+
+    const handleClear = () => {
+        sellerProfileDetailsForm.reset({
+            fullName: "",
+            email: "",
+            contact: "",
+        });
+    };
+
     return (
         <section className="w-full xl:max-w-7xl p-5">
             <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-5">My Profile</h1>
@@ -167,7 +168,7 @@ const SellerProfile = ({ currentUser }: CurrentUserPropsType) => {
                             <Image
                                 fill
                                 src={preview ? preview : currentUser?.profilePictureUrl!}
-                                alt={currentUser?.fullName || "Admin"}
+                                alt={currentUser?.fullName || "Seller"}
                             />
                         ) : (
                             <AvatarFallback className="text-6xl font-semibold text-gray-700 dark:text-gray-100">

@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar.tsx";
+import { Avatar, AvatarFallback } from "./ui/avatar.tsx";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -247,9 +247,10 @@ const Navbar = ({ currentUser }: CurrentUserPropsType) => {
                                 onClick={() => setDesktopMenuOpen((v) => !v)}
                             >
                                 {currentUser.profilePictureUrl ? (
-                                    <AvatarImage
+                                    <Image
+                                        fill
                                         src={currentUser.profilePictureUrl}
-                                        alt={currentUser.fullName ?? "Profile Picture Preview"}
+                                        alt={currentUser.fullName || "Buyer"}
                                     />
                                 ) : (
                                     <AvatarFallback>
@@ -407,9 +408,10 @@ const Navbar = ({ currentUser }: CurrentUserPropsType) => {
                             >
                                 <Avatar className="h-8 w-8 cursor-pointer border border-gray-900 dark:border-gray-100">
                                     {currentUser.profilePictureUrl ? (
-                                        <AvatarImage
+                                        <Image
+                                            fill
                                             src={currentUser.profilePictureUrl}
-                                            alt={currentUser.fullName ?? "Profile Picture Preview"}
+                                            alt={currentUser.fullName || "Buyer"}
                                         />
                                     ) : (
                                         <AvatarFallback>

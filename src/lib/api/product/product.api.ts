@@ -111,3 +111,27 @@ export const getAllProducts = async () => {
         throw new Error(axiosError.response?.data.message || "Failed to fetch all products!");
     }
 };
+
+// Get All Products By Seller Id Axios
+export const getAllProductsBySellerId = async (sellerId: string) => {
+    try {
+        const response = await axios.get<AllProductsApiResponseType>(`${API.PRODUCT.GET_ALL_PRODUCTS}/${sellerId}`);
+        return response.data;
+    }
+    catch (error: Error | any) {
+        const axiosError = error as AxiosErrorType;
+        throw new Error(axiosError.response?.data.message || "Failed to fetch all products with seller id!");
+    }
+};
+
+// Get All Products By Buyer Id Axios
+export const getAllProductsByBuyerId = async (buyerId: string) => {
+    try {
+        const response = await axios.get<AllProductsApiResponseType>(`${API.PRODUCT.GET_ALL_PRODUCTS}/${buyerId}`);
+        return response.data;
+    }
+    catch (error: Error | any) {
+        const axiosError = error as AxiosErrorType;
+        throw new Error(axiosError.response?.data.message || "Failed to fetch all products with buyer id!");
+    }
+};

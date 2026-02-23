@@ -3,7 +3,7 @@ import React from "react";
 import { getServerSession } from "@/lib/get-server-session.ts";
 import { notFound, redirect } from "next/navigation";
 import ProductListing from "@/components/common/product-listing.tsx";
-import { handleGetCurrentSellerUser } from "@/lib/actions/seller/profile-details.action.ts";
+import { handleGetCurrentBuyerUser } from "@/lib/actions/buyer/profile-details.action.ts";
 import { handleGetAllProducts } from "@/lib/actions/product/product.action.ts";
 import { handleGetAllCategories } from "@/lib/actions/category/category.action.ts";
 import { handleGetAllSellers } from "@/lib/actions/seller/profile-details.action.ts";
@@ -24,7 +24,7 @@ const ProductPage = async () => {
             redirect("/login");
         }
 
-        const getCurrentUserResult = await handleGetCurrentSellerUser(user._id);
+        const getCurrentUserResult = await handleGetCurrentBuyerUser(user._id);
         if (!getCurrentUserResult.success) {
             throw new Error("Error fetching current user data");
         }

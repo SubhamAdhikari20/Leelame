@@ -1,48 +1,40 @@
 // src/app/(app)/(buyer)/[usename]/my-profile/dashboard/page.tsx
-"use client";
 import React from "react";
-import { IndianRupee, Medal, Star } from "lucide-react";
+import { getServerSession } from "@/lib/get-server-session.ts";
+import { handleGetCurrentBuyerUser } from "@/lib/actions/buyer/profile-details.action.ts";
+import { notFound, redirect } from "next/navigation";
+import ProfileDashboard from "@/components/buyer/profile-dashboard.tsx";
 
 
-const ProfileDashboard = () => {
-    const activityData = [
-        {
-            title: "Balance",
-            value: 0,
-            icon: <IndianRupee className="h-8 w-8 text-green-600 dark:text-green-500" />,
-        },
-        {
-            title: "Items Won",
-            value: 0,
-            icon: <Medal className="h-8 w-8 text-green-600 dark:text-green-500" />,
-        },
-        {
-            title: "Your Products",
-            value: 0,
-            icon: <Star className="h-8 w-8 text-green-600 dark:text-green-500" />,
-        },
-    ];
+const ProfileDashboardPage = async () => {
+    const response = await getServerSession();
+
+    if (!response.success) {
+        throw new Error(response.message ?? "Unknown");
+    }
+
+    const token = response.token;
+    const user = response.data;
+    if (!token || !user || !user._id) {
+        redirect("/login");
+    }
+
+    const result = await handleGetCurrentBuyerUser(user._id);
+    if (!result.success) {
+        throw new Error(`Error fetching user data: ${result.message ?? "Unknown"}`);
+    }
+
+    if (!result.data) {
+        notFound();
+    }
+
+    const currentUser = result.data;
 
     return (
-        <div className="w-full bg-[#d3ecdc] dark:bg-gray-900 border rounded-xl shadow-lg p-5 xl:max-w-7xl mx-auto">
-            {/* Header */}
-            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">My Activity</h2>
-
-            {/* Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {activityData.map((item, index) => (
-                    <div
-                        key={index}
-                        className="flex flex-col items-center justify-center gap-3 bg-green-50 dark:bg-gray-800 border border-green-200 dark:border-gray-600 rounded-2xl p-6 shadow-sm transition hover:shadow-md hover:border-green-300 dark:hover:border-gray-500 dark:hover:shadow-[0_5px_7px_1px_rgba(255,255,255,0.1),0_1px_4px_2px_rgba(255,255,255,0.1)]"
-                    >
-                        <div className="flex justify-center items-center">{item.icon}</div>
-                        <p className="text-3xl font-bold text-gray-800 dark:text-gray-200">{item.value}</p>
-                        <span className="text-gray-700 dark:text-gray-300 font-medium">{item.title}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
+        <>
+            <ProfileDashboard currentUser={currentUser} />
+        </>
     );
 };
 
-export default ProfileDashboard;
+export default ProfileDashboardPage;

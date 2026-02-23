@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import type { ProductCardPropsType } from "@/types/common-props.type.ts";
 
 
-const ProductCard = ({ product, category, seller, productCondition, onBid, onToggleFavourite }: ProductCardPropsType) => {
+const ProductCard = ({ currentUser, product, category, seller, productCondition, onBid, onToggleFavourite }: ProductCardPropsType) => {
     // Local favourite state (can connect to backend later)
     const [isFavourite, setIsFavourite] = useState(false);
 

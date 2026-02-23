@@ -3,10 +3,11 @@
 import React from "react";
 import { FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
 import Link from "next/link";
-import { CurrentUserProps } from "@/types/current-user.type.ts";
+import { CurrentUserPropsType } from "@/types/current-user.type.ts";
+import Image from "next/image";
 
 
-const Footer = ({ currentUser }: CurrentUserProps) => {
+const Footer = ({ currentUser }: CurrentUserPropsType) => {
     const currentYear = new Date().getFullYear();
 
     return (
@@ -15,8 +16,8 @@ const Footer = ({ currentUser }: CurrentUserProps) => {
                 <div className="container mx-auto px-4 flex flex-col md:flex-row items-center md:justify-between space-y-6 md:space-y-0 py-7">
                     <div className="flex items-center space-x-4">
                         <Link href="/">
-                            <img
-                                src="images/leelame_logo_cropped_png.png"
+                            <Image
+                                src="/images/leelame_logo_cropped_png.png"
                                 alt="Leelame Logo"
                                 width={75}
                                 height={75}

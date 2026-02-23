@@ -2,23 +2,26 @@
 "use server";
 import { getCurrentBuyerUser, updateBuyerProfileDetails, deleteBuyerAccount, uploadBuyerProfilePicture, getBuyerById } from "@/lib/api/buyer/profile-details.api.ts";
 import { UpdateProfileDetailsSchemaType } from "@/schemas/buyer/update-profile-details.schema.ts";
+import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 
 
 // Get Current Buyer User Handler
 export const handleGetCurrentBuyerUser = async (userId: string) => {
     try {
         const result = await getCurrentBuyerUser(userId);
-        if (!result.success) {
+        if (!result.success || !result.user) {
             return {
                 success: false,
                 message: result.message || "Failed to fetch buyer user!"
             };
         }
-        console.log(result.success);
+
+        const data = { ...result.user, profilePictureUrl: normalizeHttpUrl(result.user.profilePictureUrl) };
+
         return {
             success: true,
             message: result.message || "Buyer user fetched successfully.",
-            data: result.user
+            data: data
         };
     }
     catch (error: Error | any) {
@@ -33,16 +36,19 @@ export const handleGetCurrentBuyerUser = async (userId: string) => {
 export const handleUpdateBuyerProfileDetails = async (userId: string, buyerProfileData: UpdateProfileDetailsSchemaType) => {
     try {
         const result = await updateBuyerProfileDetails(userId, buyerProfileData);
-        if (!result.success) {
+        if (!result.success || !result.user) {
             return {
                 success: false,
                 message: result.message || "Failed to update buyer profile details!"
             };
         }
+
+        const data = { ...result.user, profilePictureUrl: normalizeHttpUrl(result.user.profilePictureUrl) };
+
         return {
             success: true,
             message: result.message || "Buyer profile details updated successfully.",
-            data: result.user
+            data: data
         };
     }
     catch (error: Error | any) {
@@ -57,16 +63,18 @@ export const handleUpdateBuyerProfileDetails = async (userId: string, buyerProfi
 export const handleUploadBuyerProfilePicture = async (userId: string, formData: FormData) => {
     try {
         const result = await uploadBuyerProfilePicture(userId, formData);
-        if (!result.success) {
+        if (!result.success || !result.user) {
             return {
                 success: false,
                 message: result.message || "Failed to upload buyer profile picture!"
             };
         }
+        const data = { ...result.user, profilePictureUrl: normalizeHttpUrl(result.user.profilePictureUrl) };
+
         return {
             success: true,
             message: result.message || "Buyer profile picture uploaded successfully.",
-            data: result.user
+            data: data
         };
     }
     catch (error: Error | any) {
@@ -104,16 +112,19 @@ export const handleDeleteBuyerAccount = async (userId: string) => {
 export const handleGetBuyerById = async (buyerId: string) => {
     try {
         const result = await getBuyerById(buyerId);
-        if (!result.success) {
+        if (!result.success || !result.user) {
             return {
                 success: false,
                 message: result.message || "Failed to fetch buyer user!"
             };
         }
+
+        const data = { ...result.user, profilePictureUrl: normalizeHttpUrl(result.user.profilePictureUrl) };
+
         return {
             success: true,
             message: result.message || "Seller user fetched successfully.",
-            data: result.user
+            data: data
         };
     }
     catch (error: Error | any) {

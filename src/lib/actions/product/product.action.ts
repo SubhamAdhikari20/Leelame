@@ -1,6 +1,6 @@
 // src/lib/actions/product/product.action.ts
 "use server";
-import { createProduct, updateProduct, deleteProduct, getProductById, getAllProducts } from "@/lib/api/product/product.api.ts";
+import { createProduct, updateProduct, deleteProduct, getProductById, getAllProducts, getAllProductsBySellerId, getAllProductsByBuyerId } from "@/lib/api/product/product.api.ts";
 import type { CreateProductSchemaType } from "@/schemas/product/create-product.schema.ts";
 import type { UpdateProductSchemaType } from "@/schemas/product/update-product.schema.ts";
 
@@ -120,6 +120,54 @@ export const handleGetAllProducts = async () => {
         return {
             success: false,
             message: error.message || "An unexpected error occurred while fetching all products!",
+        };
+    }
+};
+
+// Get All Products By Seller Id Handler
+export const handleGetAllProductsBySellerId = async (sellerId: string) => {
+    try {
+        const result = await getAllProductsBySellerId(sellerId);
+        if (!result.success) {
+            return {
+                success: false,
+                message: result.message || "Failed to fetch all the products with this seller id!",
+            };
+        }
+        return {
+            success: true,
+            message: result.message || "All products with this seller id fetched successfully.",
+            data: result.data
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred while fetching all products with this seller id!",
+        };
+    }
+};
+
+// Get All Products By Buyer Id Handler
+export const handleGetAllProductsByBuyerId = async (buyerId: string) => {
+    try {
+        const result = await getAllProductsByBuyerId(buyerId);
+        if (!result.success) {
+            return {
+                success: false,
+                message: result.message || "Failed to fetch all the products with this buyer id!",
+            };
+        }
+        return {
+            success: true,
+            message: result.message || "All products with this buyer id fetched successfully.",
+            data: result.data
+        };
+    }
+    catch (error: Error | any) {
+        return {
+            success: false,
+            message: error.message || "An unexpected error occurred while fetching all products with this buyer id!",
         };
     }
 };

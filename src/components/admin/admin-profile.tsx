@@ -23,7 +23,7 @@ import {
 import { Input } from "@/components/ui/input.tsx";
 import { toast } from "sonner";
 import { Loader2, Trash2 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar.tsx";
 import Image from "next/image";
 import { useForm, Controller } from "react-hook-form";
 import { handleDeleteAdminAccount, handleUpdateAdminProfileDetails, handleUploadAdminProfilePicture } from "@/lib/actions/admin/profile-details.action.ts";
@@ -160,10 +160,6 @@ const AdminProfile = ({ currentUser }: CurrentUserPropsType) => {
                 <div className="flex flex-col justify-center items-center gap-4 xl:min-w-[310px]">
                     <Avatar className="h-30 w-30 lg:h-45 lg:w-45 border-2 border-gray-900 dark:border-gray-100">
                         {preview || (currentUser && currentUser.profilePictureUrl) ? (
-                            // <AvatarImage
-                            //     src={preview ? preview : (currentUser?.profilePictureUrl || undefined)}
-                            //     alt={currentUser?.fullName || undefined}
-                            // />
                             <Image
                                 fill
                                 src={preview ? preview : currentUser?.profilePictureUrl!}

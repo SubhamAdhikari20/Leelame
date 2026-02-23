@@ -26,19 +26,6 @@ const ProductListing = ({ currentUser, products, categories, sellers, productCon
     //     return products?.slice(start, start + pageSize);
     // }, [page, products]);
 
-    // const handlePlaceBid = ({ productId, bidAmount, quantity }: { productId: string; bidAmount: number; quantity: number }) => {
-    //     // hook this to your API: place bid -> update product.currentBid and bids count
-    //     // For now we update the mock in-memory product set (not persisted)
-    //     const index = products.findIndex((p) => p.id === productId);
-    //     if (index >= 0) {
-    //         products[index].currentBid = Math.round(Number(bidAmount) * 100);
-    //         products[index].bids = (products[index].bids || 0) + 1;
-    //     }
-    // };
-
-    const handlePlaceBid = ({ productId, bidAmount, quantity }: { productId: string; bidAmount: number; quantity: number }) => {
-
-    };
 
     return (
         <section className="container mx-auto px-4 py-8">
@@ -64,16 +51,15 @@ const ProductListing = ({ currentUser, products, categories, sellers, productCon
                         const condition = productConditions?.find((condition) => condition._id === product.conditionId);
 
                         return seller && category && condition ?
-                            <>
-                                <ProductCard
-                                    key={product._id}
-                                    product={product}
-                                    category={category}
-                                    seller={seller}
-                                    productCondition={condition}
-                                    onBid={() => openBidDialog({ product, seller, category, condition })}
-                                />
-                            </>
+                            <ProductCard
+                                key={product._id}
+                                product={product}
+                                category={category}
+                                seller={seller}
+                                productCondition={condition}
+                                currentUser={currentUser}
+                                onBid={() => openBidDialog({ currentUser, product, seller, category, condition })}
+                            />
                             : null;
                     })}
                 </div>
@@ -95,9 +81,9 @@ const ProductListing = ({ currentUser, products, categories, sellers, productCon
                 <BidDialog
                     open={dialogOpen}
                     onOpenChange={(o) => setDialogOpen(o)}
+                    currentUser={selectedProduct.currentUser}
                     product={selectedProduct.product}
                     seller={selectedProduct.seller}
-                    onPlaceBid={handlePlaceBid}
                 />
             )}
         </section>

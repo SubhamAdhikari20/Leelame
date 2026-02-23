@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { FaUser, FaSignOutAlt } from "react-icons/fa";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar.tsx";
+import { Avatar, AvatarFallback } from "./ui/avatar.tsx";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -16,6 +16,7 @@ import {
     AlertDialogTrigger,
 } from "./ui/alert-dialog.tsx";
 import { Button } from "./ui/button.tsx";
+import Image from "next/image";
 import type { CurrentUserType } from "@/types/current-user.type.ts";
 
 
@@ -36,21 +37,16 @@ const ProfilePopover: React.FC<ProfilePopoverProps> = ({
     setMobileMenuOpen,
     handleLogout,
 }) => {
-    if (!currentUser) {
-        return null;
-    }
-
     return (
         <div className="absolute right-0 mt-3 w-70 bg-white dark:bg-background rounded-lg shadow-lg ring-1 ring-black dark:ring-white ring-opacity-5 overflow-hidden z-20">
             {/* Profile Header */}
             <div className="px-4 py-3 text-center">
                 <Avatar className="mx-auto h-12 w-12 border border-gray-900 dark:border-gray-100">
                     {currentUser.profilePictureUrl ? (
-                        <AvatarImage
-                            src={
-                                currentUser.profilePictureUrl
-                            }
-                            alt={currentUser.fullName ?? "Profile Picture Preview"}
+                        <Image
+                            fill
+                            src={currentUser.profilePictureUrl}
+                            alt={currentUser.fullName || "Buyer"}
                         />
                     ) : (
                         <AvatarFallback>

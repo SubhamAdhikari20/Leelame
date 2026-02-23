@@ -20,7 +20,6 @@ import { Button } from "../ui/button.tsx";
 import {
     Avatar,
     AvatarFallback,
-    AvatarImage,
 } from "../ui/avatar.tsx";
 import { ScrollArea } from "../ui/scroll-area.tsx";
 import {
@@ -35,6 +34,7 @@ import {
     AlertDialogTrigger,
 } from "../ui/alert-dialog.tsx";
 import { toast } from "sonner";
+import Image from "next/image";
 import { handleBuyerLogout } from "@/lib/actions/auth/buyer-auth.action.ts";
 import type { CurrentUserPropsType } from "@/types/current-user.type.ts";
 
@@ -71,7 +71,8 @@ const Sidebar = ({ currentUser }: CurrentUserPropsType) => {
             <div className="flex flex-col items-center py-5 border-b dark:border-gray-700">
                 <Avatar className="w-16 h-16 border border-gray-900 dark:border-gray-100">
                     {currentUser && currentUser.profilePictureUrl ? (
-                        <AvatarImage
+                        <Image
+                            fill
                             src={currentUser.profilePictureUrl}
                             alt={currentUser.fullName || "Buyer"}
                         />

@@ -23,7 +23,7 @@ import {
 import { Input } from "@/components/ui/input.tsx";
 import { toast } from "sonner";
 import { Loader2, Trash2 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar.tsx";
 import { useForm, Controller } from "react-hook-form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -32,7 +32,8 @@ import axios, { AxiosError } from "axios";
 import { UpdateProfileDetailsSchema, type UpdateProfileDetailsSchemaType } from "@/schemas/buyer/update-profile-details.schema.ts";
 import type { CurrentUserType, CurrentUserPropsType } from "@/types/current-user.type.ts";
 import type { BuyerApiResponseType } from "@/types/api-response.type.ts";
-import { handleGetCurrentBuyerUser, handleUploadBuyerProfilePicture } from "@/lib/actions/buyer/profile-details.action.ts";
+import { handleUpdateBuyerProfileDetails, handleDeleteBuyerAccount, handleGetCurrentBuyerUser, handleUploadBuyerProfilePicture } from "@/lib/actions/buyer/profile-details.action.ts";
+import Image from "next/image";
 
 
 const BuyerProfile = ({ currentUser }: CurrentUserPropsType) => {
@@ -105,33 +106,25 @@ const BuyerProfile = ({ currentUser }: CurrentUserPropsType) => {
         checkUsernameUnique();
     }, [username]);
 
-    const onImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreview(reader.result as string);
-            };
-            // const url = URL.createObjectURL(file);
-            reader.readAsDataURL(file);
-            setSelectedFile(file);
-        }
-    };
-
     const onSubmit = async (data: UpdateProfileDetailsSchemaType) => {
         setIsSubmitting(true);
         try {
-            const response = await axios.put<BuyerApiResponseType>("", data);
-            if (response.data.success) {
-                toast.success("Success", {
-                    description: response.data.message
+            const response = await handleUpdateBuyerProfileDetails(currentUser!._id, data);
+            if (!response.success) {
+                toast.error("Failed", {
+                    description: response.message
                 });
-                // await getCurrentUser();
-
-                if (response.data.user?.username !== currentUser!.username) {
-                    router.replace(`/verify-account/registration/${response.data.user?.username}`);
-                }
+                return;
             }
+
+            toast.success("Success", {
+                description: response.message
+            });
+            router.refresh();
+
+            // if (response.data?.username !== currentUser!.username) {
+            //     router.replace(`/verify-account/registration/${response.data?.username}`);
+            // }
         }
         catch (error: Error | any) {
             console.error("Error updating user details: ", error);
@@ -144,34 +137,16 @@ const BuyerProfile = ({ currentUser }: CurrentUserPropsType) => {
         }
     };
 
-    const handleClear = () => {
-        userDetailsForm.reset({
-            fullName: "",
-            username: "",
-            email: "",
-            contact: "",
-        });
-    };
-
-    // Handle delete
-    const handleDelete = async (userId: string) => {
-        try {
-            const response = await axios.delete<BuyerApiResponseType>("",);
-            if (response.data.success) {
-                toast.success("Successful", {
-                    description: response.data.message,
-                });
-            }
-            toast.error("Failed", {
-                description: response.data.message,
-            });
-        }
-        catch (error) {
-            const axiosError = error as AxiosError<BuyerApiResponseType>;
-            console.error("Error deleting user account: ", axiosError);
-            toast.error("Error deleting user account: ", {
-                description: axiosError.response?.data?.message
-            });
+    const onImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreview(reader.result as string);
+            };
+            // const url = URL.createObjectURL(file);
+            reader.readAsDataURL(file);
+            setSelectedFile(file);
         }
     };
 
@@ -200,7 +175,8 @@ const BuyerProfile = ({ currentUser }: CurrentUserPropsType) => {
             });
             setPreview("");
             setSelectedFile(null);
-            await getCurrentUser();
+            router.refresh();
+            // await getCurrentUser();
         }
         catch (error) {
             const axiosError = error as AxiosError<BuyerApiResponseType>;
@@ -212,24 +188,62 @@ const BuyerProfile = ({ currentUser }: CurrentUserPropsType) => {
         }
     };
 
+    // Handle delete account
+    const handleDelete = async (userId: string) => {
+        try {
+            const response = await handleDeleteBuyerAccount(userId);
+            if (!response.success) {
+                toast.error("Failed", {
+                    description: response.message,
+                });
+                return;
+            }
+
+            toast.success("Successful", {
+                description: response.message,
+            });
+        }
+        catch (error) {
+            const axiosError = error as AxiosError<BuyerApiResponseType>;
+            console.error("Error deleting user account: ", axiosError);
+            toast.error("Error deleting user account: ", {
+                description: axiosError.response?.data?.message
+            });
+        }
+    };
+
+    const handleClear = () => {
+        userDetailsForm.reset({
+            fullName: "",
+            username: "",
+            email: "",
+            contact: "",
+        });
+    };
+
     return (
         <div className="w-full xl:max-w-7xl bg-[#d3ecdc] dark:bg-gray-900 border rounded-xl shadow-lg p-5">
             <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-5">My Profile</h1>
             <div className="flex flex-col xl:flex-row xl:justify-evenly gap-4 justify-center">
                 <div className="flex flex-col justify-center items-center gap-4 xl:min-w-[310px]">
                     <Avatar className="h-30 w-30 lg:h-45 lg:w-45 border-2 border-gray-900 dark:border-gray-100">
-                        <AvatarImage
-                            src={preview ? preview : (currentUser?.profilePictureUrl || undefined)}
-                            alt={currentUser?.fullName || currentUser?.username || "Owner"}
-                        />
-                        <AvatarFallback className="text-6xl font-semibold text-gray-700 dark:text-gray-100">
-                            {(currentUser?.fullName || currentUser?.username || "O")
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")
-                                .slice(0, 2)
-                                .toUpperCase()}
-                        </AvatarFallback>
+                        {preview || (currentUser && currentUser.profilePictureUrl) ? (
+                            <Image
+                                fill
+                                src={preview ? preview : currentUser?.profilePictureUrl!}
+                                alt={currentUser?.fullName || "Buyer"}
+                                className="object-cover"
+                            />
+                        ) : (
+                            <AvatarFallback className="text-6xl font-semibold text-gray-700 dark:text-gray-100">
+                                {(currentUser?.fullName || currentUser?.username || "O")
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")
+                                    .slice(0, 2)
+                                    .toUpperCase()}
+                            </AvatarFallback>
+                        )}
                     </Avatar>
 
                     <div className="flex flex-col items-center space-y-2">
