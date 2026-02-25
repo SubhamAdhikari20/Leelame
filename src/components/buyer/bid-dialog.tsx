@@ -32,16 +32,16 @@ import { Input } from "../ui/input.tsx";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { handleCreateBid } from "@/lib/actions/bid/bid.action.ts";
 import { CreateBidSchema, type CreateBidSchemaType } from "@/schemas/bid/create-bid.schema.ts";
 import type { BidDialogBoxPublicPropsType } from "@/types/common-props.type.ts";
-import { handleCreateBid } from "@/lib/actions/bid/bid.action.ts";
 import { Minus, Plus } from "lucide-react";
 
 
 const BidDialog = ({ currentUser, product, seller, open, onOpenChange }: BidDialogBoxPublicPropsType) => {
     const router = useRouter();
-    const [placing, setPlacing] = useState(false);
-    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [bidPlacing, setBidPlacing] = useState(false);
+    const [showConfirmDialogBox, setShowConfirmDialogBox] = useState(false);
     const [pendingData, setPendingData] = useState<CreateBidSchemaType | null>(null);
 
     const placeBidForm = useForm<CreateBidSchemaType>({
@@ -68,7 +68,7 @@ const BidDialog = ({ currentUser, product, seller, open, onOpenChange }: BidDial
     const commissionRate = Number(product.commission) || 0;
     const serviceFee = currentBidAmount * (commissionRate / 100);
     const totalPayableAmount = currentBidAmount + serviceFee;
-    const isMinusButtonDisabled = currentBidAmount <= minRequiredBidAmount || placing;
+    const isMinusButtonDisabled = currentBidAmount <= minRequiredBidAmount || bidPlacing;
 
     const onPressPlusButton = () => {
         const bidAmount = currentBidAmount;
@@ -93,19 +93,13 @@ const BidDialog = ({ currentUser, product, seller, open, onOpenChange }: BidDial
     }
 
     const handleBidFormSubmit = (data: CreateBidSchemaType) => {
-        const bidAmount = Number(data.bidAmount);
-
-        if (bidAmount < minRequiredBidAmount) {
-            return toast.error("Failed", {
-                description: `Your bid must be greater than or equal to the sum of current bid and bid interval price (Rs.${minRequiredBidAmount.toFixed(2)})`,
-            });
-        }
-
         setPendingData(data);
-        setShowConfirmDialog(true);
+        setShowConfirmDialogBox(true);
     };
 
     const handlePlaceBid = async () => {
+        setShowConfirmDialogBox(false);
+
         if (!pendingData || !product) {
             toast.error("Data Error!", {
                 description: "The pending bid and product data is not available."
@@ -113,14 +107,36 @@ const BidDialog = ({ currentUser, product, seller, open, onOpenChange }: BidDial
             return;
         }
 
-        setShowConfirmDialog(false);
-        setPlacing(true);
+        // const bidAmount = Number(pendingData.bidAmount);
+
+        // if (bidAmount < minRequiredBidAmount) {
+        //     return toast.error("Bid Failed", {
+        //         description: `Your bid must be greater than or equal to the sum of current bid and bid interval price (Rs.${minRequiredBidAmount.toFixed(2)})`,
+        //     });
+        // }
+
+        // const endDate = new Date(product.endDate).getTime();
+        // const now = new Date().getTime();
+        // const difference = endDate - now;
+
+        // if (difference <= 0) {
+        //     return toast.error("Bid Failed", {
+        //         description: "Auction has already ended for this product!"
+        //     });
+        // }
+
+        setBidPlacing(true);
 
         try {
             if (!currentUser) {
                 toast.error("Authentication Error!", {
                     description: "Please, login to place a bid."
                 });
+
+                setPendingData(null);
+                setShowConfirmDialogBox(false);
+                setBidPlacing(false);
+                onOpenChange(false);
                 startTransition(() => router.push("/login"));
                 return;
             }
@@ -141,13 +157,13 @@ const BidDialog = ({ currentUser, product, seller, open, onOpenChange }: BidDial
             onOpenChange(false);
         }
         catch (error: Error | any) {
-            console.error("Error placing bid: ", error);
-            toast.error("Error placing bid", {
+            console.error("Error bidPlacing bid: ", error);
+            toast.error("Error bidPlacing bid", {
                 description: error.message
             });
         }
         finally {
-            setPlacing(false);
+            setBidPlacing(false);
         }
     };
 
@@ -246,6 +262,17 @@ const BidDialog = ({ currentUser, product, seller, open, onOpenChange }: BidDial
                                                             ((product.currentBidPrice + product.bidIntervalPrice) || 0)
                                                         ).toFixed(2)}
                                                         type="number"
+                                                        inputMode="decimal"
+                                                        onChange={(e) => {
+                                                            const value = e.target.value;
+                                                            const sanitizedValue = value
+                                                                .replace(/[^0-9.]/g, "")
+                                                                .replace(/(\..*?)\..*/g, "$1");
+
+                                                            if (sanitizedValue === "" || /^\d*\.?\d*$/.test(sanitizedValue)) {
+                                                                field.onChange(sanitizedValue === "" ? undefined : parseFloat(sanitizedValue));
+                                                            }
+                                                        }}
                                                         autoComplete="off"
                                                         className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                     />
@@ -255,7 +282,7 @@ const BidDialog = ({ currentUser, product, seller, open, onOpenChange }: BidDial
                                                         size="sm"
                                                         variant="outline"
                                                         onClick={onPressPlusButton}
-                                                        disabled={placing}
+                                                        disabled={bidPlacing}
                                                     >
                                                         <Plus className="h-4 w-4" />
                                                     </Button>
@@ -301,14 +328,14 @@ const BidDialog = ({ currentUser, product, seller, open, onOpenChange }: BidDial
                             </div>
 
                             <div className="w-full flex flex-row gap-3 md:col-span-2">
-                                <AlertDialog>
+                                <AlertDialog open={showConfirmDialogBox} onOpenChange={setShowConfirmDialogBox}>
                                     <AlertDialogTrigger asChild>
                                         <Button
                                             type="submit"
-                                            disabled={placing}
+                                            disabled={bidPlacing}
                                             className="flex-1 text-white bg-green-600! hover:bg-green-500! dark:bg-green-600 dark:hover:bg-green-500"
                                         >
-                                            {placing ? "Placing…" : "Place a bid"}
+                                            {bidPlacing ? "Placing…" : "Place a bid"}
                                         </Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
@@ -327,7 +354,7 @@ const BidDialog = ({ currentUser, product, seller, open, onOpenChange }: BidDial
                                                 className="text-white bg-green-600! hover:bg-green-500! dark:bg-green-600 dark:hover:bg-green-500"
                                                 onClick={handlePlaceBid}
                                             >
-                                                {placing ? "Placing bid..." : "Yes, Place Bid"}
+                                                {bidPlacing ? "Placing bid..." : "Yes, Place Bid"}
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
@@ -342,7 +369,6 @@ const BidDialog = ({ currentUser, product, seller, open, onOpenChange }: BidDial
                                 </Button>
                             </div>
                         </div>
-
                     </form>
                 </div>
             </DialogContent>

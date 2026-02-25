@@ -1,7 +1,7 @@
 // src/lib/api/buyer/profile-details.api.ts
 import axios, { AxiosErrorType } from "@/lib/api/axios.ts";
 import { API } from "@/lib/api/endpoints.ts";
-import type { BuyerApiResponseType } from "@/types/api-response.type.ts";
+import type { BuyerApiResponseType, UploadImageBuyerApiResponseType } from "@/types/api-response.type.ts";
 import type { UpdateProfileDetailsSchemaType } from "@/schemas/buyer/update-profile-details.schema.ts";
 
 
@@ -32,7 +32,7 @@ export const updateBuyerProfileDetails = async (userId: string, buyerProfileData
 // Upload Buyer Profile Picture Axios
 export const uploadBuyerProfilePicture = async (userId: string, formData: FormData) => {
     try {
-        const response = await axios.put<BuyerApiResponseType>(`${API.AUTH.BUYER.UPLOAD_PROFILE_PICTURE}/${userId}`, formData, {
+        const response = await axios.put<UploadImageBuyerApiResponseType>(`${API.AUTH.BUYER.UPLOAD_PROFILE_PICTURE}/${userId}`, formData, {
             headers: {
                 "Content-Type": "multipart/form-data"
             },

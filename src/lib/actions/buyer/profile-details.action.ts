@@ -63,13 +63,14 @@ export const handleUpdateBuyerProfileDetails = async (userId: string, buyerProfi
 export const handleUploadBuyerProfilePicture = async (userId: string, formData: FormData) => {
     try {
         const result = await uploadBuyerProfilePicture(userId, formData);
-        if (!result.success || !result.user) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to upload buyer profile picture!"
             };
         }
-        const data = { ...result.user, profilePictureUrl: normalizeHttpUrl(result.user.profilePictureUrl) };
+
+        const data = { ...result.data, imageUrl: normalizeHttpUrl(result.data.imageUrl) };
 
         return {
             success: true,

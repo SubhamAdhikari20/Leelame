@@ -1,6 +1,6 @@
 // src/helpers/http-url.helper.ts
 
-export const normalizeHttpUrl = (url?: string | null): string | null | undefined => {
+export const normalizeHttpUrl = (url?: string | null): string | null => {
     if (!url) {
         return null;
     }

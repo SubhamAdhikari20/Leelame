@@ -2,22 +2,26 @@
 "use server";
 import { deleteSellerAccount, updateSellerProfileDetails, getCurrentSellerUser, uploadSellerProfilePicture, getAllSellers, getSellerById } from "@/lib/api/seller/profile-details.api.ts";
 import type { UpdateProfileDetailsSchemaType } from "@/schemas/seller/update-profile-details.schema.ts";
+import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 
 
 // Get Current Seller User Handler
 export const handleGetCurrentSellerUser = async (userId: string) => {
     try {
         const result = await getCurrentSellerUser(userId);
-        if (!result.success) {
+        if (!result.success || !result.user) {
             return {
                 success: false,
                 message: result.message || "Failed to fetch seller user!"
             };
         }
+
+        const data = { ...result.user, profilePictureUrl: normalizeHttpUrl(result.user.profilePictureUrl) };
+
         return {
             success: true,
             message: result.message || "Seller user fetched successfully.",
-            data: result.user
+            data: data
         };
     }
     catch (error: Error | any) {
@@ -32,16 +36,19 @@ export const handleGetCurrentSellerUser = async (userId: string) => {
 export const handleUpdateSellerProfileDetails = async (userId: string, sellerProfileData: UpdateProfileDetailsSchemaType) => {
     try {
         const result = await updateSellerProfileDetails(userId, sellerProfileData);
-        if (!result.success) {
+        if (!result.success || !result.user) {
             return {
                 success: false,
                 message: result.message || "Failed to update seller profile details!"
             };
         }
+
+        const data = { ...result.user, profilePictureUrl: normalizeHttpUrl(result.user.profilePictureUrl) };
+
         return {
             success: true,
             message: result.message || "Seller profile details updated successfully.",
-            data: result.user
+            data: data
         };
     }
     catch (error: Error | any) {
@@ -56,16 +63,19 @@ export const handleUpdateSellerProfileDetails = async (userId: string, sellerPro
 export const handleUploadSellerProfilePicture = async (userId: string, formData: FormData) => {
     try {
         const result = await uploadSellerProfilePicture(userId, formData);
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to upload seller profile picture!"
             };
         }
+
+        const data = { ...result.data, imageUrl: normalizeHttpUrl(result.data.imageUrl) };
+
         return {
             success: true,
             message: result.message || "Seller profile picture uploaded successfully.",
-            data: result.data
+            data: data
         };
     }
     catch (error: Error | any) {
@@ -103,16 +113,19 @@ export const handleDeleteSellerAccount = async (userId: string) => {
 export const handleGetSellerById = async (sellerId: string) => {
     try {
         const result = await getSellerById(sellerId);
-        if (!result.success) {
+        if (!result.success || !result.user) {
             return {
                 success: false,
                 message: result.message || "Failed to fetch seller user!"
             };
         }
+
+        const data = { ...result.user, profilePictureUrl: normalizeHttpUrl(result.user.profilePictureUrl) };
+
         return {
             success: true,
             message: result.message || "Seller user fetched successfully.",
-            data: result.user
+            data: data
         };
     }
     catch (error: Error | any) {
@@ -127,16 +140,22 @@ export const handleGetSellerById = async (sellerId: string) => {
 export const handleGetAllSellers = async () => {
     try {
         const result = await getAllSellers();
-        if (!result.success) {
+        if (!result.success || !result.users) {
             return {
                 success: false,
                 message: result.message || "Failed to fetch all the sellers!",
             };
         }
+
+        const data = result.users.map((user) => ({
+            ...user,
+            profilePictureUrl: normalizeHttpUrl(user.profilePictureUrl)
+        }));
+
         return {
             success: true,
             message: result.message || "All selles fetched successfully.",
-            data: result.users
+            data: data
         };
     }
     catch (error: Error | any) {

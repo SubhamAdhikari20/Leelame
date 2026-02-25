@@ -26,7 +26,6 @@ const ProductListing = ({ currentUser, products, categories, sellers, productCon
     //     return products?.slice(start, start + pageSize);
     // }, [page, products]);
 
-
     return (
         <section className="container mx-auto px-4 py-8">
             <header className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -43,7 +42,7 @@ const ProductListing = ({ currentUser, products, categories, sellers, productCon
                 </div>
             </header>
 
-            {products &&
+            {(products && (products.length > 0)) &&
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {products.map((product) => {
                         const seller = sellers?.find((seller) => seller._id === product.sellerId);

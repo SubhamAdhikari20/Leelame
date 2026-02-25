@@ -41,7 +41,7 @@ export type ProductPropsType = {
 };
 
 export type BidDialogBoxPublicPropsType = {
-    open: any;
+    open: boolean;
     currentUser?: CurrentUserType | null;
     product: z.infer<typeof ProductApiResponse>;
     seller: z.infer<typeof SellerApiResponse>;

@@ -1,6 +1,6 @@
 // src/components/buyer/product-card.tsx
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Card,
     CardContent,
@@ -9,7 +9,6 @@ import {
     CardHeader,
     CardTitle,
 } from "./../ui/card.tsx";
-import { Separator } from "./../ui/separator.tsx";
 import { Button } from "../ui/button.tsx";
 import { Avatar, AvatarFallback } from "./../ui/avatar.tsx";
 import { Badge } from "./../ui/badge.tsx";
@@ -23,6 +22,36 @@ import type { ProductCardPropsType } from "@/types/common-props.type.ts";
 const ProductCard = ({ currentUser, product, category, seller, productCondition, onBid, onToggleFavourite }: ProductCardPropsType) => {
     // Local favourite state (can connect to backend later)
     const [isFavourite, setIsFavourite] = useState(false);
+    const [timeLeft, setTimeLeft] = useState<string>("");
+
+    useEffect(() => {
+        const calculateTimeLeft = () => {
+            const endDate = new Date(product.endDate).getTime();
+            const now = new Date().getTime();
+            const difference = endDate - now;
+
+            if (difference <= 0) {
+                setTimeLeft("Auction Ended");
+                return "Ended";
+            }
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            // const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            // const hours = Math.floor(difference / (1000 * 60 * 60));
+            // const minutes = Math.floor((difference / (1000 * 60)) % 60);
+
+            const pad = (num: number) => String(num).padStart(2, "0");
+            setTimeLeft(`${days}d ${pad(hours)}h ${pad(minutes)}m left`);
+            // setTimeLeft(`${days}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s left`);
+        };
+        calculateTimeLeft();
+        const timer = setInterval(calculateTimeLeft, 1000);
+        return () => clearInterval(timer);
+    }, [product.endDate]);
+
 
     const handleFavourite = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -41,14 +70,6 @@ const ProductCard = ({ currentUser, product, category, seller, productCondition,
             minimumFractionDigits: 2
         });
         return `Rs. ${format}`;
-    };
-
-    const timeRemaining = () => {
-        const diff = new Date(product!.endDate).getTime() - new Date().getTime();
-        if (diff <= 0) return "Ended";
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-        return `${hours}h ${minutes}m left`;
     };
 
     return (
@@ -95,7 +116,17 @@ const ProductCard = ({ currentUser, product, category, seller, productCondition,
                 <CardContent className="px-4 pb-4 border-b">
                     {/* <p className="text-sm text-muted-foreground mb-1">{location}</p> */}
                     <p className="text-lg font-bold">{formatAmount(product.currentBidPrice)}</p>
-                    <p className="text-xs text-muted-foreground">10 bids • {timeRemaining()}</p>
+                    <p className="text-xs text-muted-foreground">
+                        10 bids •
+                        <span
+                            className={`${timeLeft === "Auction Ended"
+                                ? "text-red-600 dark:text-red-500"
+                                : "text-gray-600 dark:text-gray-200"
+                                }`}
+                        >
+                            {` ${timeLeft}`}
+                        </span>
+                    </p>
                 </CardContent>
             </Link>
 

@@ -112,6 +112,18 @@ export const getAllProducts = async () => {
     }
 };
 
+// Get All Verified Products Axios
+export const getAllVerifiedProducts = async () => {
+    try {
+        const response = await axios.get<AllProductsApiResponseType>(API.PRODUCT.GET_ALL_VERIFIED_PRODUCTS);
+        return response.data;
+    }
+    catch (error: Error | any) {
+        const axiosError = error as AxiosErrorType;
+        throw new Error(axiosError.response?.data.message || "Failed to fetch all verified products!");
+    }
+};
+
 // Get All Products By Seller Id Axios
 export const getAllProductsBySellerId = async (sellerId: string) => {
     try {
@@ -127,11 +139,23 @@ export const getAllProductsBySellerId = async (sellerId: string) => {
 // Get All Products By Buyer Id Axios
 export const getAllProductsByBuyerId = async (buyerId: string) => {
     try {
-        const response = await axios.get<AllProductsApiResponseType>(`${API.PRODUCT.GET_ALL_PRODUCTS}/${buyerId}`);
+        const response = await axios.get<AllProductsApiResponseType>(`${API.PRODUCT.GET_ALL_VERIFIED_PRODUCTS}/${buyerId}`);
         return response.data;
     }
     catch (error: Error | any) {
         const axiosError = error as AxiosErrorType;
         throw new Error(axiosError.response?.data.message || "Failed to fetch all products with buyer id!");
+    }
+};
+
+// Verify Product By Admin Axios
+export const verifyProductByAdmin = async (productId: string, isVerified: boolean) => {
+    try {
+        const response = await axios.put<ProductApiResponseType>(`${API.PRODUCT.VERIFY_PRODUCT_BY_ADMIN}/${productId}`, { isVerified });
+        return response.data;
+    }
+    catch (error: Error | any) {
+        const axiosError = error as AxiosErrorType;
+        throw new Error(axiosError.response?.data.message || "Failed to verify product by admin!");
     }
 };

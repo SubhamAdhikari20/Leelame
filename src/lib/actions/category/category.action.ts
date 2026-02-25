@@ -9,7 +9,7 @@ import type { UpdateCategorySchemaType } from "@/schemas/category/update-categor
 export const handleCreateCategory = async (createCategorySchema: CreateCategorySchemaType) => {
     try {
         const result = await createCategory(createCategorySchema);
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to create category!"
@@ -33,7 +33,7 @@ export const handleCreateCategory = async (createCategorySchema: CreateCategoryS
 export const handleUpdateCategory = async (categoryId: string, updateCategorySchema: UpdateCategorySchemaType) => {
     try {
         const result = await updateCategory(categoryId, updateCategorySchema);
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to update category!"
@@ -57,7 +57,7 @@ export const handleUpdateCategory = async (categoryId: string, updateCategorySch
 export const handleDeleteCategory = async (categoryId: string) => {
     try {
         const result = await deleteCategory(categoryId);
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to delete category!"
@@ -80,7 +80,7 @@ export const handleDeleteCategory = async (categoryId: string) => {
 export const handleGetCategoryById = async (categoryId: string) => {
     try {
         const result = await getCategoryById(categoryId);
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to fetch category by id!"
@@ -104,7 +104,7 @@ export const handleGetCategoryById = async (categoryId: string) => {
 export const handleGetAllCategories = async () => {
     try {
         const result = await getAllCategories();
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to fetch all the categories!",

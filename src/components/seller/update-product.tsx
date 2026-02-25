@@ -88,11 +88,11 @@ const UpdateProduct = ({ currentUser, product, categories, productConditions }: 
                 if (removedExistingProductImages && (removedExistingProductImages.length > 0)) {
                     updateProductPlayLoad.removedExisitingProductImageUrls = removedExistingProductImages;
                 }
-                else {
-                    selectedFiles.forEach((file) => {
-                        productImageFormData.append("product-images", file, file.name);
-                    });
-                }
+                // else {
+                selectedFiles.forEach((file) => {
+                    productImageFormData.append("product-images", file, file.name);
+                });
+                // }
 
                 response = await handleUpdateProduct(product!._id, updateProductPlayLoad, productImageFormData);
             }

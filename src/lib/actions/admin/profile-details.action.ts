@@ -3,22 +3,26 @@
 import { deleteAdminAccount, updateAdminProfileDetails, getCurrentAdminUser, adminLogout, uploadAdminProfilePicture } from "@/lib/api/admin/profile-details.api.ts";
 import { clearAuthCookies } from "@/lib/cookie.ts";
 import type { UpdateAdminProfileDetailsSchemaType } from "@/schemas/admin/update-profile-details.schema.ts";
+import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 
 
 // Get Current Admin User Handler
 export const handleGetCurrentAdminUser = async (userId: string) => {
     try {
         const result = await getCurrentAdminUser(userId);
-        if (!result.success) {
+        if (!result.success || !result.user) {
             return {
                 success: false,
                 message: result.message || "Failed to fetch admin user!"
             };
         }
+
+        const data = { ...result.user, profilePictureUrl: normalizeHttpUrl(result.user.profilePictureUrl) };
+
         return {
             success: true,
             message: result.message || "Admin user fetched successfully.",
-            data: result.user
+            data: data
         };
     }
     catch (error: Error | any) {
@@ -33,16 +37,19 @@ export const handleGetCurrentAdminUser = async (userId: string) => {
 export const handleUpdateAdminProfileDetails = async (userId: string, adminProfileData: UpdateAdminProfileDetailsSchemaType) => {
     try {
         const result = await updateAdminProfileDetails(userId, adminProfileData);
-        if (!result.success) {
+        if (!result.success || !result.user) {
             return {
                 success: false,
                 message: result.message || "Failed to update admin profile details!"
             };
         }
+
+        const data = { ...result.user, profilePictureUrl: normalizeHttpUrl(result.user.profilePictureUrl) };
+
         return {
             success: true,
             message: result.message || "Admin profile details updated successfully.",
-            data: result.user
+            data: data
         };
     }
     catch (error: Error | any) {
@@ -57,16 +64,19 @@ export const handleUpdateAdminProfileDetails = async (userId: string, adminProfi
 export const handleUploadAdminProfilePicture = async (userId: string, formData: FormData) => {
     try {
         const result = await uploadAdminProfilePicture(userId, formData);
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to upload admin profile picture!"
             };
         }
+
+        const data = { ...result.data, imageUrl: normalizeHttpUrl(result.data.imageUrl) };
+
         return {
             success: true,
             message: result.message || "Admin profile picture uploaded successfully.",
-            data: result.data
+            data: data
         };
     }
     catch (error: Error | any) {

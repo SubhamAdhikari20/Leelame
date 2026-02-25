@@ -5,13 +5,13 @@ import { handleGetCurrentBuyerUser } from "@/lib/actions/buyer/profile-details.a
 import { notFound, redirect } from "next/navigation";
 import Navbar from "@/components/navbar.tsx";
 import Footer from "@/components/footer.tsx";
-import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
+import type { CurrentUserType } from "@/types/current-user.type.ts";
 
 
 const AppLayout = async ({ children }: { children: React.ReactNode }) => {
     const response = await getServerSession();
 
-    let currentUser;
+    let currentUser: CurrentUserType | null | undefined;
     if (response.success) {
         const token = response.token;
         const user = response.data;
@@ -28,7 +28,7 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
             notFound();
         }
 
-        currentUser = { ...result.data, profilePictureUrl: normalizeHttpUrl(result.data.profilePictureUrl) };
+        currentUser = result.data;
     }
 
     return (

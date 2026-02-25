@@ -4,11 +4,10 @@ import { getServerSession } from "@/lib/get-server-session.ts";
 import { notFound, redirect } from "next/navigation";
 import ProductListing from "@/components/common/product-listing.tsx";
 import { handleGetCurrentBuyerUser } from "@/lib/actions/buyer/profile-details.action.ts";
-import { handleGetAllProducts } from "@/lib/actions/product/product.action.ts";
+import { handleGetAllProducts, handleGetAllVerifiedProducts } from "@/lib/actions/product/product.action.ts";
 import { handleGetAllCategories } from "@/lib/actions/category/category.action.ts";
 import { handleGetAllSellers } from "@/lib/actions/seller/profile-details.action.ts";
 import { handleGetAllProductConditions } from "@/lib/actions/product-condition/condition.action.ts";
-import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 import type { CurrentUserType } from "@/types/current-user.type.ts";
 
 
@@ -33,42 +32,36 @@ const ProductPage = async () => {
             notFound();
         }
 
-        currentUser = { ...getCurrentUserResult.data, profilePictureUrl: normalizeHttpUrl(getCurrentUserResult.data.profilePictureUrl) };
+        currentUser = getCurrentUserResult.data;
     }
 
     const getAllProductsResult = await handleGetAllProducts();
-    if (!getAllProductsResult.success) {
+    if (!getAllProductsResult.success || !getAllProductsResult.data) {
         throw new Error(`Error fetching products data: ${getAllProductsResult.message}`);
     }
 
-    const products = getAllProductsResult.data?.map((product) => ({
-        ...product,
-        productImageUrls: product.productImageUrls.map((productImageUrl) => normalizeHttpUrl(productImageUrl)).filter((url) => url !== null) as string[],
-    })) || [];
+    const products = getAllProductsResult.data;
 
     const getAllCategoriesResult = await handleGetAllCategories();
-    if (!getAllCategoriesResult.success) {
+    if (!getAllCategoriesResult.success || !getAllCategoriesResult.data) {
         throw new Error(`Error fetching categories data: ${getAllCategoriesResult.message}`);
     }
 
-    const categories = getAllCategoriesResult.data?.map((category) => (category)) || [];
+    const categories = getAllCategoriesResult.data;
 
     const getAllSellersResult = await handleGetAllSellers();
-    if (!getAllSellersResult.success) {
+    if (!getAllSellersResult.success || !getAllSellersResult.data) {
         throw new Error(`Error fetching user data: ${getAllSellersResult.message}`);
     }
 
-    const sellers = getAllSellersResult.data?.map((seller) => ({
-        ...seller,
-        profilePictureUrl: normalizeHttpUrl(seller.profilePictureUrl),
-    })) || [];
+    const sellers = getAllSellersResult.data;
 
     const getAllProductConditionsResult = await handleGetAllProductConditions();
-    if (!getAllProductConditionsResult.success) {
+    if (!getAllProductConditionsResult.success || !getAllProductConditionsResult.data) {
         throw new Error(`Error fetching product conditions data: ${getAllProductConditionsResult.message}`);
     }
 
-    const productConditions = getAllProductConditionsResult.data?.map((productCondition) => (productCondition)) || [];
+    const productConditions = getAllProductConditionsResult.data;
 
     return (
         <>

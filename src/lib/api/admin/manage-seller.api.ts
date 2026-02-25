@@ -82,7 +82,6 @@ export const uploadSellerProfilePictureByAdmin = async (sellerId: string, formDa
     }
 };
 
-
 // Delete Seller Account By Admin Axios
 export const deleteSellerAccountByAdmin = async (sellerId: string) => {
     try {

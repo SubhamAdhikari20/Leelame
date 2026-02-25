@@ -2,22 +2,29 @@
 "use server";
 import { createSellerAccountByAdmin, deleteSellerAccountByAdmin, getAllSellers, getSellerById, updateSellerProfileDetailsByAdmin, uploadSellerProfilePictureByAdmin } from "@/lib/api/admin/manage-seller.api.ts";
 import type { CreateSellerAccountSchemaType, UpdateSellerAccountSchemaType } from "@/schemas/admin/manage-seller-account.schema.ts";
+import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 
 
 // Get All Sellers User By Admin Handler
 export const handleGetAllSellers = async () => {
     try {
         const result = await getAllSellers();
-        if (!result.success) {
+        if (!result.success || !result.users) {
             return {
                 success: false,
                 message: result.message || "Failed to fetch all the sellers in admin workspace!",
             };
         }
+
+        const data = result.users.map((user) => ({
+            ...user,
+            profilePictureUrl: normalizeHttpUrl(user.profilePictureUrl)
+        }));
+
         return {
             success: true,
             message: result.message || "All selles fetched successfully.",
-            data: result.users
+            data: data
         };
     }
     catch (error: Error | any) {
@@ -32,16 +39,19 @@ export const handleGetAllSellers = async () => {
 export const handleCreateSellerAccountByAdmin = async (createSellerAccountData: CreateSellerAccountSchemaType, formData?: FormData | null) => {
     try {
         const result = await createSellerAccountByAdmin(createSellerAccountData, formData);
-        if (!result.success) {
+        if (!result.success || !result.user) {
             return {
                 success: false,
                 message: result.message || "Failed to create seller account by admin!"
             };
         }
+
+        const data = { ...result.user, profilePictureUrl: normalizeHttpUrl(result.user.profilePictureUrl) };
+
         return {
             success: true,
             message: result.message || "Seller created by admin successfully.",
-            data: result.user
+            data: data
         };
     }
     catch (error: Error | any) {
@@ -56,16 +66,19 @@ export const handleCreateSellerAccountByAdmin = async (createSellerAccountData: 
 export const handleGetSellerById = async (sellerId: string) => {
     try {
         const result = await getSellerById(sellerId);
-        if (!result.success) {
+        if (!result.success || !result.user) {
             return {
                 success: false,
                 message: result.message || "Failed to fetch the seller in admin workspace!"
             };
         }
+
+        const data = { ...result.user, profilePictureUrl: normalizeHttpUrl(result.user.profilePictureUrl) };
+
         return {
             success: true,
             message: result.message || "Seller fetched successfully.",
-            data: result.user
+            data: data
         };
     }
     catch (error: Error | any) {
@@ -80,16 +93,19 @@ export const handleGetSellerById = async (sellerId: string) => {
 export const handleUpdateSellerProfileDetailsByAdmin = async (sellerId: string, sellerProfileData: UpdateSellerAccountSchemaType) => {
     try {
         const result = await updateSellerProfileDetailsByAdmin(sellerId, sellerProfileData);
-        if (!result.success) {
+        if (!result.success || !result.user) {
             return {
                 success: false,
                 message: result.message || "Failed to update seller profile details by admin!"
             };
         }
+
+        const data = { ...result.user, profilePictureUrl: normalizeHttpUrl(result.user.profilePictureUrl) };
+
         return {
             success: true,
             message: result.message || "Seller profile details updated by admin successfully.",
-            data: result.user
+            data: data
         };
     }
     catch (error: Error | any) {
@@ -104,16 +120,19 @@ export const handleUpdateSellerProfileDetailsByAdmin = async (sellerId: string, 
 export const handleUploadSellerProfilePictureByAdmin = async (sellerId: string, formData: FormData) => {
     try {
         const result = await uploadSellerProfilePictureByAdmin(sellerId, formData);
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to upload seller profile picture by admin!"
             };
         }
+
+        const data = { ...result.data, imageUrl: normalizeHttpUrl(result.data.imageUrl) };
+
         return {
             success: true,
             message: result.message || "Seller profile picture uploaded successfully.",
-            data: result.data
+            data: data
         };
     }
     catch (error: Error | any) {
@@ -123,8 +142,6 @@ export const handleUploadSellerProfilePictureByAdmin = async (sellerId: string, 
         };
     }
 };
-
-
 
 // Delete Seller Account By Admin Handler
 export const handleDeleteSellerAccountByAdmin = async (sellerId: string) => {
