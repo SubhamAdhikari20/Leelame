@@ -1,8 +1,9 @@
 // src/lib/actions/product/product.action.ts
 "use server";
-import { createProduct, updateProduct, deleteProduct, getProductById, getAllProducts, getAllProductsBySellerId, getAllProductsByBuyerId, getAllVerifiedProducts, verifyProductByAdmin } from "@/lib/api/product/product.api.ts";
+import { createProduct, updateProduct, deleteProduct, getProductById, getAllProducts, getAllProductsBySellerId, getAllProductsByBuyerId, getAllVerifiedProducts, updateProductByAdmin } from "@/lib/api/product/product.api.ts";
 import type { CreateProductSchemaType } from "@/schemas/product/create-product.schema.ts";
 import type { UpdateProductSchemaType } from "@/schemas/product/update-product.schema.ts";
+import type { UpdateProductByAdminSchemaType } from "@/schemas/product/update-product-by-admin.schema";
 import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 
 
@@ -230,14 +231,14 @@ export const handleGetAllProductsByBuyerId = async (buyerId: string) => {
     }
 };
 
-// Verify Product By Admin Handler
-export const handleVerifyProductByAdmin = async (productId: string, isVerified: boolean) => {
+// Update Product By Admin Handler
+export const handleUpdateProductByAdmin = async (productId: string, updateProductData: UpdateProductByAdminSchemaType) => {
     try {
-        const result = await verifyProductByAdmin(productId, isVerified);
+        const result = await updateProductByAdmin(productId, updateProductData);
         if (!result.success || !result.data) {
             return {
                 success: false,
-                message: result.message || "Failed to verify product by admin."
+                message: result.message || "Failed to update product by admin."
             };
         }
 
@@ -245,14 +246,14 @@ export const handleVerifyProductByAdmin = async (productId: string, isVerified: 
 
         return {
             success: true,
-            message: result.message || "Product verification by admin successful.",
+            message: result.message || "Product updated by admin successful.",
             data: data
         };
     }
     catch (error: Error | any) {
         return {
             success: false,
-            message: error.message || "An unexpected error occurred while verifying product by admin."
+            message: error.message || "An unexpected error occurred while updating product by admin."
         };
     }
 };

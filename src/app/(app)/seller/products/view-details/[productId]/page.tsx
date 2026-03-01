@@ -7,7 +7,6 @@ import { handleGetCurrentSellerUser } from "@/lib/actions/seller/profile-details
 import { handleGetProductById } from "@/lib/actions/product/product.action.ts";
 import { handleGetAllCategories } from "@/lib/actions/category/category.action.ts";
 import { handleGetAllProductConditions } from "@/lib/actions/product-condition/condition.action.ts";
-import { normalizeHttpUrl } from "@/helpers/http-url.helper.ts";
 
 
 const ProductViewDetailsPage = async ({ params }: { params: { productId: string } }) => {
@@ -33,32 +32,28 @@ const ProductViewDetailsPage = async ({ params }: { params: { productId: string 
         notFound();
     }
 
-    const currentUser = { ...getCurrentUserResult.data, profilePictureUrl: normalizeHttpUrl(getCurrentUserResult.data.profilePictureUrl) };
+    const currentUser = getCurrentUserResult.data;
 
     const getProductResult = await handleGetProductById(productId);
-    if (!getProductResult.success) {
+    if (!getProductResult.success || !getProductResult.data) {
         throw new Error(`Error fetching product details: ${getProductResult.message}`);
     }
 
-    if (!getProductResult.data) {
-        notFound();
-    }
-
-    const product = { ...getProductResult.data, productImageUrls: getProductResult.data.productImageUrls.map((productImageUrl) => normalizeHttpUrl(productImageUrl)).filter((url) => url !== null) as string[] };
+    const product = getProductResult.data;
 
     const getAllCategoriesResult = await handleGetAllCategories();
-    if (!getAllCategoriesResult.success) {
+    if (!getAllCategoriesResult.success || !getAllCategoriesResult.data) {
         throw new Error(`Error fetching categories data: ${getAllCategoriesResult.message}`);
     }
 
-    const categories = getAllCategoriesResult.data?.map((category) => (category)) || [];
+    const categories = getAllCategoriesResult.data;
 
     const getAllProductConditionsResult = await handleGetAllProductConditions();
-    if (!getAllProductConditionsResult.success) {
+    if (!getAllProductConditionsResult.success || !getAllProductConditionsResult.data) {
         throw new Error(`Error fetching product conditions data: ${getAllProductConditionsResult.message}`);
     }
 
-    const productConditions = getAllProductConditionsResult.data?.map((productCondition) => (productCondition)) || [];
+    const productConditions = getAllProductConditionsResult.data;
 
     return (
         <>

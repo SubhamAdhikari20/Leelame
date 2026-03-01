@@ -46,7 +46,7 @@ import { Input } from "../ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Calendar1Icon, IndianRupeeIcon, Minus, Plus } from "lucide-react";
+import { Calendar1Icon, Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import { format } from "date-fns";
 import { handleCreateBid } from "@/lib/actions/bid/bid.action.ts";
@@ -205,8 +205,8 @@ const ProductViewDetailsPublic = ({ currentUser, product, seller, categories, pr
             router.refresh();
         }
         catch (error: Error | any) {
-            console.error("Error bidPlacing bid: ", error);
-            toast.error("Error bidPlacing bid", {
+            console.error("Error bid placing bid: ", error);
+            toast.error("Error bid placing bid", {
                 description: error.message
             });
         }

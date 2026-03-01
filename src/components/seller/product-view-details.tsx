@@ -80,6 +80,13 @@ const ProductViewDetails = ({ currentUser, product, categories, productCondition
         }
     };
 
+    const formatAmount = (amount: number) => {
+        const format = Number(amount).toLocaleString("en-IN", {
+            minimumFractionDigits: 2
+        });
+        return `Rs. ${format}`;
+    };
+
     return (
         <section className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-6">
@@ -228,22 +235,20 @@ const ProductViewDetails = ({ currentUser, product, categories, productCondition
 
                         <div className="flex items-center justify-between">
                             <div>
-                                <span className="text-[12px] md:text-[14px] text-gray-500 dark:text-gray-400 text-xs mb-1">
+                                <p className="text-[12px] md:text-[14px] text-gray-500 dark:text-gray-400 text-xs mb-1">
                                     Start Price
-                                </span>
-                                <div className="flex items-center gap-1 text-2xl font-semibold text-emerald-600 dark:text-emerald-500">
-                                    <IndianRupeeIcon className="h-5 w-5" />
-                                    {product?.startPrice.toLocaleString()}
-                                </div>
+                                </p>
+                                <p className="text-lg md:text-[20px] xl:text-2xl font-semibold text-emerald-600 dark:text-emerald-500">
+                                    {formatAmount(product.startPrice)}
+                                </p>
                             </div>
                             <div>
                                 <p className="text-right text-[12px] md:text-[14px] text-gray-500 dark:text-gray-400 text-xs mb-1">
                                     Current Bid Price
                                 </p>
-                                <div className="flex items-center gap-1 text-2xl font-semibold text-orange-600 dark:text-orange-500">
-                                    <IndianRupeeIcon className="h-5 w-5" />
-                                    {product?.currentBidPrice.toLocaleString()}
-                                </div>
+                                <p className="text-lg md:text-[20px] xl:text-2xl font-semibold text-orange-600 dark:text-orange-500">
+                                    {formatAmount(product.currentBidPrice)}
+                                </p>
                             </div>
                         </div>
 
@@ -271,10 +276,9 @@ const ProductViewDetails = ({ currentUser, product, categories, productCondition
                             <span className="text-[13px] md:text-[15px] text-gray-500 dark:text-gray-400">
                                 Bid Interval Price
                             </span>
-                            <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-200">
-                                <IndianRupeeIcon className="h-4 w-4" />
-                                <span className="font-bold text-sm md:text-[16px]">{product?.bidIntervalPrice}</span>
-                            </div>
+                            <span className="font-bold text-sm md:text-[16px] text-gray-600 dark:text-gray-200">
+                                {formatAmount(product.bidIntervalPrice)}
+                            </span>
                         </div>
 
                         <div className="flex items-center justify-between pb-2 border-b dark:border-gray-800">
@@ -282,7 +286,7 @@ const ProductViewDetails = ({ currentUser, product, categories, productCondition
                                 Commission
                             </span>
                             <span className="text-sm md:text-[16px] text-gray-600 dark:text-gray-200">
-                                {product?.commission} %
+                                {product.commission} %
                             </span>
                         </div>
 
@@ -292,7 +296,7 @@ const ProductViewDetails = ({ currentUser, product, categories, productCondition
                             </span>
                             <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-200">
                                 <Calendar1Icon className="h-4 w-4" />
-                                <span className="text-[11px] md:text-[13px]">{format(product!.endDate, "PPp")}</span>
+                                <span className="text-[11px] md:text-[13px]">{format(product.endDate, "PPp")}</span>
                             </div>
                         </div>
                     </CardContent>

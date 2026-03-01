@@ -9,7 +9,7 @@ import type { UpdateBidSchemaType } from "@/schemas/bid/update-bid.schema.ts";
 export const handleCreateBid = async (createBidSchema: CreateBidSchemaType) => {
     try {
         const result = await createBid(createBidSchema);
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to create bid!"
@@ -33,7 +33,7 @@ export const handleCreateBid = async (createBidSchema: CreateBidSchemaType) => {
 export const handleUpdateBid = async (bidId: string, updateBidSchema: UpdateBidSchemaType) => {
     try {
         const result = await updateBid(bidId, updateBidSchema);
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to update bid!"
@@ -80,7 +80,7 @@ export const handleDeleteBid = async (bidId: string) => {
 export const handleGetBidById = async (bidId: string) => {
     try {
         const result = await getBidById(bidId);
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to fetch bid by id!"
@@ -104,7 +104,7 @@ export const handleGetBidById = async (bidId: string) => {
 export const handleGetAllBids = async () => {
     try {
         const result = await getAllBids();
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to fetch all the bids!",

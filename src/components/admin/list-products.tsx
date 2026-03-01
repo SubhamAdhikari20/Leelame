@@ -1,4 +1,4 @@
-// src/components/seller/list-products.tsx
+// src/components/admin/list-products.tsx
 "use client";
 import React from "react";
 import {
@@ -13,55 +13,18 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog.tsx";
 import Image from "next/image";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button.tsx";
 import { format } from "date-fns";
-import { Edit, Plus, Trash2, MoreVerticalIcon, FileText } from "lucide-react";
+import { Plus, MoreVerticalIcon, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { handleDeleteProduct } from "@/lib/actions/product/product.action.ts";
-import type { ListProductsPropsType } from "@/types/seller-props.type.ts";
+import type { ListProductsPropsType } from "@/types/admin-props.type.ts";
 
 
 const ListProducts = ({ currentUser, products, categories, productConditions }: ListProductsPropsType) => {
     const router = useRouter();
-
-    // Handle product delete
-    const handleDeleteProductById = async (productId: string) => {
-        try {
-            const response = await handleDeleteProduct(productId);
-            if (!response.success) {
-                toast.error("Failed", {
-                    description: response.message,
-                });
-            }
-
-            toast.success("Successful", {
-                description: response.message,
-            });
-            router.refresh();
-        }
-        catch (error: Error | any) {
-            console.error("Error deleting product: ", error);
-            toast.error("Error deleting product", {
-                description: error.message
-            });
-        }
-    };
 
     return (
         <section className="p-4 md:p-6">
@@ -94,12 +57,11 @@ const ListProducts = ({ currentUser, products, categories, productConditions }: 
                                 <TableHead className="text-white font-semibold text-[16px]"></TableHead>
                                 <TableHead className="text-white font-semibold text-[16px]">Name</TableHead>
                                 <TableHead className="text-white font-semibold text-[16px]">Category</TableHead>
-                                <TableHead className="text-white font-semibold text-[16px]">Condition</TableHead>
                                 <TableHead className="text-white font-semibold text-[16px]">Commission (%)</TableHead>
-                                {/* <TableHead className="text-white font-semibold text-[16px]">Start Price</TableHead> */}
-                                <TableHead className="text-white font-semibold text-[16px]">Current Bid Price (NPR)</TableHead>
-                                {/* <TableHead className="text-white font-semibold text-[16px]">Bid Interval Price</TableHead> */}
+                                <TableHead className="text-white font-semibold text-[16px]">Start Price (NPR)</TableHead>
                                 <TableHead className="text-white font-semibold text-[16px]">End Date</TableHead>
+                                <TableHead className="text-white font-semibold text-[16px]">Status</TableHead>
+                                <TableHead className="text-white font-semibold text-[16px]">Sold Out</TableHead>
                                 <TableHead className="text-white font-semibold text-[16px]"></TableHead>
                             </TableRow>
                         </TableHeader>
@@ -131,14 +93,11 @@ const ListProducts = ({ currentUser, products, categories, productConditions }: 
                                     <TableCell>
                                         {categories?.find(category => category._id === product.categoryId)?.categoryName}
                                     </TableCell>
-                                    <TableCell>
-                                        {productConditions?.find(condition => condition._id === product.conditionId)?.productConditionName}
-                                    </TableCell>
                                     <TableCell>{product.commission}</TableCell>
-                                    {/* <TableCell>{product.startPrice}</TableCell> */}
-                                    <TableCell>{product.currentBidPrice}</TableCell>
-                                    {/* <TableCell>{product.bidIntervalPrice}</TableCell> */}
+                                    <TableCell>{product.startPrice}</TableCell>
                                     <TableCell>{format(product.endDate, "PPp")}</TableCell>
+                                    <TableCell>{product.isVerified ? "Verified" : "Unverified"}</TableCell>
+                                    <TableCell>{product.soldToBuyerId ? "Sold Out" : "Available"}</TableCell>
                                     <TableCell className="text-center flex gap-2">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
@@ -148,45 +107,10 @@ const ListProducts = ({ currentUser, products, categories, productConditions }: 
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onSelect={() => router.push(`/seller/products/view-details/${product._id}`)}>
+                                                <DropdownMenuItem onSelect={() => router.push(`/admin/products/view-details/${product._id}`)}>
                                                     <FileText />
                                                     View Details
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem onSelect={() => router.push(`/seller/products/manage/update/${product._id}`)}>
-                                                    <Edit />
-                                                    Edit
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                <AlertDialog>
-                                                    <AlertDialogTrigger asChild>
-                                                        <DropdownMenuItem
-                                                            variant="destructive"
-                                                            onSelect={(e) => e.preventDefault()}
-                                                            className="hover:text-red-500 dark:text-red-600 dark:hover:text-red-500"
-                                                        >
-                                                            <Trash2 />
-                                                            Delete
-                                                        </DropdownMenuItem>
-                                                    </AlertDialogTrigger>
-                                                    <AlertDialogContent>
-                                                        <AlertDialogHeader>
-                                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                            <AlertDialogDescription>
-                                                                This action cannot be undone. This will permanently delete the product <strong> "{product.productName}"</strong> and remove its data from the system.
-                                                            </AlertDialogDescription>
-                                                        </AlertDialogHeader>
-                                                        <AlertDialogFooter>
-                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                            <AlertDialogAction
-                                                                variant="destructive"
-                                                                className="hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-500"
-                                                                onClick={() => handleDeleteProductById(product._id)}
-                                                            >
-                                                                Delete
-                                                            </AlertDialogAction>
-                                                        </AlertDialogFooter>
-                                                    </AlertDialogContent>
-                                                </AlertDialog>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>
@@ -195,8 +119,6 @@ const ListProducts = ({ currentUser, products, categories, productConditions }: 
                         </TableBody>
                     </Table>
                 </div>
-                //     <ScrollBar orientation="horizontal" />
-                // </ScrollArea>
             )}
         </section>
     );

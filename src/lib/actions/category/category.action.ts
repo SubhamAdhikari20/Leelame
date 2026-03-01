@@ -57,7 +57,7 @@ export const handleUpdateCategory = async (categoryId: string, updateCategorySch
 export const handleDeleteCategory = async (categoryId: string) => {
     try {
         const result = await deleteCategory(categoryId);
-        if (!result.success || !result.data) {
+        if (!result.success) {
             return {
                 success: false,
                 message: result.message || "Failed to delete category!"

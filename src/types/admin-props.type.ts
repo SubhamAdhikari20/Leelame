@@ -1,6 +1,6 @@
 // src/type/admin-props.type.ts
 import { z } from "zod";
-import { SellerApiResponse, CategoryApiResponse, ProductConditionApiResponse } from "./api-response.type.ts";
+import { SellerApiResponse, CategoryApiResponse, ProductConditionApiResponse, ProductApiResponse } from "./api-response.type.ts";
 import type { CurrentUserType } from "./current-user.type.ts";
 
 
@@ -38,4 +38,21 @@ export type ListProductConditionsPropsType = {
 export type UpdateProductConditionDetailsPropsType = {
     currentUser?: CurrentUserType | null;
     productCondition: z.infer<typeof ProductConditionApiResponse>;
+};
+
+// All Products list in Admin Workspace
+export type ListProductsPropsType = {
+    currentUser?: CurrentUserType | null;
+    categories?: z.infer<typeof CategoryApiResponse>[] | null;
+    productConditions?: z.infer<typeof ProductConditionApiResponse>[] | null;
+    products?: z.infer<typeof ProductApiResponse>[] | null;
+};
+
+// View Details Product in Admin Workspace
+export type ProductViewDetailsPropsType = {
+    currentUser?: CurrentUserType | null;
+    product: z.infer<typeof ProductApiResponse>;
+    seller: z.infer<typeof SellerApiResponse>;
+    categories?: z.infer<typeof CategoryApiResponse>[] | null;
+    productConditions?: z.infer<typeof ProductConditionApiResponse>[] | null;
 };

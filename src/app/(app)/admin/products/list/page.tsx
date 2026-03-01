@@ -1,15 +1,15 @@
-// src/app/(app)/seller/products/manage/list/page.tsx
+// src/app/(app)/admin/products/list/error.tsx
 import React from "react";
 import { getServerSession } from "@/lib/get-server-session.ts";
 import { notFound, redirect } from "next/navigation";
-import ListProducts from "@/components/seller/list-products.tsx";
-import { handleGetCurrentSellerUser } from "@/lib/actions/seller/profile-details.action.ts";
+import ListProducts from "@/components/admin/list-products.tsx";
+import { handleGetCurrentAdminUser } from "@/lib/actions/admin/profile-details.action.ts";
 import { handleGetAllProducts } from "@/lib/actions/product/product.action.ts";
 import { handleGetAllCategories } from "@/lib/actions/category/category.action.ts";
 import { handleGetAllProductConditions } from "@/lib/actions/product-condition/condition.action.ts";
 
 
-const SellerManageProducts = async () => {
+const AdminManageProducts = async () => {
     const response = await getServerSession();
 
     if (!response.success) {
@@ -19,10 +19,10 @@ const SellerManageProducts = async () => {
     const token = response.token;
     const user = response.data;
     if (!token || !user || !user._id) {
-        redirect("/become-seller");
+        redirect("/admin/login");
     }
 
-    const getCurrentUserResult = await handleGetCurrentSellerUser(user._id);
+    const getCurrentUserResult = await handleGetCurrentAdminUser(user._id);
     if (!getCurrentUserResult.success) {
         throw new Error("Error fetching user data");
     }
@@ -61,4 +61,4 @@ const SellerManageProducts = async () => {
     );
 };
 
-export default SellerManageProducts;
+export default AdminManageProducts;

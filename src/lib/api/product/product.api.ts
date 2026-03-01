@@ -4,6 +4,7 @@ import { API } from "@/lib/api/endpoints.ts";
 import type { ProductApiResponseType, AllProductsApiResponseType } from "@/types/api-response.type.ts";
 import type { CreateProductSchemaType } from "@/schemas/product/create-product.schema.ts";
 import type { UpdateProductSchemaType } from "@/schemas/product/update-product.schema.ts";
+import type { UpdateProductByAdminSchemaType } from "@/schemas/product/update-product-by-admin.schema";
 
 
 // Create Product Axios
@@ -148,14 +149,14 @@ export const getAllProductsByBuyerId = async (buyerId: string) => {
     }
 };
 
-// Verify Product By Admin Axios
-export const verifyProductByAdmin = async (productId: string, isVerified: boolean) => {
+// Update Product By Admin Axios
+export const updateProductByAdmin = async (productId: string, data: UpdateProductByAdminSchemaType) => {
     try {
-        const response = await axios.put<ProductApiResponseType>(`${API.PRODUCT.VERIFY_PRODUCT_BY_ADMIN}/${productId}`, { isVerified });
+        const response = await axios.put<ProductApiResponseType>(`${API.PRODUCT.UPDATE_PRODUCT_BY_ADMIN}/${productId}`, data);
         return response.data;
     }
     catch (error: Error | any) {
         const axiosError = error as AxiosErrorType;
-        throw new Error(axiosError.response?.data.message || "Failed to verify product by admin!");
+        throw new Error(axiosError.response?.data.message || "Failed to update product by admin!");
     }
 };

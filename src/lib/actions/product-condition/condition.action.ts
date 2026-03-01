@@ -9,7 +9,7 @@ import type { UpdateProductConditionSchemaType } from "@/schemas/product-conditi
 export const handleCreateProductCondition = async (createProductConditionSchema: CreateProductConditionSchemaType) => {
     try {
         const result = await createProductCondition(createProductConditionSchema);
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to create product condition!"
@@ -33,7 +33,7 @@ export const handleCreateProductCondition = async (createProductConditionSchema:
 export const handleUpdateProductCondition = async (productConditionId: string, updateProductConditionSchema: UpdateProductConditionSchemaType) => {
     try {
         const result = await updateProductCondition(productConditionId, updateProductConditionSchema);
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to update product condition!"
@@ -80,7 +80,7 @@ export const handleDeleteProductCondition = async (productConditionId: string) =
 export const handleGetProductConditionById = async (productConditionId: string) => {
     try {
         const result = await getProductConditionById(productConditionId);
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to fetch productCondition by id!"
@@ -104,7 +104,7 @@ export const handleGetProductConditionById = async (productConditionId: string) 
 export const handleGetAllProductConditions = async () => {
     try {
         const result = await getAllProductConditions();
-        if (!result.success) {
+        if (!result.success || !result.data) {
             return {
                 success: false,
                 message: result.message || "Failed to fetch all the product conditions!",

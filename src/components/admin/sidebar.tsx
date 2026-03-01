@@ -21,7 +21,7 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@/components/ui/collapsible.tsx"
-import { Calendar, ChevronRight, Home, Inbox, Search, Settings, ShoppingBag } from "lucide-react";
+import { ChevronRight, Home, Search, Settings, ShoppingBag, ShoppingCart } from "lucide-react";
 import NavUser from "@/components/admin/nav-user.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import { IconInnerShadowTop } from "@tabler/icons-react";
@@ -41,19 +41,9 @@ const AdminSidebar = ({ currentUser, ...props }: CurrentUserPropsType & React.Co
             icon: Home,
         },
         {
-            title: "Inbox",
-            path: "/inbox",
-            icon: Inbox,
-        },
-        {
-            title: "Calendar",
-            path: "/calendar",
-            icon: Calendar,
-        },
-        {
-            title: "Search",
-            path: "/search",
-            icon: Search,
+            title: "Products",
+            path: "/admin/products/list",
+            icon: ShoppingCart,
         },
     ];
     const items2 = [
@@ -96,10 +86,6 @@ const AdminSidebar = ({ currentUser, ...props }: CurrentUserPropsType & React.Co
                 {
                     title: "Seller Management",
                     path: "/admin/settings/manage-seller/list",
-                },
-                {
-                    title: "Starred",
-                    path: "#",
                 },
                 {
                     title: "Account Settings",

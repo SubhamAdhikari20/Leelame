@@ -68,7 +68,7 @@ export const API = {
         GET_PRODUCT_BY_ID: "/api/product",
         GET_ALL_PRODUCTS: "/api/product/get-all-products",
         GET_ALL_VERIFIED_PRODUCTS: "/api/product/get-all-verified-products",
-        VERIFY_PRODUCT_BY_ADMIN: "/api/product/verify-product-by-admin",
+        UPDATE_PRODUCT_BY_ADMIN: "/api/product/update-product-by-admin",
     },
     PRODUCT_CONDITION: {
         CREATE_PRODUCT_CONDITION: "/api/product-condition/create-product-condition",
