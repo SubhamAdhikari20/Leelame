@@ -4,7 +4,7 @@ import { getServerSession } from "@/lib/get-server-session.ts";
 import { notFound, redirect } from "next/navigation";
 import ProductListing from "@/components/common/product-listing.tsx";
 import { handleGetCurrentBuyerUser } from "@/lib/actions/buyer/profile-details.action.ts";
-import { handleGetAllProducts, handleGetAllVerifiedProducts } from "@/lib/actions/product/product.action.ts";
+import { handleGetAllVerifiedProducts } from "@/lib/actions/product/product.action.ts";
 import { handleGetAllCategories } from "@/lib/actions/category/category.action.ts";
 import { handleGetAllSellers } from "@/lib/actions/seller/profile-details.action.ts";
 import { handleGetAllProductConditions } from "@/lib/actions/product-condition/condition.action.ts";
@@ -35,12 +35,16 @@ const ProductPage = async () => {
         currentUser = getCurrentUserResult.data;
     }
 
-    const getAllProductsResult = await handleGetAllProducts();
+    const getAllProductsResult = await handleGetAllVerifiedProducts();
     if (!getAllProductsResult.success || !getAllProductsResult.data) {
         throw new Error(`Error fetching products data: ${getAllProductsResult.message}`);
     }
 
-    const products = getAllProductsResult.data;
+    const products = getAllProductsResult.data.map((product) => {
+        if (!product.isSoldOut) {
+            return product;
+        }
+    }).filter((product) => product !== undefined);
 
     const getAllCategoriesResult = await handleGetAllCategories();
     if (!getAllCategoriesResult.success || !getAllCategoriesResult.data) {

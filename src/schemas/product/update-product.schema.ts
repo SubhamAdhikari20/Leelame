@@ -1,6 +1,6 @@
 // src/schemas/product/update-product.schema.ts
 import { z } from "zod";
-import { productNameValidation, productDescriptionValidation, productStartPriceValidation, productBidIntervalPriceValidation } from "./product.schema.ts";
+import { productNameValidation, productDescriptionValidation, productStartPriceValidation, productBidIntervalPriceValidation, productBuyNowPriceValidation } from "./product.schema.ts";
 
 
 // Update Product Schema
@@ -9,6 +9,7 @@ export const UpdateProductSchema = z.object({
     description: productDescriptionValidation.nullish(),
     startPrice: productStartPriceValidation,
     bidIntervalPrice: productBidIntervalPriceValidation,
+    buyNowPrice: productBuyNowPriceValidation.nullish(),
     endDate: z.date(),
     removedExisitingProductImageUrls: z.array(z.string()),
     categoryId: z.string(),

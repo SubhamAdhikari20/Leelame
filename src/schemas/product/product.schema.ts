@@ -30,3 +30,7 @@ export const productCurrentBidPriceValidation = z
 export const productBidIntervalPriceValidation = z
     .number()
     .min(1, { message: "Product Bid Interval Price must be a positive number greater than 0" });
+
+export const productBuyNowPriceValidation = z
+    .number()
+    .min(1, { message: "Product Buy Now Price must be a positive number greater than 0" });

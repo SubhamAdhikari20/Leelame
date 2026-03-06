@@ -141,7 +141,7 @@ const BidDialog = ({ currentUser, product, seller, open, onOpenChange }: BidDial
                 return;
             }
 
-            const response = await handleCreateBid(pendingData);
+            const response = await handleCreateBid({ ...pendingData, bidAmount: totalPayableAmount });
             if (!response.success) {
                 toast.error("Failed", {
                     description: response.message

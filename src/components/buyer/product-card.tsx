@@ -17,9 +17,10 @@ import Image from "next/image";
 import { Gavel, Heart } from "lucide-react";
 import { toast } from "sonner";
 import type { ProductCardPropsType } from "@/types/common-props.type.ts";
+import { IconMoneybag } from "@tabler/icons-react";
 
 
-const ProductCard = ({ currentUser, product, category, seller, productCondition, onBid, onToggleFavourite }: ProductCardPropsType) => {
+const ProductCard = ({ currentUser, product, category, seller, productCondition, onBid, onToggleFavourite, onBuyNow }: ProductCardPropsType) => {
     // Local favourite state (can connect to backend later)
     const [isFavourite, setIsFavourite] = useState(false);
     const [timeLeft, setTimeLeft] = useState<string>("");
@@ -113,57 +114,82 @@ const ProductCard = ({ currentUser, product, category, seller, productCondition,
                     </CardDescription>
                 </CardHeader>
 
-                <CardContent className="px-4 pb-4 border-b">
-                    {/* <p className="text-sm text-muted-foreground mb-1">{location}</p> */}
-                    <p className="text-lg font-bold">{formatAmount(product.currentBidPrice)}</p>
-                    <p className="text-xs text-muted-foreground">
-                        10 bids •
-                        <span
-                            className={`${timeLeft === "Auction Ended"
-                                ? "text-red-600 dark:text-red-500"
-                                : "text-gray-600 dark:text-gray-200"
-                                }`}
-                        >
-                            {` ${timeLeft}`}
-                        </span>
-                    </p>
+                <CardContent className="px-4 pb-4 border-b space-y-3">
+                    <div>
+                        <p className="text-lg font-bold">{formatAmount(product.currentBidPrice)}</p>
+                        <p className="text-xs text-muted-foreground">
+                            10 bids •
+                            <span
+                                className={`${timeLeft === "Auction Ended"
+                                    ? "text-red-600 dark:text-red-500"
+                                    : "text-gray-600 dark:text-gray-200"
+                                    }`}
+                            >
+                                {` ${timeLeft}`}
+                            </span>
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <Avatar className="h-7 w-7">
+                            {seller.profilePictureUrl ? (
+                                <Image
+                                    fill
+                                    src={seller.profilePictureUrl}
+                                    alt={seller.fullName || "Seller"}
+                                />
+
+                            ) : (
+                                <AvatarFallback>
+                                    {(seller?.fullName || "NaN")
+                                        .split(" ")
+                                        .map((n) => n[0])
+                                        .join("")
+                                        .slice(0, 2)
+                                        .toUpperCase()}
+                                </AvatarFallback>
+                            )}
+                        </Avatar>
+                        <span className="text-xs font-medium">{seller.fullName}</span>
+                    </div>
                 </CardContent>
             </Link>
 
-            {/* <Separator /> */}
+            {product.buyNowPrice ? (
+                <CardFooter className="px-4 pb-4 flex items-center justify-between gap-4">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={onBuyNow}
+                        className="flex-1"
+                    >
+                        <IconMoneybag className="mr-1 h-4 w-4" />
+                        Buy Now
+                    </Button>
 
-            <CardFooter className="px-4 pb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Avatar className="h-7 w-7">
-                        {seller.profilePictureUrl ? (
-                            <Image
-                                fill
-                                src={seller.profilePictureUrl}
-                                alt={seller.fullName || "Seller"}
-                            />
-
-                        ) : (
-                            <AvatarFallback>
-                                {(seller?.fullName || "NaN")
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")
-                                    .slice(0, 2)
-                                    .toUpperCase()}
-                            </AvatarFallback>
-                        )}
-                    </Avatar>
-                    <span className="text-xs font-medium">{seller.fullName}</span>
-                </div>
-                <Button
-                    type="button"
-                    size="sm"
-                    onClick={onBid}
-                >
-                    <Gavel className="mr-1 h-4 w-4" />
-                    Bid Now
-                </Button>
-            </CardFooter>
+                    <Button
+                        type="button"
+                        size="sm"
+                        onClick={onBid}
+                        className="flex-1"
+                    >
+                        <Gavel className="mr-1 h-4 w-4" />
+                        Bid Now
+                    </Button>
+                </CardFooter>
+            ) : (
+                <CardFooter className="px-4 pb-4 flex items-center justify-end">
+                    <Button
+                        type="button"
+                        size="sm"
+                        onClick={onBid}
+                    >
+                        <Gavel className="mr-1 h-4 w-4" />
+                        Bid Now
+                    </Button>
+                </CardFooter>
+            )}
         </Card>
     );
 };

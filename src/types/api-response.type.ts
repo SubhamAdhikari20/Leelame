@@ -1,5 +1,6 @@
 // src/types/api-response.type.ts
 import { z } from "zod";
+import type { ESewaPayload } from "./payment-gateways.type.ts";
 
 
 // ---------------------------------- Buyer Response ---------------------------------
@@ -34,6 +35,12 @@ export type UploadImageBuyerApiResponseType = {
     success: boolean;
     message: string;
     data?: z.infer<typeof UploadImageBuyerApiResponse> | null;
+};
+
+export type AllBuyersApiResponseType = {
+    success: boolean;
+    message: string;
+    users?: z.infer<typeof BuyerApiResponse>[] | null;
 };
 
 
@@ -124,7 +131,6 @@ export const CategoryApiResponse = z.object({
 export type CategoryApiResponseType = {
     success: boolean;
     message: string;
-    status?: number | null;
     data?: z.infer<typeof CategoryApiResponse> | null;
 };
 
@@ -132,7 +138,6 @@ export type CategoryApiResponseType = {
 export type AllCategoriesApiResponseType = {
     success: boolean;
     message: string;
-    status?: number | null;
     data?: z.infer<typeof CategoryApiResponse>[] | null;
 };
 
@@ -151,7 +156,6 @@ export const ProductConditionApiResponse = z.object({
 export type ProductConditionApiResponseType = {
     success: boolean;
     message: string;
-    status?: number | null;
     data?: z.infer<typeof ProductConditionApiResponse> | null;
 };
 
@@ -159,7 +163,6 @@ export type ProductConditionApiResponseType = {
 export type AllProductConditionsApiResponseType = {
     success: boolean;
     message: string;
-    status?: number | null;
     data?: z.infer<typeof ProductConditionApiResponse>[] | null;
 };
 
@@ -174,6 +177,7 @@ export const ProductApiResponse = z.object({
     startPrice: z.number(),
     currentBidPrice: z.number(),
     bidIntervalPrice: z.number(),
+    buyNowPrice: z.number().nullish(),
     endDate: z.date(),
     productImageUrls: z.array(z.string()),
     isVerified: z.boolean(),
@@ -189,7 +193,6 @@ export const ProductApiResponse = z.object({
 export type ProductApiResponseType = {
     success: boolean;
     message: string;
-    status?: number | null;
     data?: z.infer<typeof ProductApiResponse> | null;
 };
 
@@ -197,7 +200,6 @@ export type ProductApiResponseType = {
 export type AllProductsApiResponseType = {
     success: boolean;
     message: string;
-    status?: number | null;
     data?: z.infer<typeof ProductApiResponse>[] | null;
 };
 
@@ -209,20 +211,105 @@ export const BidApiResponse = z.object({
     productId: z.string(),
     buyerId: z.string(),
     bidAmount: z.number(),
-    createdAt: z.date().nullish(),
-    updatedAt: z.date().nullish(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    // createdAt: z.date().nullish(),
+    // updatedAt: z.date().nullish(),
 });
 
 export type BidApiResponseType = {
     success: boolean;
     message: string;
-    status?: number | null;
     data?: z.infer<typeof BidApiResponse> | null;
 };
 
 export type AllBidsApiResponseType = {
     success: boolean;
     message: string;
-    status?: number | null;
     data?: z.infer<typeof BidApiResponse>[] | null;
+};
+
+
+// -------------------------------- Order Api Response ---------------------------------
+// Order Api Response
+export const OrderApiResponse = z.object({
+    _id: z.string(),
+    productId: z.string(),
+    buyerId: z.string(),
+    sellerId: z.string(),
+    delivaryAddress: z.string(),
+    delivaryDate: z.date(),
+    totalPrice: z.number(),
+    status: z.string(),
+    paymentReference: z.string().nullish(),
+    createdAt: z.date().nullish(),
+    updatedAt: z.date().nullish(),
+});
+export type OrderApiResponseType = {
+    success: boolean;
+    message: string;
+    data: z.infer<typeof OrderApiResponse>
+};
+
+export type AllOrdersApiResponseType = {
+    success: boolean;
+    message: string;
+    data?: z.infer<typeof OrderApiResponse>[] | null;
+};
+
+
+// -------------------------------- Payment Api Response ---------------------------------
+// Payment Api Response
+export const PaymentApiResponse = z.object({
+    _id: z.string(),
+    orderId: z.string(),
+    transactionId: z.string(),
+    amount: z.number(),
+    method: z.string(),
+    status: z.string(),
+    createdAt: z.date().nullish(),
+    updatedAt: z.date().nullish(),
+});
+export type PaymentApiResponseType = {
+    success: boolean;
+    message: string;
+    data?: z.infer<typeof PaymentApiResponse> | null;
+    formData?: ESewaPayload | null;
+    gatewayUrl?: string | null;
+};
+
+export type AllPaymentsApiResponseType = {
+    success: boolean;
+    message: string;
+    data?: z.infer<typeof PaymentApiResponse>[] | null;
+};
+
+
+// -------------------------------- Invoice Api Response ---------------------------------
+// Invoice Api Response
+export const InvoiceApiResponse = z.object({
+    _id: z.string(),
+    buyerName: z.string(),
+    buyerContact: z.string().nullish(),
+    sellerName: z.string(),
+    sellerContact: z.string(),
+    productName: z.string(),
+    price: z.number(),
+    serviceCharge: z.number(),
+    totalPrice: z.number(),
+    paymentMethod: z.string(),
+    buyerId: z.string(),
+    sellerId: z.string(),
+    productId: z.string(),
+    orderId: z.string(),
+    paymentId: z.string(),
+    transactionId: z.string(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+});
+export type InvoiceApiResponseType = {
+    success: boolean;
+    message: string;
+    status?: number | null;
+    data?: z.infer<typeof InvoiceApiResponse> | null;
 };

@@ -13,6 +13,7 @@ const PUBLIC_PATHS = [
     "/contact",
     "/products",
     "/become-seller",
+    "/payment"
     // "/admin/login",
     // "/admin/sign-up"
 ];

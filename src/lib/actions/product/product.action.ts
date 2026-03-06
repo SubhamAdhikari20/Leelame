@@ -157,6 +157,15 @@ export const handleGetAllVerifiedProducts = async () => {
             productImageUrls: product.productImageUrls.map((productImageUrl) => normalizeHttpUrl(productImageUrl)).filter((url): url is string => url !== null),
         }));
 
+        // const data = result.data.map((product) => {
+        //     if (!product.isSoldOut) {
+        //         return {
+        //             ...product,
+        //             productImageUrls: product.productImageUrls.map((productImageUrl) => normalizeHttpUrl(productImageUrl)).filter((url): url is string => url !== null),
+        //         };
+        //     }
+        // }).filter((product) => product !== undefined);
+
         return {
             success: true,
             message: result.message || "All verified products fetched successfully.",

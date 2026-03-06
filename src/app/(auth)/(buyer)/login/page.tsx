@@ -279,7 +279,7 @@ const Login = () => {
                             </div>
                         </form>
 
-                        <div className="mt-4 flex items-center justify-between">
+                        {/* <div className="mt-4 flex items-center justify-between">
                             <hr className="w-full border-gray-300" />
                             <span className="px-2 text-gray-400 text-sm">OR</span>
                             <hr className="w-full border-gray-300" />
@@ -292,7 +292,7 @@ const Login = () => {
                                 <FcGoogle className="text-xl" />
                                 Continue with Google
                             </Button>
-                        </div>
+                        </div> */}
 
                         <div className="text-center mt-5">
                             <p className="text-sm">

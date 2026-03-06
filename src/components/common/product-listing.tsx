@@ -4,12 +4,14 @@ import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button.tsx";
 import ProductCard from "@/components/buyer/product-card.tsx";
 import BidDialog from "@/components/buyer/bid-dialog.tsx";
+import BuyNowDialog from "@/components/buyer/buy-now-dialog.tsx";
 import type { ProductListingPropsType, ProductPropsType } from "@/types/common-props.type.ts";
 
 
 const ProductListing = ({ currentUser, products, categories, sellers, productConditions }: ProductListingPropsType) => {
     const [selectedProduct, setSelectedProduct] = useState<ProductPropsType | null>(null);
-    const [dialogOpen, setDialogOpen] = useState(false);
+    const [bidDialogOpen, setBidDialogOpen] = useState(false);
+    const [buyNowDialogOpen, setBuyNowDialogOpen] = useState(false);
 
     const pageSize = 8;
     const [page, setPage] = useState(1);
@@ -18,7 +20,12 @@ const ProductListing = ({ currentUser, products, categories, sellers, productCon
 
     const openBidDialog = (productData: ProductPropsType) => {
         setSelectedProduct(productData);
-        setDialogOpen(true);
+        setBidDialogOpen(true);
+    };
+
+    const openBuyNowDialog = (productData: ProductPropsType) => {
+        setSelectedProduct(productData);
+        setBuyNowDialogOpen(true);
     };
 
     // const paged = useMemo(() => {
@@ -28,7 +35,7 @@ const ProductListing = ({ currentUser, products, categories, sellers, productCon
 
     return (
         <section className="container mx-auto px-4 py-8">
-            <header className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-extrabold">Live Auctions</h1>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -40,28 +47,36 @@ const ProductListing = ({ currentUser, products, categories, sellers, productCon
                     <Button variant="secondary">Filter</Button>
                     <Button>New Auction</Button>
                 </div>
-            </header>
+            </div>
 
-            {(products && (products.length > 0)) &&
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {products.map((product) => {
-                        const seller = sellers?.find((seller) => seller._id === product.sellerId);
-                        const category = categories?.find((category) => category._id === product.categoryId);
-                        const condition = productConditions?.find((condition) => condition._id === product.conditionId);
+            {(products && (products.length > 0)) ?
+                (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {products.map((product) => {
+                            const seller = sellers?.find((seller) => seller._id === product.sellerId);
+                            const category = categories?.find((category) => category._id === product.categoryId);
+                            const condition = productConditions?.find((condition) => condition._id === product.conditionId);
 
-                        return seller && category && condition ?
-                            <ProductCard
-                                key={product._id}
-                                product={product}
-                                category={category}
-                                seller={seller}
-                                productCondition={condition}
-                                currentUser={currentUser}
-                                onBid={() => openBidDialog({ currentUser, product, seller, category, condition })}
-                            />
-                            : null;
-                    })}
-                </div>
+                            return seller && category && condition ?
+                                <ProductCard
+                                    key={product._id}
+                                    product={product}
+                                    category={category}
+                                    seller={seller}
+                                    productCondition={condition}
+                                    currentUser={currentUser}
+                                    onBid={() => openBidDialog({ currentUser, product, seller, category, condition })}
+                                    onBuyNow={() => openBuyNowDialog({ currentUser, product, seller, category, condition })}
+                                />
+                                : null;
+                        })}
+                    </div>
+                ) : (
+                    <div className="text-center py-20">
+                        <h2 className="text-2xl font-semibold">No products available</h2>
+                        <p className="text-muted-foreground mt-2">Please check back later for new auctions.</p>
+                    </div>
+                )
             }
 
             {/* Pagination */}
@@ -78,8 +93,19 @@ const ProductListing = ({ currentUser, products, categories, sellers, productCon
             {/* Bid Dialog */}
             {selectedProduct && (
                 <BidDialog
-                    open={dialogOpen}
-                    onOpenChange={(o) => setDialogOpen(o)}
+                    open={bidDialogOpen}
+                    onOpenChange={(o) => setBidDialogOpen(o)}
+                    currentUser={selectedProduct.currentUser}
+                    product={selectedProduct.product}
+                    seller={selectedProduct.seller}
+                />
+            )}
+
+            {/* Buy Now Dialog */}
+            {selectedProduct && (
+                <BuyNowDialog
+                    open={buyNowDialogOpen}
+                    onOpenChange={(o) => setBuyNowDialogOpen(o)}
                     currentUser={selectedProduct.currentUser}
                     product={selectedProduct.product}
                     seller={selectedProduct.seller}

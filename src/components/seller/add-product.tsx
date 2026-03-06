@@ -52,6 +52,7 @@ const AddProduct = ({ currentUser, categories, productConditions }: AddProductPr
             productName: "",
             startPrice: 0,
             bidIntervalPrice: 0,
+            // buyNowPrice: null, // Optional field
             endDate: new Date(),
             categoryId: "",
             conditionId: "",
@@ -309,12 +310,22 @@ const AddProduct = ({ currentUser, categories, productConditions }: AddProductPr
                                         <Input
                                             {...field}
                                             id={field.name}
+                                            // value={field.value ?? ""}
                                             aria-invalid={fieldState.invalid}
                                             placeholder="Starting Price"
                                             type="number"
                                             min="0"
                                             step="1"
-                                            onChange={e => field.onChange(parseFloat(e.target.value))}
+                                            // onChange={(e) => {
+                                            //     const val = e.target.value;
+                                            //     if (val === "") {
+                                            //         field.onChange(undefined);
+                                            //     } else {
+                                            //         const num = parseFloat(val);
+                                            //         field.onChange(Number.isNaN(num) ? null : num);
+                                            //     }
+                                            // }}
+                                        onChange={e => field.onChange(parseFloat(e.target.value))}
                                         />
                                         {fieldState.invalid && (
                                             <FieldError errors={[fieldState.error]} />
@@ -335,11 +346,56 @@ const AddProduct = ({ currentUser, categories, productConditions }: AddProductPr
                                             {...field}
                                             id={field.name}
                                             aria-invalid={fieldState.invalid}
+                                            value={field.value ?? ""}
                                             placeholder="Bid Interval Price"
                                             type="number"
                                             min="0"
                                             step="1"
-                                            onChange={e => field.onChange(parseFloat(e.target.value))}
+                                            // onChange={(e) => {
+                                            //     const val = e.target.value;
+                                            //     if (val === "") {
+                                            //         field.onChange(undefined);
+                                            //     } else {
+                                            //         const num = parseFloat(val);
+                                            //         field.onChange(Number.isNaN(num) ? null : num);
+                                            //     }
+                                            // }}
+                                        onChange={e => field.onChange(parseFloat(e.target.value))}
+                                        />
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
+
+                            <Controller
+                                name="buyNowPrice"
+                                control={createProductFrom.control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor={field.name}>
+                                            Buy Now Price (NPR) (Optional)
+                                        </FieldLabel>
+                                        <Input
+                                            {...field}
+                                            value={field.value ?? ""}
+                                            id={field.name}
+                                            aria-invalid={fieldState.invalid}
+                                            placeholder="Buy Now Price"
+                                            type="number"
+                                            min="0"
+                                            step="1"
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (val === "") {
+                                                    field.onChange(undefined);
+                                                } else {
+                                                    const num = parseFloat(val);
+                                                    field.onChange(Number.isNaN(num) ? null : num);
+                                                }
+                                            }}
+                                        // onChange={e => field.onChange(parseFloat(e.target.value) || null)}
                                         />
                                         {fieldState.invalid && (
                                             <FieldError errors={[fieldState.error]} />

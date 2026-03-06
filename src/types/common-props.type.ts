@@ -1,6 +1,6 @@
 // src/type/common-props.type.ts
 import { z } from "zod";
-import { CategoryApiResponse, ProductApiResponse, SellerApiResponse, ProductConditionApiResponse } from "./api-response.type.ts";
+import { CategoryApiResponse, ProductApiResponse, SellerApiResponse, ProductConditionApiResponse, BidApiResponse, BuyerApiResponse } from "./api-response.type.ts";
 import type { CurrentUserType } from "./current-user.type.ts";
 
 
@@ -20,6 +20,7 @@ export type ProductCardPropsType = {
     seller: z.infer<typeof SellerApiResponse>;
     productCondition: z.infer<typeof ProductConditionApiResponse>;
     onBid: () => void;
+    onBuyNow?: () => void;
     onToggleFavourite?: (product: z.infer<typeof ProductApiResponse>, isFavourite: boolean) => void;
 };
 
@@ -30,6 +31,8 @@ export type ProductViewDetailsPublicPropsType = {
     seller: z.infer<typeof SellerApiResponse>;
     categories?: z.infer<typeof CategoryApiResponse>[] | null;
     productConditions?: z.infer<typeof ProductConditionApiResponse>[] | null;
+    bids: z.infer<typeof BidApiResponse>[];
+    bidders: z.infer<typeof BuyerApiResponse>[];
 };
 
 export type ProductPropsType = {
@@ -49,4 +52,22 @@ export type BidDialogBoxPublicPropsType = {
     // condition: z.infer<typeof ProductConditionApiResponse>;
     onOpenChange: (bool: boolean) => void;
     // onPlaceBid: (data: any) => void;
+};
+
+export type BuyNowDialogBoxPublicPropsType = {
+    open: boolean;
+    currentUser?: CurrentUserType | null;
+    product: z.infer<typeof ProductApiResponse>;
+    seller: z.infer<typeof SellerApiResponse>;
+    // category: z.infer<typeof CategoryApiResponse>;
+    // condition: z.infer<typeof ProductConditionApiResponse>;
+    onOpenChange: (bool: boolean) => void;
+    // onPlaceBid: (data: any) => void;
+};
+
+export type BidCardPropsType = {
+    currentUser?: CurrentUserType | null;
+    bid: z.infer<typeof BidApiResponse>;
+    buyer: z.infer<typeof BuyerApiResponse>;
+    isHighest: boolean;
 };

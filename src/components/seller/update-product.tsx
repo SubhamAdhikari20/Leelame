@@ -53,6 +53,7 @@ const UpdateProduct = ({ currentUser, product, categories, productConditions }: 
             description: product.description,
             startPrice: product.startPrice || 0,
             bidIntervalPrice: product?.bidIntervalPrice || 0,
+            buyNowPrice: product?.buyNowPrice || null,
             endDate: product.endDate ? new Date(product.endDate) : new Date(),
             categoryId: product.categoryId || "",
             conditionId: product.conditionId || "",
@@ -365,6 +366,22 @@ const UpdateProduct = ({ currentUser, product, categories, productConditions }: 
                                     )}
                                 />
                             </div>
+
+                            <Controller
+                                name="buyNowPrice"
+                                control={updateProductFrom.control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel>Buy Now Price (NPR) (Optional)</FieldLabel>
+                                        <Input
+                                            type="number"
+                                            {...field}
+                                            value={field.value ?? undefined}
+                                            onChange={e => field.onChange(e.target.value === "" ? null : parseFloat(e.target.value))}
+                                        />
+                                    </Field>
+                                )}
+                            />
 
                             {/* End Date & Time */}
                             <div className="flex gap-4">

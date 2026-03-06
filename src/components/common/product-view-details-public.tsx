@@ -52,9 +52,10 @@ import { format } from "date-fns";
 import { handleCreateBid } from "@/lib/actions/bid/bid.action.ts";
 import { CreateBidSchema, type CreateBidSchemaType } from "@/schemas/bid/create-bid.schema.ts";
 import type { ProductViewDetailsPublicPropsType } from "@/types/common-props.type.ts";
+import BidCard from "@/components/buyer/bid-card.tsx";
 
 
-const ProductViewDetailsPublic = ({ currentUser, product, seller, categories, productConditions }: ProductViewDetailsPublicPropsType) => {
+const ProductViewDetailsPublic = ({ currentUser, product, seller, categories, productConditions, bids = [], bidders = [] }: ProductViewDetailsPublicPropsType) => {
     const router = useRouter();
     const [bidPlacing, setBidPlacing] = useState(false);
     const [showConfirmDialogBox, setShowConfirmDialogBox] = useState(false);
@@ -222,6 +223,12 @@ const ProductViewDetailsPublic = ({ currentUser, product, seller, categories, pr
         return `Rs. ${format}`;
     };
 
+    // Bid history logic
+    const sortedBids = [...bids].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    const maxBidAmount = bids.length > 0 ? Math.max(...bids.map((b) => Number(b.bidAmount))) : 0;
+
     return (
         <section className="p-4 md:p-6 mx-auto">
             <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-5">
@@ -374,10 +381,10 @@ const ProductViewDetailsPublic = ({ currentUser, product, seller, categories, pr
                             <TabsTrigger value="bids">
                                 Bids
                             </TabsTrigger>
-                            <TabsTrigger value="reviews">
-                                {/* Reviews ({reviews.length}) */}
+                            {/* <TabsTrigger value="reviews">
                                 Reviews
-                            </TabsTrigger>
+                            </TabsTrigger> */}
+                            {/* Reviews ({reviews.length}) */}
                         </TabsList>
 
                         <TabsContent value="overview">
@@ -387,12 +394,31 @@ const ProductViewDetailsPublic = ({ currentUser, product, seller, categories, pr
                         </TabsContent>
 
                         <TabsContent value="bids">
-                            <p className="text-center text-gray-500">No bids yet.</p>
+                            {sortedBids.length === 0 ? (
+                                <Card className="p-12 text-center border-dashed">
+                                    <p className="text-muted-foreground text-lg">No bids yet. Be the first to place one!</p>
+                                </Card>
+                            ) : (
+                                <div className="space-y-4">
+                                    {sortedBids.map((bid) => (
+                                        <BidCard
+                                            key={bid._id}
+                                            bid={bid}
+                                            buyer={bidders.find(bidder => bidder._id === bid.buyerId)!}
+                                            isHighest={Number(bid.bidAmount) === maxBidAmount}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* <p className="text-center text-gray-500">No bids yet.</p> */}
                         </TabsContent>
 
-                        <TabsContent value="reviews">
-                            <p className="text-center text-gray-500">No reviews yet.</p>
-                            {/* {reviews.length === 0 ? (
+                        {/* <TabsContent value="reviews">
+                            <Card className="p-12 text-center border-dashed">
+                                <p className="text-muted-foreground text-lg">No reviews yet.</p>
+                            </Card> */}
+                        {/* {reviews.length === 0 ? (
                         <p className="text-center text-gray-500">No reviews yet.</p>
                     ) : (
                         <div className="space-y-6">
@@ -472,7 +498,7 @@ const ProductViewDetailsPublic = ({ currentUser, product, seller, categories, pr
                             ))}
                         </div>
                     )} */}
-                        </TabsContent>
+                        {/* </TabsContent> */}
                     </Tabs>
                 </div>
 

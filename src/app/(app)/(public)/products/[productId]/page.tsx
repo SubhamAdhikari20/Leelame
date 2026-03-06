@@ -8,6 +8,8 @@ import { handleGetProductById } from "@/lib/actions/product/product.action.ts";
 import { handleGetSellerById } from "@/lib/actions/seller/profile-details.action.ts";
 import { handleGetAllCategories } from "@/lib/actions/category/category.action.ts";
 import { handleGetAllProductConditions } from "@/lib/actions/product-condition/condition.action.ts";
+import { handleGetAllBidsByProductId } from "@/lib/actions/bid/bid.action.ts";
+import { handleGetAllBuyers } from "@/lib/actions/buyer/buyer.action.ts";
 import type { CurrentUserType } from "@/types/current-user.type.ts";
 
 
@@ -65,9 +67,23 @@ const ProductViewDetailsPublicPage = async ({ params }: { params: { productId: s
 
     const productConditions = getAllProductConditionsResult.data;
 
+    const getAllBiddersResult = await handleGetAllBidsByProductId(productId);
+    if (!getAllBiddersResult.success || !getAllBiddersResult.data) {
+        throw new Error(`Error fetching bidders data: ${getAllBiddersResult.message}`);
+    }
+
+    const bids = getAllBiddersResult.data;
+
+    const getAllBuyers = await handleGetAllBuyers();
+    if (!getAllBuyers.success || !getAllBuyers.data) {
+        throw new Error(`Error fetching bidders data: ${getAllBuyers.message}`);
+    }
+
+    const buyers = getAllBuyers.data;
+
     return (
         <>
-            <ProductViewDetailsPublic currentUser={currentUser} product={product} seller={seller} categories={categories} productConditions={productConditions} />
+            <ProductViewDetailsPublic currentUser={currentUser} product={product} seller={seller} categories={categories} productConditions={productConditions} bids={bids} bidders={buyers} />
         </>
     );
 };

@@ -18,6 +18,7 @@ const ThemedToaster = () => {
             richColors
             closeButton
             theme={resolvedTheme}
+            position="top-right"
         />
     );
 };

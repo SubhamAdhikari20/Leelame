@@ -18,6 +18,7 @@ export const API = {
             UPLOAD_PROFILE_PICTURE: "/api/users/buyer/upload-profile-picture",
             DELETE_ACCOUNT: "/api/users/buyer/delete-account",
             GET_BUYER_BY_ID: "/api/users/buyer",
+            GET_ALL_BUYERS: "/api/users/buyer/get-all-buyers",
         },
         SELLER: {
             SIGN_UP: "/api/users/seller/sign-up",
@@ -87,4 +88,30 @@ export const API = {
         // GET_ALL_BIDS_BY_BUYER_ID: "/api/bid/get-all-bids",
         // GET_ALL_BIDS_BY_SELLER_ID: "/api/bid/get-all-bids",
     },
+    ORDER: {
+        CREATE_ORDER: "/api/order/create-order",
+        UPDATE_ORDER_DETAILS: "/api/order/update-order-details",
+        UPDATE_ORDER_STATUS: "/api/order/update-order-status",
+        DELETE_ORDER: "/api/order/delete-order",
+        GET_ORDER_BY_ID: "/api/order",
+        GET_ALL_ORDERS: "/api/order/get-all-orders",
+        GET_ALL_ORDERS_BY_BUYER_ID: "/api/order/get-all-orders-by-buyer-id",
+        GET_ALL_ORDERS_BY_SELLER_ID: "/api/order/get-all-orders-by-seller-id",
+    },
+    PAYMENT: {
+        INITIATE_PAYMENT: "/api/payment/initiate-payment",
+        FINALIZE_PAYMENT_ESEWA: "/api/payment/esewa-callback",
+        FINALIZE_PAYMENT_KHALTI: "/api/payment/khalti-callback",
+        UPDATE_PAYMENT_STATUS: "/api/payment/update-payment-status",
+        DELETE_PAYMENT: "/api/payment/delete-payment",
+        GET_PAYMENT_BY_ID: "/api/payment",
+        GET_ALL_PAYMENTS: "/api/payment/get-all-payments",
+        GET_ALL_PAYMENTS_BY_BUYER_ID: "/api/payment/get-all-payments-by-buyer-id",
+        GET_ALL_PAYMENTS_BY_SELLER_ID: "/api/payment/get-all-payments-by-seller-id",
+    },
+    INVOICE: {
+        GET_INVOICE_BY_ID: "/api/invoice",
+        GET_INVOICE_BY_TRANSACTION_ID: "/api/invoice/get-invoice-by-transaction-id",
+        GET_ALL_INVOICES: "/api/invoice/get-all-invoices",
+    }
 };
